@@ -160,10 +160,10 @@ public class Builder extends IncrementalProjectBuilder {
 				.getNature(JavaCore.NATURE_ID);
 		IWorkspace workspace = project.getWorkspace();
 		IWorkspaceRoot workspaceRoot = workspace.getRoot();
-		IBinaryRoot bindir;
+		IContainerRoot bindir;
 		
 		if(outputDirectory != null) {
-			bindir = new IBinaryRoot(outputDirectory);
+			bindir = new IContainerRoot(outputDirectory);
 		} else {
 			bindir = null;
 		}
@@ -177,7 +177,7 @@ public class Builder extends IncrementalProjectBuilder {
 	protected void initialisePaths(IClasspathEntry[] entries,
 			ArrayList<Path.Root> whileypath, ArrayList<Path.Root> sourcepath,
 			IWorkspaceRoot workspaceRoot, IJavaProject javaProject,
-			IBinaryRoot bindir)
+			IContainerRoot bindir)
 			throws CoreException {
 	for (IClasspathEntry e : entries) {
 			switch (e.getEntryKind()) {

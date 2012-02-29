@@ -34,10 +34,10 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.Path;
 
-import wyil.util.path.Path.*;
-import wyil.lang.Module;
-import wyil.lang.ModuleID;
-import wyil.lang.PkgID;
+import wycore.lang.Content;
+import wycore.lang.Path.*;
+import wycore.util.AbstractRoot;
+import wycore.util.AbstractEntry;
 
 /**
  * A Directory represents a directory on the file system. Using this, we can
@@ -46,7 +46,8 @@ import wyil.lang.PkgID;
  * @author djp
  * 
  */
-public class IBinaryRoot implements Root {
+public class IContainerRoot implements Root {
+	private final Content.Registry contentTypes;
 	private final IContainer dir;	
 		
 	/**
@@ -55,15 +56,48 @@ public class IBinaryRoot implements Root {
 	 * @param file
 	 *            --- location of directory on filesystem.
 	 */
-	public IBinaryRoot(IContainer dir) {
+	public IContainerRoot(IContainer dir, Content.Registry contentTypes) {
+		this.contentTypes = contentTypes;
 		this.dir = dir;
 	}
 	
-	public boolean exists(PkgID pkg) throws CoreException {				
-		String pkgname = pkg.toString().replace('.', '/') + "/";
-		return dir.exists(new Path(pkgname));
+	public boolean contains(Entry<?> e) {
+		if(e instanceof IEntry) {
+			IEntry ie = (IEntry) e;
+			return dir.exists(ie.file.getLocation());
+		}
+		return false;
 	}
 	
+	public boolean exists(ID id, Content.Type<?> ct) throws Exception {
+		return dir.exists(new Path(id.toString()));
+	}
+	
+	public <T> IEntry<T> get(ID id, Content.Type<T> ct) throws Exception {
+		return new IEntry(id, dir.getFile(new Path(id.toString())));
+	}
+	
+	public <T> List<Entry<T>> get(Content.Filter<T> filter) throws Exception {
+		return Collections.EMPTY_LIST;
+	}
+	
+	public <T> Set<ID> match(Content.Filter<T> filter) throws Exception {
+		return Collections.EMPTY_SET;
+	}
+		
+	public <T> IEntry create(ID id, Content.Type<T> ct) throws Exception {
+		return null; // to do!
+	}
+	
+	public void flush() {
+		
+	}
+	
+	public void refresh() {
+		
+	}
+	
+	/*
 	public List<Entry> list(PkgID pkg) throws CoreException {
 		System.err.println("LISTING: " + pkg);
 		Path path = new Path(pkg.toString().replace('.','/'));
@@ -87,19 +121,8 @@ public class IBinaryRoot implements Root {
 			return Collections.EMPTY_LIST;
 		}
 	}
+	*/
 	
-	public Entry lookup(ModuleID mid) {
-		System.err.println("LOOKING UP: " + mid);
-		Path path = new Path(mid.toString().replace('.', '/'));
-		IResource member = dir.findMember(path);
-
-		if (member.exists() && member instanceof IFile) {
-			return new IEntry(mid, (IFile) member);
-		} else {
-			return null; // not found
-		}
-	}
-
 	public String toString() {
 		return dir.toString();
 	}
@@ -112,17 +135,12 @@ public class IBinaryRoot implements Root {
 	 * @author djp
 	 * 
 	 */
-	public static class IEntry implements Entry {
-		private final ModuleID mid;
+	public static class IEntry<T> extends AbstractEntry<T> {		
 		private final IFile file;		
 		
-		public IEntry(ModuleID mid, IFile file) {
-			this.mid = mid;
+		public IEntry(ID mid, IFile file) {
+			super(mid);			
 			this.file = file;
-		}
-		
-		public ModuleID id() {
-			return mid;
 		}
 		
 		public String location() {
@@ -143,8 +161,13 @@ public class IBinaryRoot implements Root {
 			return suffix;
 		}
 		
-		public InputStream contents() throws Exception {
+		public InputStream inputStream() throws Exception {
 			return file.getContents();		
-		}		
+		}
+		
+		public OutputStream outputStream() throws Exception {
+			// BUMMER
+			return null;		
+		}
 	}	
 }
