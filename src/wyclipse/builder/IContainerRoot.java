@@ -30,7 +30,9 @@ import java.util.*;
 
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IResourceVisitor;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.Path;
 
@@ -38,6 +40,7 @@ import wycore.lang.Content;
 import wycore.lang.Path.*;
 import wycore.util.AbstractRoot;
 import wycore.util.AbstractEntry;
+import wycore.util.Trie;
 
 /**
  * A Directory represents a directory on the file system. Using this, we can
@@ -46,9 +49,8 @@ import wycore.util.AbstractEntry;
  * @author djp
  * 
  */
-public class IContainerRoot implements Root {
-	private final Content.Registry contentTypes;
-	private final IContainer dir;	
+public class IContainerRoot extends AbstractRoot {	
+	private final IContainer dir;		
 		
 	/**
 	 * Construct a directory root from a given directory and file filter.
@@ -57,36 +59,18 @@ public class IContainerRoot implements Root {
 	 *            --- location of directory on filesystem.
 	 */
 	public IContainerRoot(IContainer dir, Content.Registry contentTypes) {
-		this.contentTypes = contentTypes;
+		super(contentTypes);		
 		this.dir = dir;
 	}
 	
-	public boolean contains(Entry<?> e) {
-		if(e instanceof IEntry) {
-			IEntry ie = (IEntry) e;
-			return dir.exists(ie.file.getLocation());
-		}
-		return false;
-	}
-	
-	public boolean exists(ID id, Content.Type<?> ct) throws Exception {
-		return dir.exists(new Path(id.toString()));
-	}
-	
-	public <T> IEntry<T> get(ID id, Content.Type<T> ct) throws Exception {
-		return new IEntry(id, dir.getFile(new Path(id.toString())));
-	}
-	
-	public <T> List<Entry<T>> get(Content.Filter<T> filter) throws Exception {
-		return Collections.EMPTY_LIST;
-	}
-	
-	public <T> Set<ID> match(Content.Filter<T> filter) throws Exception {
-		return Collections.EMPTY_SET;
-	}
-		
-	public <T> IEntry create(ID id, Content.Type<T> ct) throws Exception {
-		return null; // to do!
+	public <T> Entry<T> create(ID id, Content.Type<T> contentType) throws Exception {
+		Path path = new Path(id.toString()); 
+		IFile file = dir.getFile(path);		
+		IEntry<T> entry = new IEntry<T>(id,file);
+		insert(entry);
+		entry.associate(contentType,null);
+		System.out.println("CREATING ENTRY FOR: " + id + ", " + contentType);
+		return entry;
 	}
 	
 	public void flush() {
@@ -96,35 +80,36 @@ public class IContainerRoot implements Root {
 	public void refresh() {
 		
 	}
-	
-	/*
-	public List<Entry> list(PkgID pkg) throws CoreException {
-		System.err.println("LISTING: " + pkg);
-		Path path = new Path(pkg.toString().replace('.','/'));
-		IResource member = dir.findMember(path);
 		
-		if (member.exists() && member instanceof IContainer) {
-			IContainer container = (IContainer) member;
-			ArrayList<Entry> entries = new ArrayList<Entry>();
-
-			for (IResource file : container.members()) {				
-				if(file instanceof IFile && file.getFileExtension().equals("class")) {
-					String filename = file.getName();
-					String name = filename.substring(0, filename.lastIndexOf('.'));
-					ModuleID mid = new ModuleID(pkg, name);
-					entries.add(new IEntry(mid, (IFile) file));				
-				}
-			}
-
-			return entries;
-		} else {
-			return Collections.EMPTY_LIST;
-		}
+	protected Entry[] contents() throws CoreException {
+		ArrayList<Entry> contents = new ArrayList<Entry>();
+		traverse(dir,Trie.ROOT,contents);
+		System.out.println("IDENTIFIED: " + contents.size() + " files");
+		return contents.toArray(new Entry[contents.size()]);		
 	}
-	*/
-	
+		
 	public String toString() {
 		return dir.toString();
+	}
+	
+	private void traverse(IContainer container, Trie id,
+			ArrayList<Entry> entries) throws CoreException {
+
+		for (IResource file : container.members()) {			
+			if(file instanceof IFile) {
+				String suffix = file.getFileExtension();
+				if(suffix.equals("class") || suffix.equals("whiley")) {
+					String filename = file.getName();
+					String name = filename.substring(0, filename.lastIndexOf('.'));
+					IEntry entry = new IEntry(id.append(name), (IFile) file);
+					entries.add(entry);
+					contentTypes.associate(entry);
+				}
+			} else if(file instanceof IFolder) {
+				IFolder folder = (IFolder) file;
+				traverse(folder,id.append(folder.getName()),entries);
+			}
+		}
 	}
 	
 	/**

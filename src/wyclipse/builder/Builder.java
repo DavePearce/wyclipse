@@ -95,7 +95,7 @@ public class Builder extends IncrementalProjectBuilder {
 			throws CoreException {
 		
 		if(project == null) {
-			initialiseCompiler();
+			initialiseProject();
 		}
 		
 		if (kind == IncrementalProjectBuilder.FULL_BUILD) {
@@ -116,7 +116,7 @@ public class Builder extends IncrementalProjectBuilder {
 	protected void fullBuild(IProgressMonitor monitor) throws CoreException {
 		// Force a complete reinitialisation of the compiler. This is necessary
 		// in case things changed, such as the CLASSPATH, etc.		
-		initialiseCompiler();
+		initialiseProject();
 					
 		ArrayList<IFile> sourceFiles = identifyAllCompileableResources(); 
 		clearSourceFileMarkers(sourceFiles);
@@ -229,7 +229,7 @@ public class Builder extends IncrementalProjectBuilder {
 		}
 	}
 	
-	protected void initialiseCompiler() throws CoreException {		
+	protected void initialiseProject() throws CoreException {		
 		IProject iproject = (IProject) getProject();
 		IJavaProject javaProject = (IJavaProject) iproject
 				.getNature(JavaCore.NATURE_ID);
@@ -276,11 +276,12 @@ public class Builder extends IncrementalProjectBuilder {
 		}
 		
 		project.add(rule);
+		
 	}
 
 	protected void compile(List<IFile> compileableResources)
-			throws CoreException {
-
+			throws CoreException {		
+		
 		HashMap<String, IFile> resourceMap = new HashMap<String, IFile>();
 		try {
 			ArrayList<Path.Entry<?>> files = new ArrayList();
@@ -290,10 +291,13 @@ public class Builder extends IncrementalProjectBuilder {
 				File file = resource.getLocation().toFile();
 				resourceMap.put(file.getAbsolutePath(), resource);
 			}
-						
+			
+			System.out.println("COMPILING " + files.size() + " source file(s)");
+			
 			project.build(files);
 						
 		} catch (SyntaxError e) {
+			System.out.println(e);
 			IFile resource = resourceMap.get(e.filename());
 			highlightSyntaxError(resource, e);
 		} catch (Exception e) {			
@@ -456,7 +460,7 @@ public class Builder extends IncrementalProjectBuilder {
 	}
 	
 	private static void addMatchingFiles(IContainer resource,
-			final String extension, final ArrayList<IFile> files) {
+			final String extension, final ArrayList<IFile> files) throws CoreException {
 		IResourceVisitor visitor = new IResourceVisitor() {
 			public boolean visit(IResource resource) {
 				if (resource.getType() == IResource.FILE
@@ -466,5 +470,6 @@ public class Builder extends IncrementalProjectBuilder {
 				return true; // visit children as well.
 			}
 		};
+		resource.accept(visitor);
 	}
 }
