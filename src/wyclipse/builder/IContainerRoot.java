@@ -63,13 +63,26 @@ public class IContainerRoot extends AbstractRoot {
 		this.dir = dir;
 	}
 	
+	public IEntry<?> get(IFile file) {		
+		for(int i=0;i!=size();++i) {
+			IEntry e = (IEntry) get(i);			
+			if(e.file.equals(file)) {
+				return e;
+			}
+		}
+		return null;
+	}
+	
 	public <T> Entry<T> create(ID id, Content.Type<T> contentType) throws Exception {
+		Entry<T> entry = get(id,contentType);
+		if(entry != null) {
+			return entry;
+		}
 		Path path = new Path(id.toString()); 
 		IFile file = dir.getFile(path);		
-		IEntry<T> entry = new IEntry<T>(id,file);
+		entry = new IEntry<T>(id,file);
 		insert(entry);
-		entry.associate(contentType,null);
-		System.out.println("CREATING ENTRY FOR: " + id + ", " + contentType);
+		entry.associate(contentType,null);		
 		return entry;
 	}
 	
@@ -84,7 +97,6 @@ public class IContainerRoot extends AbstractRoot {
 	protected Entry[] contents() throws CoreException {
 		ArrayList<Entry> contents = new ArrayList<Entry>();
 		traverse(dir,Trie.ROOT,contents);
-		System.out.println("IDENTIFIED: " + contents.size() + " files");
 		return contents.toArray(new Entry[contents.size()]);		
 	}
 		

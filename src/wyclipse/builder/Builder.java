@@ -86,6 +86,7 @@ public class Builder extends IncrementalProjectBuilder {
 	};
 			
 	private Project project;
+	private ArrayList<IContainerRoot> sourceRoots;
 
 	public Builder() {
 		
@@ -178,8 +179,8 @@ public class Builder extends IncrementalProjectBuilder {
 
 	}
 
-	protected void initialisePaths(ArrayList<Path.Root> whileypath,
-			ArrayList<Path.Root> sourcepath, IContainer outputDirectory)
+	protected void initialisePaths(ArrayList<Path.Root> externalRoots,
+			ArrayList<IContainerRoot> sourceRoots, IContainer outputDirectory)
 			throws CoreException {
 		IProject project = (IProject) getProject();	
 		IJavaProject javaProject = (IJavaProject) project
@@ -189,13 +190,13 @@ public class Builder extends IncrementalProjectBuilder {
 				
 		
 		if (javaProject != null) {
-			initialisePaths(javaProject.getRawClasspath(), whileypath,
-					sourcepath, workspaceRoot, javaProject);
+			initialisePaths(javaProject.getRawClasspath(), externalRoots,
+					sourceRoots, workspaceRoot, javaProject);
 		}
 	}
 
 	protected void initialisePaths(IClasspathEntry[] entries,
-			ArrayList<Path.Root> externalRoots, ArrayList<Path.Root> sourceRoots,
+			ArrayList<Path.Root> externalRoots, ArrayList<IContainerRoot> sourceRoots,
 			IWorkspaceRoot workspaceRoot, IJavaProject javaProject)
 			throws CoreException {
 		for (IClasspathEntry e : entries) {
@@ -241,15 +242,15 @@ public class Builder extends IncrementalProjectBuilder {
 		// Initialise whiley and source paths
 		// =========================================================
 		IContainer outputDirectory = workspaceRoot.getFolder(javaProject.getOutputLocation());		
-		ArrayList<Path.Root> externalRoots = new ArrayList<Path.Root>();
-		ArrayList<Path.Root> sourceRoots = new ArrayList<Path.Root>();
+		ArrayList<Path.Root> externalRoots = new ArrayList();
+		sourceRoots = new ArrayList<IContainerRoot>();
 		initialisePaths(externalRoots,sourceRoots,outputDirectory);
 		
 		// =========================================================
 		// Construct Namespace
 		// =========================================================
 		
-		NameSpace namespace = new StandardNameSpace(sourceRoots,externalRoots) {        		
+		NameSpace namespace = new StandardNameSpace((ArrayList) sourceRoots, externalRoots) {        		
 			public Path.ID create(String s) {
 				return Trie.fromString(s);
 			}
@@ -286,16 +287,26 @@ public class Builder extends IncrementalProjectBuilder {
 		try {
 			ArrayList<Path.Entry<?>> files = new ArrayList();
 			for (IFile resource : compileableResources) {
-				Path.ID id = Trie.fromString(resource.getLocation().toString());
-				files.add(new IContainerRoot.IEntry(id,resource));
-				File file = resource.getLocation().toFile();
-				resourceMap.put(file.getAbsolutePath(), resource);
+				for(IContainerRoot root : sourceRoots) {
+					System.out.println("LOOKING FOR: " + resource);
+					IContainerRoot.IEntry<?> e = root.get(resource);
+					if(e != null) {
+						System.out.println("MATCHED: " + e.id());
+						files.add(e);
+						
+						// FIXME: following is broken and needs to be fixed.
+						File file = resource.getLocation().toFile();
+						resourceMap.put(file.getAbsolutePath(), resource);
+					}
+				}
 			}
 			
 			System.out.println("COMPILING " + files.size() + " source file(s)");
 			
 			project.build(files);
-						
+			
+			System.out.println("DONE");
+			
 		} catch (SyntaxError e) {
 			System.out.println(e);
 			IFile resource = resourceMap.get(e.filename());
