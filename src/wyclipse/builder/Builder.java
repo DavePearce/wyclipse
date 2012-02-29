@@ -287,16 +287,14 @@ public class Builder extends IncrementalProjectBuilder {
 		try {
 			ArrayList<Path.Entry<?>> files = new ArrayList();
 			for (IFile resource : compileableResources) {
-				for(IContainerRoot root : sourceRoots) {
-					System.out.println("LOOKING FOR: " + resource);
+				for(IContainerRoot root : sourceRoots) {					
 					IContainerRoot.IEntry<?> e = root.get(resource);
-					if(e != null) {
-						System.out.println("MATCHED: " + e.id());
-						files.add(e);
-						
+					if(e != null) {						
+						files.add(e);						
 						// FIXME: following is broken and needs to be fixed.
 						File file = resource.getLocation().toFile();
 						resourceMap.put(file.getAbsolutePath(), resource);
+						System.out.println("GOT: " + file.getAbsolutePath());
 					}
 				}
 			}
@@ -308,9 +306,13 @@ public class Builder extends IncrementalProjectBuilder {
 			System.out.println("DONE");
 			
 		} catch (SyntaxError e) {
-			System.out.println(e);
+			System.out.println("LOOKING FOR: " + e.filename());			
 			IFile resource = resourceMap.get(e.filename());
-			highlightSyntaxError(resource, e);
+			if(resource != null) { // saftey
+				highlightSyntaxError(resource, e);
+			} else {
+				System.out.println("SKIPPING ERROR");
+			}
 		} catch (Exception e) {			
 			e.printStackTrace();
 		}
@@ -453,17 +455,14 @@ public class Builder extends IncrementalProjectBuilder {
 	
 	protected void highlightSyntaxError(IResource resource, SyntaxError err)
 			throws CoreException {
-		// IMarker m = resource.createMarker(IMarker.PROBLEM);
-		//IMarker m = resource.createMarker(Activator.WYCLIPSE_MARKER_ID);
 		IMarker m = resource.createMarker("wyclipse.whileymarker");
+		System.out.println("START: " + err.start());
 		m.setAttribute(IMarker.CHAR_START, err.start());
 		m.setAttribute(IMarker.CHAR_END, err.end() + 1);
 		m.setAttribute(IMarker.MESSAGE, err.msg());
 		m.setAttribute(IMarker.LOCATION, "Whiley File");
 		m.setAttribute(IMarker.PRIORITY, IMarker.PRIORITY_HIGH);
-		m.setAttribute(IMarker.SEVERITY, IMarker.SEVERITY_ERROR);
-	
-		
+		m.setAttribute(IMarker.SEVERITY, IMarker.SEVERITY_ERROR);			
 	}
 	
 	private static boolean isClassPath(IResource resource) {

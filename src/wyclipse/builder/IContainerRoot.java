@@ -141,7 +141,7 @@ public class IContainerRoot extends AbstractRoot {
 		}
 		
 		public String location() {
-			return file.toString();
+			return file.getLocation().toFile().toString();			
 		}
 		
 		public long lastModified() {
