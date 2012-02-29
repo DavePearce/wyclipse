@@ -161,6 +161,21 @@ public class IContainerRoot implements Root {
 			return suffix;
 		}
 		
+		public void write(T contents) throws Exception {
+			ByteArrayOutputStream out = new ByteArrayOutputStream();
+			contentType().write(out,contents);
+			byte[] bytes = out.toByteArray();
+			ByteArrayInputStream input = new ByteArrayInputStream(bytes);
+			
+			if(file.exists()) {
+				// I don't really understand why I need to do this. I would have
+				// expected the create method below to be sufficient.
+				file.setContents(input, IResource.FORCE | IResource.DERIVED, null);
+			} else {				
+				file.create(input, IResource.FORCE | IResource.DERIVED, null);
+			}
+		}
+		
 		public InputStream inputStream() throws Exception {
 			return file.getContents();		
 		}

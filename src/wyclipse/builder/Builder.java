@@ -34,33 +34,58 @@ import org.eclipse.core.runtime.*;
 import org.eclipse.jdt.core.*;
 import org.osgi.framework.Bundle;
 
-import wyc.Compiler;
-import wyc.NameResolver;
-import wyc.Pipeline;
-import wyc.Pipeline.Template;
-import wyc.stages.BackPropagation;
-import wyc.stages.TypePropagation;
+import wycore.lang.*;
+import wycore.lang.Path;
+import wycore.util.*;
+import wyil.Pipeline;
+import wyil.Pipeline.Template;
+import wyc.builder.WhileyBuilder;
+import wyc.lang.WhileyFile;
 import wyclipse.Activator;
 import wyil.io.WyilFileWriter;
-import wyil.util.path.*;
-import wyil.util.path.Path;
-import wyil.ModuleLoader;
+import wyil.lang.WyilFile;
+
 import wyil.Transform;
-import wyil.transforms.CoercionCheck;
-import wyil.transforms.ConstraintInline;
-import wyil.transforms.DeadCodeElimination;
-import wyil.transforms.DefiniteAssignment;
-import wyil.transforms.LiveVariablesAnalysis;
-import wyil.transforms.ModuleCheck;
-import wyil.util.SyntaxError;
+import wyil.transforms.*;
 import wyjc.io.ClassFileLoader;
 
 public class Builder extends IncrementalProjectBuilder {
 	private static final boolean verbose = false;
 
-	private NameResolver nameResolver;
-	private List<Transform> compilerStages;
-	private Compiler compiler;
+	/**
+	 * The master project content type registry.
+	 */
+	public static final Content.Registry registry = new Content.Registry() {
+	
+		public void associate(Path.Entry e) {
+			if(e.suffix().equals("whiley")) {
+				e.associate(WhileyFile.ContentType, null);
+			} else if(e.suffix().equals("class")) {
+				// this could be either a normal JVM class, or a Wyil class. We
+				// need to determine which.
+				try { 					
+					WyilFile c = WyilFile.ContentType.read(e,e.inputStream());
+					if(c != null) {
+						e.associate(WyilFile.ContentType,c);
+					}					
+				} catch(Exception ex) {
+					// hmmm, not ideal
+				}
+			} 
+		}
+		
+		public String suffix(Content.Type<?> t) {
+			if(t == WhileyFile.ContentType) {
+				return "whiley";
+			} else if(t == WyilFile.ContentType) {
+				return "class";
+			} else {
+				return "dat";
+			}
+		}
+	};
+			
+	private Project project;
 
 	public Builder() {
 		
@@ -69,7 +94,7 @@ public class Builder extends IncrementalProjectBuilder {
 	protected IProject[] build(int kind, Map args, IProgressMonitor monitor)
 			throws CoreException {
 		
-		if(compiler == null) {
+		if(project == null) {
 			initialiseCompiler();
 		}
 		
@@ -84,6 +109,7 @@ public class Builder extends IncrementalProjectBuilder {
 				incrementalBuild(delta, monitor);
 			}
 		}
+		
 		return null;
 	}
 
@@ -160,100 +186,96 @@ public class Builder extends IncrementalProjectBuilder {
 				.getNature(JavaCore.NATURE_ID);
 		IWorkspace workspace = project.getWorkspace();
 		IWorkspaceRoot workspaceRoot = workspace.getRoot();
-		IContainerRoot bindir;
-		
-		if(outputDirectory != null) {
-			bindir = new IContainerRoot(outputDirectory);
-		} else {
-			bindir = null;
-		}
+				
 		
 		if (javaProject != null) {
 			initialisePaths(javaProject.getRawClasspath(), whileypath,
-					sourcepath, workspaceRoot, javaProject, bindir);
+					sourcepath, workspaceRoot, javaProject);
 		}
 	}
 
 	protected void initialisePaths(IClasspathEntry[] entries,
-			ArrayList<Path.Root> whileypath, ArrayList<Path.Root> sourcepath,
-			IWorkspaceRoot workspaceRoot, IJavaProject javaProject,
-			IContainerRoot bindir)
+			ArrayList<Path.Root> externalRoots, ArrayList<Path.Root> sourceRoots,
+			IWorkspaceRoot workspaceRoot, IJavaProject javaProject)
 			throws CoreException {
-	for (IClasspathEntry e : entries) {
+		for (IClasspathEntry e : entries) {
 			switch (e.getEntryKind()) {
-			case IClasspathEntry.CPE_LIBRARY: {
-				IPath location = e.getPath();
-				try {
-					whileypath.add(new JarFileRoot(location.toOSString()));
-				} catch (IOException ex) {
-					// ignore entries which don't exist
+				case IClasspathEntry.CPE_LIBRARY : {
+					IPath location = e.getPath();
+					try {
+						externalRoots.add(new JarFileRoot(location.toOSString(),
+								registry));
+					} catch (IOException ex) {
+						// ignore entries which don't exist
+					}
+					break;
 				}
-				break;
-			}
-			case IClasspathEntry.CPE_SOURCE: {
-				IPath location = e.getPath();
-				IFolder folder = workspaceRoot.getFolder(location);
-				sourcepath.add(new ISourceRoot(folder, bindir));
-				break;
-			}
-			case IClasspathEntry.CPE_CONTAINER:
-				IPath location = e.getPath();
-				IClasspathContainer container = JavaCore.getClasspathContainer(location, javaProject);
-				// can container be null here?
-				// Now, recursively add paths
-				initialisePaths(container.getClasspathEntries(), whileypath,
-						sourcepath, workspaceRoot, javaProject, bindir);
-				break;
+				case IClasspathEntry.CPE_SOURCE : {
+					IPath location = e.getPath();
+					IFolder folder = workspaceRoot.getFolder(location);
+					sourceRoots.add(new IContainerRoot(folder, registry));
+					break;
+				}
+				case IClasspathEntry.CPE_CONTAINER :
+					IPath location = e.getPath();
+					IClasspathContainer container = JavaCore
+							.getClasspathContainer(location, javaProject);
+					// can container be null here?
+					// Now, recursively add paths
+					initialisePaths(container.getClasspathEntries(),
+							externalRoots, sourceRoots, workspaceRoot, javaProject);
+					break;
 			}
 		}
 	}
 	
 	protected void initialiseCompiler() throws CoreException {		
-		IProject project = (IProject) getProject();
-		IJavaProject javaProject = (IJavaProject) project
+		IProject iproject = (IProject) getProject();
+		IJavaProject javaProject = (IJavaProject) iproject
 				.getNature(JavaCore.NATURE_ID);
 
-		IWorkspace workspace = project.getWorkspace();
+		IWorkspace workspace = iproject.getWorkspace();
 		IWorkspaceRoot workspaceRoot = workspace.getRoot();		
 
 		// =========================================================
 		// Initialise whiley and source paths
 		// =========================================================
 		IContainer outputDirectory = workspaceRoot.getFolder(javaProject.getOutputLocation());		
-		ArrayList<Path.Root> whileypath = new ArrayList<Path.Root>();
-		ArrayList<Path.Root> sourcepath = new ArrayList<Path.Root>();
-		initialisePaths(whileypath,sourcepath,outputDirectory);
+		ArrayList<Path.Root> externalRoots = new ArrayList<Path.Root>();
+		ArrayList<Path.Root> sourceRoots = new ArrayList<Path.Root>();
+		initialisePaths(externalRoots,sourceRoots,outputDirectory);
 		
 		// =========================================================
-		// Construct name resolver
+		// Construct Namespace
 		// =========================================================
 		
-		this.nameResolver = new NameResolver(sourcepath,whileypath);
-		this.nameResolver.setModuleReader("class",new ClassFileLoader());
+		NameSpace namespace = new StandardNameSpace(sourceRoots,externalRoots) {        		
+			public Path.ID create(String s) {
+				return Trie.fromString(s);
+			}
+		};
+
+		// =========================================================
+		// Construct and Configure Project
+		// =========================================================
+
+		project = new Project(namespace);			
+
+		if(verbose) {			
+			project.setLogger(new Logger.Default(System.err));
+		}		
+
+		// now, initialise builder appropriately
+		Pipeline pipeline = new Pipeline(Pipeline.defaultPipeline);
+		WhileyBuilder builder = new WhileyBuilder(project,pipeline);
+		Content.Filter includes = Content.filter(Trie.fromString("**"),WhileyFile.ContentType);
+		StandardBuildRule rule = new StandardBuildRule(builder);
 		
-		// =========================================================
-		// Construct and configure pipeline
-		// =========================================================
-				
-		compilerStages = new ArrayList<Transform>();
-		compilerStages.add(new TypePropagation(nameResolver));					
-		compilerStages.add(new DefiniteAssignment(nameResolver));
-		compilerStages.add(new ModuleCheck(nameResolver));							
-		compilerStages.add(new BackPropagation(nameResolver));		
-		compilerStages.add(new CoercionCheck(nameResolver));
-		compilerStages.add(new DeadCodeElimination(nameResolver));
-		compilerStages.add(new LiveVariablesAnalysis(nameResolver));
-		compilerStages.add(new ClassWriter(nameResolver, outputDirectory));
-		
-		// =========================================================
-		// Construct and configure the compiler
-		// =========================================================
-				
-		compiler = new Compiler(nameResolver, compilerStages);
-		if (verbose) {
-			compiler.setLogOut(System.err);
+		for(Path.Root source : sourceRoots) {			
+			rule.add(source, includes, source, WyilFile.ContentType);			
 		}
-		nameResolver.setLogger(compiler);
+		
+		project.add(rule);
 	}
 
 	protected void compile(List<IFile> compileableResources)
@@ -261,14 +283,15 @@ public class Builder extends IncrementalProjectBuilder {
 
 		HashMap<String, IFile> resourceMap = new HashMap<String, IFile>();
 		try {
-			ArrayList<File> files = new ArrayList<File>();
+			ArrayList<Path.Entry<?>> files = new ArrayList();
 			for (IFile resource : compileableResources) {
+				Path.ID id = Trie.fromString(resource.getLocation().toString());
+				files.add(new IContainerRoot.IEntry(id,resource));
 				File file = resource.getLocation().toFile();
-				files.add(file);				
 				resourceMap.put(file.getAbsolutePath(), resource);
 			}
 						
-			compiler.compile(files);
+			project.build(files);
 						
 		} catch (SyntaxError e) {
 			IFile resource = resourceMap.get(e.filename());
