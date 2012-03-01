@@ -182,7 +182,7 @@ public class Builder extends IncrementalProjectBuilder {
 	}
 
 	protected void initialisePaths(ArrayList<Path.Root> externalRoots,
-			ArrayList<IContainerRoot> sourceRoots, IContainer outputDirectory)
+			ArrayList<IContainerRoot> sourceRoots)
 			throws CoreException {
 		IProject project = (IProject) getProject();	
 		IJavaProject javaProject = (IJavaProject) project
@@ -246,10 +246,15 @@ public class Builder extends IncrementalProjectBuilder {
 		// =========================================================
 		// Initialise whiley and source paths
 		// =========================================================
-		IContainer outputDirectory = workspaceRoot.getFolder(javaProject.getOutputLocation());		
+		IContainer defaultOutputDirectory = workspaceRoot.getFolder(javaProject.getOutputLocation());
+		IContainerRoot outputRoot = defaultOutputDirectory != null ? new IContainerRoot(defaultOutputDirectory,registry) : null;
+		
 		ArrayList<Path.Root> externalRoots = new ArrayList();
 		sourceRoots = new ArrayList<IContainerRoot>();
-		initialisePaths(externalRoots,sourceRoots,outputDirectory);
+		if(outputRoot != null) {
+			externalRoots.add(outputRoot);
+		}
+		initialisePaths(externalRoots,sourceRoots);		
 		
 		// =========================================================
 		// Construct Namespace
@@ -274,11 +279,16 @@ public class Builder extends IncrementalProjectBuilder {
 		// now, initialise builder appropriately
 		Pipeline pipeline = new Pipeline(Pipeline.defaultPipeline);
 		WhileyBuilder builder = new WhileyBuilder(project,pipeline);
-		Content.Filter includes = Content.filter(Trie.fromString("**"),WhileyFile.ContentType);
+		Content.Filter<WhileyFile> includes = Content.filter(Trie.fromString("**"),WhileyFile.ContentType);
 		StandardBuildRule rule = new StandardBuildRule(builder);
 		
-		for(Path.Root source : sourceRoots) {			
-			rule.add(source, includes, source, WyilFile.ContentType);			
+		for(Path.Root source : sourceRoots) {	
+			if(outputRoot != null) {
+				rule.add(source, includes, outputRoot, WyilFile.ContentType);
+			} else {
+				// default backup
+				rule.add(source, includes, source, WyilFile.ContentType);
+			}
 		}
 		
 		project.add(rule);
