@@ -47,20 +47,25 @@ import wyil.lang.WyilFile;
  * 
  */
 public class WhileyProject implements NameSpace {
-	
+
 	/**
-	 * The roots of all binary entries known to the builder. This includes all
-	 * external archives (e.g. jars), as well as the standard library. It also
-	 * includes any output directories.
-	 */	
+	 * The roots of all external entries known to the builder. This includes all
+	 * external archives (e.g. jars), as well as the standard library.
+	 */
+	protected final ArrayList<IContainerRoot> externalRoots;
+
+	/**
+	 * The roots of all binary entries known to the builder. This is essentially
+	 * the list of all output directories.
+	 */
 	protected final ArrayList<IContainerRoot> binaryRoots;
-	
+
 	/**
 	 * The roots of all source entries known to the builder. From this pool of
 	 * resources, the set of files needing recompilation is determined.
-	 */	
+	 */
 	protected final ArrayList<IContainerRoot> sourceRoots;
-	
+
 	/**
 	 * The delta is a list of entries which require recompilation. As entries
 	 * are changed, they may be added to this list (e.g. Whiley). Entries which
@@ -68,7 +73,7 @@ public class WhileyProject implements NameSpace {
 	 * dependents (e.g. jar files) then this may force a total recompilation.
 	 */
 	protected final ArrayList<IFileEntry> delta;
-	
+
 	/**
 	 * <p>
 	 * The whiley builder is responsible for actually compiling whiley files
@@ -78,14 +83,14 @@ public class WhileyProject implements NameSpace {
 	 * </p>
 	 */
 	private final WhileyBuilder builder;
-	
+
 	/**
 	 * The build rules identify how source files are converted into binary
 	 * files. In particular, they determine which whiley files are compiled,
 	 * what their target types are and where their binaries should be written.
 	 */
 	protected final ArrayList<BuildRule> rules;
-	
+
 	/**
 	 * Construct a build manager from a given IJavaProject. This will traverse
 	 * the projects raw classpath to identify all classpath entries, such as
@@ -94,49 +99,57 @@ public class WhileyProject implements NameSpace {
 	 * 
 	 * @param project
 	 */
-	public WhileyProject(IWorkspace workspace, IJavaProject project) throws CoreException {
+	public WhileyProject(IWorkspace workspace, IJavaProject project)
+			throws CoreException {
 		IWorkspaceRoot workspaceRoot = workspace.getRoot();
-		
+
+		externalRoots = new ArrayList<IContainerRoot>();
 		binaryRoots = new ArrayList<IContainerRoot>();
 		sourceRoots = new ArrayList<IContainerRoot>();
-		this.delta = new ArrayList<IFileEntry>();		
-		
+		this.delta = new ArrayList<IFileEntry>();
+		this.rules = new ArrayList<BuildRule>();
+
 		// ===============================================================
 		// First, initialise roots
 		// ===============================================================
-		
+
 		IContainer defaultOutputDirectory = workspaceRoot.getFolder(project
 				.getOutputLocation());
-		
-		IContainerRoot outputRoot = null;		
-		if(defaultOutputDirectory != null) {
+
+		IContainerRoot outputRoot = null;
+		if (defaultOutputDirectory != null) {
 			// we have a default output directory, so make sure to include it!
 			outputRoot = new IContainerRoot(defaultOutputDirectory, registry);
 			binaryRoots.add(outputRoot);
+		} else {
+			throw new RuntimeException(
+					"Whiley Plugin currently unable to handle projects without default output folder");
 		}
-				
-		initialise(workspace.getRoot(),project,project.getRawClasspath());
-		
+
+		initialise(workspace.getRoot(), project, project.getRawClasspath());
+
 		// ===============================================================
 		// Second, initialise builder + rules
 		// ===============================================================
+
 		Pipeline pipeline = new Pipeline(Pipeline.defaultPipeline);
-		WhileyBuilder builder = new WhileyBuilder(this,pipeline);
-		Content.Filter<WhileyFile> includes = Content.filter(Trie.fromString("**"),WhileyFile.ContentType);
+		this.builder = new WhileyBuilder(this, pipeline);
+		Content.Filter<WhileyFile> includes = Content.filter(
+				Trie.fromString("**"), WhileyFile.ContentType);
 		StandardBuildRule rule = new StandardBuildRule(builder);
-		
-		for(Path.Root source : sourceRoots) {	
-			if(outputRoot != null) {
+
+		for (Path.Root source : sourceRoots) {
+			if (outputRoot != null) {
 				rule.add(source, includes, outputRoot, WyilFile.ContentType);
 			} else {
 				// default backup
 				rule.add(source, includes, source, WyilFile.ContentType);
 			}
 		}
-		
+
 		rules.add(rule);
-	}	
-	
+	}
+
 	private void initialise(IWorkspaceRoot workspaceRoot,
 			IJavaProject javaProject, IClasspathEntry[] entries)
 			throws CoreException {
@@ -145,8 +158,8 @@ public class WhileyProject implements NameSpace {
 				case IClasspathEntry.CPE_LIBRARY : {
 					IPath location = e.getPath();
 					try {
-						binaryRoots.add(new JarFileRoot(location.toOSString(),
-								registry));
+						externalRoots.add(new JarFileRoot(
+								location.toOSString(), registry));
 					} catch (IOException ex) {
 						// ignore entries which don't exist
 					}
@@ -173,62 +186,111 @@ public class WhileyProject implements NameSpace {
 			}
 		}
 	}
-	
+
 	// ======================================================================
 	// Accessors
-	// ======================================================================		
-	
+	// ======================================================================
+
 	public boolean exists(Path.ID id, Content.Type<?> ct) throws Exception {
-		for(int i=0;i!=binaryRoots.size();++i) {
-			if(binaryRoots.get(i).exists(id, ct)) {
+		for (int i = 0; i != sourceRoots.size(); ++i) {
+			if (sourceRoots.get(i).exists(id, ct)) {
+				return true;
+			}
+		}
+		for (int i = 0; i != binaryRoots.size(); ++i) {
+			if (binaryRoots.get(i).exists(id, ct)) {
+				return true;
+			}
+		}
+		for (int i = 0; i != externalRoots.size(); ++i) {
+			if (externalRoots.get(i).exists(id, ct)) {
 				return true;
 			}
 		}
 		return false;
 	}
-	
-	public <T> Path.Entry<T> get(Path.ID id, Content.Type<T> ct) throws Exception {
-		for(int i=0;i!=binaryRoots.size();++i) {
-			Path.Entry<T> e = binaryRoots.get(i).get(id, ct);
-			if(e != null) {
+
+	public <T> Path.Entry<T> get(Path.ID id, Content.Type<T> ct)
+			throws Exception {
+		for (int i = 0; i != sourceRoots.size(); ++i) {
+			Path.Entry<T> e = sourceRoots.get(i).get(id, ct);
+			if (e != null) {
 				return e;
-			}			
+			}
+		}
+		for (int i = 0; i != binaryRoots.size(); ++i) {
+			Path.Entry<T> e = binaryRoots.get(i).get(id, ct);
+			if (e != null) {
+				return e;
+			}
+		}
+		for (int i = 0; i != externalRoots.size(); ++i) {
+			Path.Entry<T> e = externalRoots.get(i).get(id, ct);
+			if (e != null) {
+				return e;
+			}
 		}
 		return null;
 	}
-	
-	public <T> ArrayList<Path.Entry<T>> get(Content.Filter<T> filter) throws Exception {
+
+	public <T> ArrayList<Path.Entry<T>> get(Content.Filter<T> filter)
+			throws Exception {
 		ArrayList<Path.Entry<T>> r = new ArrayList<Path.Entry<T>>();
-		for(int i=0;i!=binaryRoots.size();++i) {
+		for (int i = 0; i != sourceRoots.size(); ++i) {
+			r.addAll(sourceRoots.get(i).get(filter));
+		}
+		for (int i = 0; i != binaryRoots.size(); ++i) {
 			r.addAll(binaryRoots.get(i).get(filter));
 		}
+		for (int i = 0; i != externalRoots.size(); ++i) {
+			r.addAll(externalRoots.get(i).get(filter));
+		}
 		return r;
 	}
-	
-	public <T> HashSet<Path.ID> match(Content.Filter<T> filter) throws Exception {
+
+	public <T> HashSet<Path.ID> match(Content.Filter<T> filter)
+			throws Exception {
 		HashSet<Path.ID> r = new HashSet<Path.ID>();
-		for(int i=0;i!=binaryRoots.size();++i) {
+		for (int i = 0; i != sourceRoots.size(); ++i) {
+			r.addAll(sourceRoots.get(i).match(filter));
+		}
+		for (int i = 0; i != binaryRoots.size(); ++i) {
 			r.addAll(binaryRoots.get(i).match(filter));
 		}
+		for (int i = 0; i != externalRoots.size(); ++i) {
+			r.addAll(externalRoots.get(i).match(filter));
+		}
 		return r;
 	}
-	
+
 	// ======================================================================
 	// Mutators
-	// ======================================================================		
-	
+	// ======================================================================
+
 	public void flush() throws Exception {
-		for(int i=0;i!=binaryRoots.size();++i) {
+		for (int i = 0; i != sourceRoots.size(); ++i) {
+			sourceRoots.get(i).flush();
+		}
+		for (int i = 0; i != binaryRoots.size(); ++i) {
 			binaryRoots.get(i).flush();
 		}
-	}
-	
-	public void refresh() throws Exception {
-		for(int i=0;i!=binaryRoots.size();++i) {
-			binaryRoots.get(i).refresh();
+		for (int i = 0; i != externalRoots.size(); ++i) {
+			externalRoots.get(i).flush();
 		}
 	}
-	
+
+	public void refresh() throws Exception {
+		for (int i = 0; i != sourceRoots.size(); ++i) {
+			sourceRoots.get(i).refresh();
+		}
+		for (int i = 0; i != binaryRoots.size(); ++i) {
+			binaryRoots.get(i).refresh();
+		}
+		for (int i = 0; i != externalRoots.size(); ++i) {
+			externalRoots.get(i).refresh();
+		}
+	}
+
 	/**
 	 * A resource of some sort has changed, and we need to update the namespace
 	 * accordingly. Note that the given resource may not actually be managed by
@@ -237,9 +299,9 @@ public class WhileyProject implements NameSpace {
 	 * @param delta
 	 */
 	public void changed(IResource delta) {
-		
+
 	}
-	
+
 	/**
 	 * A resource of some sort has been created, and we need to update the
 	 * namespace accordingly. Note that the given resource may not actually be
@@ -248,10 +310,10 @@ public class WhileyProject implements NameSpace {
 	 * 
 	 * @param delta
 	 */
-	public void created(IResource delta) {
-		
+	public void added(IResource delta) {
+
 	}
-		
+
 	/**
 	 * A resource of some sort has been removed, and we need to update the
 	 * namespace accordingly. Note that the given resource may not actually be
@@ -261,35 +323,59 @@ public class WhileyProject implements NameSpace {
 	 * @param delta
 	 */
 	public void removed(IResource delta) {
-		
+
 	}
-	
+
+	/**
+	 * Delete all entries and corresponding IFiles from all binary roots. That
+	 * is, delete all output files.
+	 */
+	public void clean() {
+
+	}
+
+	/**
+	 * Build those source files which are known to have changed, and their
+	 * dependencies.
+	 */
+	public void build() {
+
+	}
+
+	/**
+	 * Build all known source files, regardless of whether they have changed or
+	 * not.
+	 */
+	public void buildAll() {
+
+	}
+
 	/**
 	 * The master project content type registry.
 	 */
 	public static final Content.Registry registry = new Content.Registry() {
-	
+
 		public void associate(Path.Entry e) {
-			if(e.suffix().equals("whiley")) {
+			if (e.suffix().equals("whiley")) {
 				e.associate(WhileyFile.ContentType, null);
-			} else if(e.suffix().equals("class")) {
+			} else if (e.suffix().equals("class")) {
 				// this could be either a normal JVM class, or a Wyil class. We
 				// need to determine which.
-				try { 					
-					WyilFile c = WyilFile.ContentType.read(e,e.inputStream());
-					if(c != null) {
-						e.associate(WyilFile.ContentType,c);
-					}					
-				} catch(Exception ex) {
+				try {
+					WyilFile c = WyilFile.ContentType.read(e, e.inputStream());
+					if (c != null) {
+						e.associate(WyilFile.ContentType, c);
+					}
+				} catch (Exception ex) {
 					// hmmm, not ideal
 				}
-			} 
+			}
 		}
-		
+
 		public String suffix(Content.Type<?> t) {
-			if(t == WhileyFile.ContentType) {
+			if (t == WhileyFile.ContentType) {
 				return "whiley";
-			} else if(t == WyilFile.ContentType) {
+			} else if (t == WyilFile.ContentType) {
 				return "class";
 			} else {
 				return "dat";
