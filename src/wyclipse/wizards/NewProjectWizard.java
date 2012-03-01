@@ -120,12 +120,14 @@ public class NewProjectWizard extends NewElementWizard implements IExecutableExt
 				ICommand buildCommand = desc.newCommand();				
 				buildCommand.setBuilderName(Activator.WYCLIPSE_BUILDER_ID);
 				
-				ICommand[] oldBuilders = desc.getBuildSpec();
+//				ICommand[] oldBuilders = desc.getBuildSpec();
 //				ICommand[] newBuilders = new ICommand[oldBuilders.length+1];
 //				System.arraycopy(oldBuilders, 0, newBuilders, 1, oldBuilders.length);				
 //				newBuilders[0] = buildCommand;
-				ICommand[] newBuilders = Arrays.copyOf(oldBuilders, oldBuilders.length+1);
-				newBuilders[oldBuilders.length] = buildCommand;
+//				ICommand[] newBuilders = Arrays.copyOf(oldBuilders, oldBuilders.length+1);	
+//				newBuilders[oldBuilders.length] = buildCommand;
+				ICommand[] newBuilders = new ICommand[1];
+				newBuilders[0] = buildCommand;
 				desc.setBuildSpec(newBuilders);		
 				
 				// Third, add the Whiley class path container

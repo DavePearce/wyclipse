@@ -50,7 +50,7 @@ import wyil.transforms.*;
 import wyjc.io.ClassFileLoader;
 
 public class Builder extends IncrementalProjectBuilder {
-	private static final boolean verbose = false;
+	private static final boolean verbose = true;
 
 	/**
 	 * The master project content type registry.
@@ -287,9 +287,12 @@ public class Builder extends IncrementalProjectBuilder {
 		try {
 			ArrayList<Path.Entry<?>> files = new ArrayList();
 			for (IFile resource : compileableResources) {
-				for(IContainerRoot root : sourceRoots) {					
+				for(IContainerRoot root : sourceRoots) {
 					IContainerRoot.IEntry<?> e = root.get(resource);
-					if(e != null) {						
+					if(e != null) {
+						// Refresh the entry since it's changed.
+						e.refresh();
+						
 						files.add(e);						
 						// FIXME: following is broken and needs to be fixed.
 						File file = resource.getLocation().toFile();
@@ -473,8 +476,9 @@ public class Builder extends IncrementalProjectBuilder {
 			final String extension, final ArrayList<IFile> files) throws CoreException {
 		IResourceVisitor visitor = new IResourceVisitor() {
 			public boolean visit(IResource resource) {
+				String suffix = resource.getFileExtension();
 				if (resource.getType() == IResource.FILE
-						&& resource.getFileExtension().equals(extension)) {
+						&& suffix != null && suffix.equals(extension)) {
 					files.add((IFile) resource);
 				}
 				return true; // visit children as well.

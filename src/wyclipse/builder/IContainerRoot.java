@@ -63,7 +63,7 @@ public class IContainerRoot extends AbstractRoot {
 		this.dir = dir;
 	}
 	
-	public IEntry<?> get(IFile file) {		
+	public IEntry<?> get(IFile file) throws Exception {		
 		for(int i=0;i!=size();++i) {
 			IEntry e = (IEntry) get(i);			
 			if(e.file.equals(file)) {
@@ -78,7 +78,7 @@ public class IContainerRoot extends AbstractRoot {
 		if(entry != null) {
 			return entry;
 		}
-		Path path = new Path(id.toString()); 
+		Path path = new Path(id.toString() + "." + contentTypes.suffix(contentType)); 
 		IFile file = dir.getFile(path);		
 		entry = new IEntry<T>(id,file);
 		insert(entry);
@@ -110,7 +110,8 @@ public class IContainerRoot extends AbstractRoot {
 		for (IResource file : container.members()) {			
 			if(file instanceof IFile) {
 				String suffix = file.getFileExtension();
-				if(suffix.equals("class") || suffix.equals("whiley")) {
+				if (suffix != null
+						&& (suffix.equals("class") || suffix.equals("whiley"))) {
 					String filename = file.getName();
 					String name = filename.substring(0, filename.lastIndexOf('.'));
 					IEntry entry = new IEntry(id.append(name), (IFile) file);
@@ -157,7 +158,7 @@ public class IContainerRoot extends AbstractRoot {
 			}
 			return suffix;
 		}
-		
+				
 		public void write(T contents) throws Exception {
 			ByteArrayOutputStream out = new ByteArrayOutputStream();
 			contentType().write(out,contents);
