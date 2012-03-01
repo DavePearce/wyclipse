@@ -30,14 +30,17 @@ import java.util.*;
 
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IResourceVisitor;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.Path;
 
-import wyil.util.path.Path.*;
-import wyil.lang.Module;
-import wyil.lang.ModuleID;
-import wyil.lang.PkgID;
+import wycore.lang.Content;
+import wycore.lang.Path.*;
+import wycore.util.AbstractRoot;
+import wycore.util.AbstractEntry;
+import wycore.util.Trie;
 
 /**
  * A Directory represents a directory on the file system. Using this, we can
@@ -46,8 +49,8 @@ import wyil.lang.PkgID;
  * @author djp
  * 
  */
-public class IBinaryRoot implements Root {
-	private final IContainer dir;	
+public class IContainerRoot extends AbstractRoot {	
+	private final IContainer dir;		
 		
 	/**
 	 * Construct a directory root from a given directory and file filter.
@@ -55,53 +58,71 @@ public class IBinaryRoot implements Root {
 	 * @param file
 	 *            --- location of directory on filesystem.
 	 */
-	public IBinaryRoot(IContainer dir) {
+	public IContainerRoot(IContainer dir, Content.Registry contentTypes) {
+		super(contentTypes);		
 		this.dir = dir;
 	}
 	
-	public boolean exists(PkgID pkg) throws CoreException {				
-		String pkgname = pkg.toString().replace('.', '/') + "/";
-		return dir.exists(new Path(pkgname));
-	}
-	
-	public List<Entry> list(PkgID pkg) throws CoreException {
-		System.err.println("LISTING: " + pkg);
-		Path path = new Path(pkg.toString().replace('.','/'));
-		IResource member = dir.findMember(path);
-		
-		if (member.exists() && member instanceof IContainer) {
-			IContainer container = (IContainer) member;
-			ArrayList<Entry> entries = new ArrayList<Entry>();
-
-			for (IResource file : container.members()) {				
-				if(file instanceof IFile && file.getFileExtension().equals("class")) {
-					String filename = file.getName();
-					String name = filename.substring(0, filename.lastIndexOf('.'));
-					ModuleID mid = new ModuleID(pkg, name);
-					entries.add(new IEntry(mid, (IFile) file));				
-				}
+	public IEntry<?> get(IFile file) throws Exception {		
+		for(int i=0;i!=size();++i) {
+			IEntry e = (IEntry) get(i);			
+			if(e.file.equals(file)) {
+				return e;
 			}
-
-			return entries;
-		} else {
-			return Collections.EMPTY_LIST;
 		}
+		return null;
 	}
 	
-	public Entry lookup(ModuleID mid) {
-		System.err.println("LOOKING UP: " + mid);
-		Path path = new Path(mid.toString().replace('.', '/'));
-		IResource member = dir.findMember(path);
-
-		if (member.exists() && member instanceof IFile) {
-			return new IEntry(mid, (IFile) member);
-		} else {
-			return null; // not found
+	public <T> Entry<T> create(ID id, Content.Type<T> contentType) throws Exception {
+		Entry<T> entry = get(id,contentType);
+		if(entry != null) {
+			return entry;
 		}
+		Path path = new Path(id.toString() + "." + contentTypes.suffix(contentType)); 
+		IFile file = dir.getFile(path);		
+		entry = new IEntry<T>(id,file);
+		insert(entry);
+		entry.associate(contentType,null);		
+		return entry;
 	}
-
+	
+	public void flush() {
+		
+	}
+	
+	public void refresh() {
+		contents = null;
+	}
+		
+	protected Entry[] contents() throws CoreException {
+		ArrayList<Entry> contents = new ArrayList<Entry>();
+		traverse(dir,Trie.ROOT,contents);
+		return contents.toArray(new Entry[contents.size()]);		
+	}
+		
 	public String toString() {
 		return dir.toString();
+	}
+	
+	private void traverse(IContainer container, Trie id,
+			ArrayList<Entry> entries) throws CoreException {
+
+		for (IResource file : container.members()) {			
+			if(file instanceof IFile) {
+				String suffix = file.getFileExtension();
+				if (suffix != null
+						&& (suffix.equals("class") || suffix.equals("whiley"))) {
+					String filename = file.getName();
+					String name = filename.substring(0, filename.lastIndexOf('.'));
+					IEntry entry = new IEntry(id.append(name), (IFile) file);
+					entries.add(entry);
+					contentTypes.associate(entry);
+				}
+			} else if(file instanceof IFolder) {
+				IFolder folder = (IFolder) file;
+				traverse(folder,id.append(folder.getName()),entries);
+			}
+		}
 	}
 	
 	/**
@@ -112,21 +133,16 @@ public class IBinaryRoot implements Root {
 	 * @author djp
 	 * 
 	 */
-	public static class IEntry implements Entry {
-		private final ModuleID mid;
+	public static class IEntry<T> extends AbstractEntry<T> {		
 		private final IFile file;		
 		
-		public IEntry(ModuleID mid, IFile file) {
-			this.mid = mid;
+		public IEntry(ID mid, IFile file) {
+			super(mid);			
 			this.file = file;
 		}
 		
-		public ModuleID id() {
-			return mid;
-		}
-		
 		public String location() {
-			return file.toString();
+			return file.getLocation().toFile().toString();			
 		}
 		
 		public long lastModified() {
@@ -142,9 +158,30 @@ public class IBinaryRoot implements Root {
 			}
 			return suffix;
 		}
+				
+		public void write(T contents) throws Exception {
+			super.write(contents);			
+			ByteArrayOutputStream out = new ByteArrayOutputStream();
+			contentType().write(out,contents);
+			byte[] bytes = out.toByteArray();
+			ByteArrayInputStream input = new ByteArrayInputStream(bytes);
+			
+			if(file.exists()) {
+				// I don't really understand why I need to do this. I would have
+				// expected the create method below to be sufficient.
+				file.setContents(input, IResource.FORCE | IResource.DERIVED, null);
+			} else {				
+				file.create(input, IResource.FORCE | IResource.DERIVED, null);
+			}
+		}
 		
-		public InputStream contents() throws Exception {
+		public InputStream inputStream() throws Exception {
 			return file.getContents();		
-		}		
+		}
+		
+		public OutputStream outputStream() throws Exception {
+			// BUMMER
+			return null;		
+		}
 	}	
 }
