@@ -53,39 +53,7 @@ import wyjc.io.ClassFileLoader;
 
 public class Builder extends IncrementalProjectBuilder {
 	private static final boolean verbose = true;
-
-	/**
-	 * The master project content type registry.
-	 */
-	public static final Content.Registry registry = new Content.Registry() {
 	
-		public void associate(Path.Entry e) {
-			if(e.suffix().equals("whiley")) {
-				e.associate(WhileyFile.ContentType, null);
-			} else if(e.suffix().equals("class")) {
-				// this could be either a normal JVM class, or a Wyil class. We
-				// need to determine which.
-				try { 					
-					WyilFile c = WyilFile.ContentType.read(e,e.inputStream());
-					if(c != null) {
-						e.associate(WyilFile.ContentType,c);
-					}					
-				} catch(Exception ex) {
-					// hmmm, not ideal
-				}
-			} 
-		}
-		
-		public String suffix(Content.Type<?> t) {
-			if(t == WhileyFile.ContentType) {
-				return "whiley";
-			} else if(t == WyilFile.ContentType) {
-				return "class";
-			} else {
-				return "dat";
-			}
-		}
-	};
 			
 	private Project project;
 	private ArrayList<IContainerRoot> sourceRoots;
@@ -130,7 +98,11 @@ public class Builder extends IncrementalProjectBuilder {
 	protected void incrementalBuild(IResourceDelta delta,
 			IProgressMonitor monitor) throws CoreException {
 		ArrayList<IResource> resources = identifyChangedResources(delta);
-		
+				
+		System.out.println("BUILD DELTA (" + resources.size() + ")");
+		for(IResource r : resources) {
+			System.out.println("CHANGED: " + r.getLocation() + " : " + r.getName());
+		}
 		// First, check whether any important resources have changed (e.g.
 		// classpath). If so, then we need to reinitialise the compiler
 		// accordingly.
@@ -194,44 +166,6 @@ public class Builder extends IncrementalProjectBuilder {
 		if (javaProject != null) {
 			initialisePaths(javaProject.getRawClasspath(), externalRoots,
 					sourceRoots, workspaceRoot, javaProject);
-		}
-	}
-
-	protected void initialisePaths(IClasspathEntry[] entries,
-			ArrayList<Path.Root> externalRoots, ArrayList<IContainerRoot> sourceRoots,
-			IWorkspaceRoot workspaceRoot, IJavaProject javaProject)
-			throws CoreException {
-		for (IClasspathEntry e : entries) {
-			switch (e.getEntryKind()) {
-				case IClasspathEntry.CPE_LIBRARY : {
-					IPath location = e.getPath();
-					try {
-						externalRoots.add(new JarFileRoot(location.toOSString(),
-								registry));
-					} catch (IOException ex) {
-						// ignore entries which don't exist
-					}
-					break;
-				}
-				case IClasspathEntry.CPE_SOURCE : {
-					IPath location = e.getPath();
-					IFolder folder = workspaceRoot.getFolder(location);
-					sourceRoots.add(new IContainerRoot(folder, registry));
-					break;
-				}
-				case IClasspathEntry.CPE_CONTAINER :
-					IPath location = e.getPath();
-					IClasspathContainer container = JavaCore
-							.getClasspathContainer(location, javaProject);				
-					if(container instanceof JREContainer) {
-						// Ignore JRE container
-					} else if(container != null){	
-						//	Now, recursively add paths
-						initialisePaths(container.getClasspathEntries(),
-							externalRoots, sourceRoots, workspaceRoot, javaProject);
-					} 
-					break;
-			}
 		}
 	}
 	
@@ -303,7 +237,7 @@ public class Builder extends IncrementalProjectBuilder {
 			ArrayList<Path.Entry<?>> files = new ArrayList();
 			for (IFile resource : compileableResources) {
 				for(IContainerRoot root : sourceRoots) {
-					IContainerRoot.IEntry<?> e = root.get(resource);
+					IContainerRoot.IFileEntry<?> e = root.get(resource);
 					if(e != null) {
 						// Refresh the entry since it's changed.
 						e.refresh();
@@ -341,7 +275,7 @@ public class Builder extends IncrementalProjectBuilder {
 		final ArrayList<IResource> files = new ArrayList<IResource>();
 		try {
 			delta.accept(new IResourceDeltaVisitor() {
-				public boolean visit(IResourceDelta delta) {
+				public boolean visit(IResourceDelta delta) {					
 					IResource resource = delta.getResource();
 					if (resource != null) {
 						files.add(resource);

@@ -63,9 +63,9 @@ public class IContainerRoot extends AbstractRoot {
 		this.dir = dir;
 	}
 	
-	public IEntry<?> get(IFile file) throws Exception {		
+	public IFileEntry<?> get(IFile file) throws Exception {		
 		for(int i=0;i!=size();++i) {
-			IEntry e = (IEntry) get(i);			
+			IFileEntry e = (IFileEntry) get(i);			
 			if(e.file.equals(file)) {
 				return e;
 			}
@@ -80,7 +80,7 @@ public class IContainerRoot extends AbstractRoot {
 		}
 		Path path = new Path(id.toString() + "." + contentTypes.suffix(contentType)); 
 		IFile file = dir.getFile(path);		
-		entry = new IEntry<T>(id,file);
+		entry = new IFileEntry<T>(id,file);
 		insert(entry);
 		entry.associate(contentType,null);		
 		return entry;
@@ -114,7 +114,7 @@ public class IContainerRoot extends AbstractRoot {
 						&& (suffix.equals("class") || suffix.equals("whiley"))) {
 					String filename = file.getName();
 					String name = filename.substring(0, filename.lastIndexOf('.'));
-					IEntry entry = new IEntry(id.append(name), (IFile) file);
+					IFileEntry entry = new IFileEntry(id.append(name), (IFile) file);
 					entries.add(entry);
 					contentTypes.associate(entry);
 				}
@@ -126,17 +126,17 @@ public class IContainerRoot extends AbstractRoot {
 	}
 	
 	/**
-	 * A WFile is a file on the file system which represents a Whiley module. The
-	 * file may be encoded in a range of different formats. For example, it may be a
-	 * source file and/or a binary wyil file.
+	 * An IFileEntry is a file on the file system which represents a Whiley
+	 * module. The file may be encoded in a range of different formats. For
+	 * example, it may be a source file and/or a binary wyil file.
 	 * 
 	 * @author djp
 	 * 
 	 */
-	public static class IEntry<T> extends AbstractEntry<T> {		
+	public static class IFileEntry<T> extends AbstractEntry<T> {		
 		private final IFile file;		
 		
-		public IEntry(ID mid, IFile file) {
+		public IFileEntry(ID mid, IFile file) {
 			super(mid);			
 			this.file = file;
 		}
