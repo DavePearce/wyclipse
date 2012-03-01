@@ -32,6 +32,8 @@ import java.util.*;
 import org.eclipse.core.resources.*;
 import org.eclipse.core.runtime.*;
 import org.eclipse.jdt.core.*;
+import org.eclipse.jdt.internal.launching.JREContainer;
+import org.eclipse.jdt.launching.*;
 import org.osgi.framework.Bundle;
 
 import wycore.lang.*;
@@ -220,11 +222,14 @@ public class Builder extends IncrementalProjectBuilder {
 				case IClasspathEntry.CPE_CONTAINER :
 					IPath location = e.getPath();
 					IClasspathContainer container = JavaCore
-							.getClasspathContainer(location, javaProject);
-					// can container be null here?
-					// Now, recursively add paths
-					initialisePaths(container.getClasspathEntries(),
+							.getClasspathContainer(location, javaProject);				
+					if(container instanceof JREContainer) {
+						// Ignore JRE container
+					} else if(container != null){	
+						//	Now, recursively add paths
+						initialisePaths(container.getClasspathEntries(),
 							externalRoots, sourceRoots, workspaceRoot, javaProject);
+					} 
 					break;
 			}
 		}
@@ -296,20 +301,14 @@ public class Builder extends IncrementalProjectBuilder {
 						files.add(e);						
 						// FIXME: following is broken and needs to be fixed.
 						File file = resource.getLocation().toFile();
-						resourceMap.put(file.getAbsolutePath(), resource);
-						System.out.println("GOT: " + file.getAbsolutePath());
+						resourceMap.put(file.getAbsolutePath(), resource);						
 					}
 				}
 			}
-			
-			System.out.println("COMPILING " + files.size() + " source file(s)");
-			
+									
 			project.build(files);
-			
-			System.out.println("DONE");
-			
-		} catch (SyntaxError e) {
-			System.out.println("LOOKING FOR: " + e.filename());			
+
+		} catch (SyntaxError e) {					
 			IFile resource = resourceMap.get(e.filename());
 			if(resource != null) { // saftey
 				highlightSyntaxError(resource, e);

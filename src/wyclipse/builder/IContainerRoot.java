@@ -91,7 +91,7 @@ public class IContainerRoot extends AbstractRoot {
 	}
 	
 	public void refresh() {
-		
+		contents = null;
 	}
 		
 	protected Entry[] contents() throws CoreException {
@@ -160,6 +160,7 @@ public class IContainerRoot extends AbstractRoot {
 		}
 				
 		public void write(T contents) throws Exception {
+			super.write(contents);			
 			ByteArrayOutputStream out = new ByteArrayOutputStream();
 			contentType().write(out,contents);
 			byte[] bytes = out.toByteArray();
