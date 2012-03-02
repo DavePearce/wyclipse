@@ -115,6 +115,7 @@ public class Builder extends IncrementalProjectBuilder {
 			initialise();
 		}
 		whileyProject.clean();
+		whileyProject.build();
 	}
 
 	/**

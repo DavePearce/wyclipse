@@ -328,8 +328,7 @@ public class WhileyProject implements NameSpace {
 	 * @param delta
 	 */
 	public void added(IResource resource) throws CoreException {
-		IPath location = resource.getLocation();
-		System.out.println("ADDED: " + resource.getFullPath() + " : " + delta.getClass().getName());
+		IPath location = resource.getLocation();		
 		for(IContainerRoot srcRoot : sourceRoots) {
 			IFileEntry e = srcRoot.create(resource);
 			if(e != null) {
@@ -353,16 +352,56 @@ public class WhileyProject implements NameSpace {
 		// We could actually do better here, in some cases. For example, if a
 		// source file is removed then we only need to recompile those which
 		// depend upon it. 
-		clean(); 			
+		for(IContainerRoot srcRoot : sourceRoots) {
+			srcRoot.refresh();
+		}
+		for(IContainerRoot binaryRoot : binaryRoots) {
+			binaryRoot.refresh();
+		}
+		
+		// FIXME: need to deal with externals here as well.
+		
+		clean();
 	}
 
 	/**
 	 * Delete all entries and corresponding IFiles from all binary roots. That
 	 * is, delete all output files. An immediate consequence of this is that all
-	 * known source files are marked for recompilation.
+	 * known source files are marked for recompilation. However, these files are
+	 * not actually recompiled until build() is called.
 	 */
-	public void clean() {
-		
+	public void clean() throws CoreException {
+		HashSet<Path.Entry<?>> allTargets = new HashSet();
+		try {
+			delta.clear();
+			
+			// first, identify all source files
+			
+			for(IContainerRoot srcRoot : sourceRoots) {
+				for(IFileEntry<?> e : srcRoot.contents()) {
+					delta.add(e);
+				}
+			}
+			
+			// second, determine all target files
+			
+			for (BuildRule r : rules) {
+				for (IFileEntry<?> source : delta) {
+					allTargets.addAll(r.dependentsOf(source));
+				}
+			}
+			
+			// third, delete all target files
+			for(Path.Entry<?> _e : allTargets) {
+				IFileEntry<?> e = (IFileEntry<?>) _e;
+				//e.delete();
+			}		
+		} catch(CoreException e) {
+			throw e;
+		} catch(Exception e) {
+			// hmmm, obviously I don't like doing this probably the best way
+			// around it is to not extend abstract root. 
+		}
 	}
 
 	/**
@@ -397,8 +436,6 @@ public class WhileyProject implements NameSpace {
 						IResource.DEPTH_INFINITE);
 			}
 			
-			System.out.println("COMPILING: " + allTargets.size() + " source file(s).");
-			
 			// Finally, build all identified targets!		
 			do {
 				oldSize = allTargets.size();
@@ -407,7 +444,6 @@ public class WhileyProject implements NameSpace {
 				}
 			} while(allTargets.size() < oldSize);
 			
-			System.out.println("DONE");
 		} catch(CoreException e) {
 			throw e;
 		} catch(SyntaxError e) {
@@ -435,8 +471,14 @@ public class WhileyProject implements NameSpace {
 	 * Build all known source files, regardless of whether they have changed or
 	 * not.
 	 */
-	public void buildAll() {
-
+	public void buildAll() throws CoreException {		
+		delta.clear();
+		for(IContainerRoot srcRoot : sourceRoots) {
+			for(IFileEntry<?> e : srcRoot.contents()) {
+				delta.add(e);
+			}
+		}
+		build();
 	}
 
 	

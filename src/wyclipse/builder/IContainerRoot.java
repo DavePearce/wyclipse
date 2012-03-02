@@ -147,9 +147,12 @@ public class IContainerRoot extends AbstractRoot {
 		if(contents instanceof IFileEntry<?>[]) {
 			return (IFileEntry<?>[]) contents;
 		} else {
-			ArrayList<IFileEntry> contents = new ArrayList<IFileEntry>();
+			ArrayList<IFileEntry> contents = new ArrayList<IFileEntry>();			
 			traverse(dir,Trie.ROOT,contents);
-			return contents.toArray(new IFileEntry[contents.size()]);
+			IFileEntry<?>[] tmp = contents.toArray(new IFileEntry[contents.size()]);
+			this.contents = tmp;
+			this.nentries = contents.size();
+			return tmp;
 		}
 	}
 		
@@ -163,7 +166,6 @@ public class IContainerRoot extends AbstractRoot {
 		for(int i=0;i!=path.segmentCount();++i) {
 			id = id.append(path.segment(i));
 		}
-		System.out.println("CONVERTED: " + path + " TO: " + id);
 		return id;
 	}
 	
