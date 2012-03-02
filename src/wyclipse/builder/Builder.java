@@ -44,6 +44,7 @@ import wyil.Pipeline.Template;
 import wyc.builder.WhileyBuilder;
 import wyc.lang.WhileyFile;
 import wyclipse.Activator;
+import wyclipse.WhileyProject;
 import wyil.io.WyilFileWriter;
 import wyil.lang.WyilFile;
 
@@ -53,61 +54,40 @@ import wyjc.io.ClassFileLoader;
 
 public class Builder extends IncrementalProjectBuilder {
 	private static final boolean verbose = true;
-
-	/**
-	 * The master project content type registry.
-	 */
-	public static final Content.Registry registry = new Content.Registry() {
-	
-		public void associate(Path.Entry e) {
-			if(e.suffix().equals("whiley")) {
-				e.associate(WhileyFile.ContentType, null);
-			} else if(e.suffix().equals("class")) {
-				// this could be either a normal JVM class, or a Wyil class. We
-				// need to determine which.
-				try { 					
-					WyilFile c = WyilFile.ContentType.read(e,e.inputStream());
-					if(c != null) {
-						e.associate(WyilFile.ContentType,c);
-					}					
-				} catch(Exception ex) {
-					// hmmm, not ideal
-				}
-			} 
-		}
 		
-		public String suffix(Content.Type<?> t) {
-			if(t == WhileyFile.ContentType) {
-				return "whiley";
-			} else if(t == WyilFile.ContentType) {
-				return "class";
-			} else {
-				return "dat";
-			}
-		}
-	};
-			
-	private Project project;
-	private ArrayList<IContainerRoot> sourceRoots;
-
+	private WhileyProject whileyProject;
+	
 	public Builder() {
 		
 	}
 
+	protected void initialise() throws CoreException {		
+		IProject iproject = (IProject) getProject();
+		IJavaProject javaProject = (IJavaProject) iproject
+				.getNature(JavaCore.NATURE_ID);
+
+		IWorkspace workspace = iproject.getWorkspace();	
+		whileyProject = new WhileyProject(workspace,javaProject);
+		
+		if(verbose) {			
+			whileyProject.setLogger(new Logger.Default(System.err));
+		}		
+	}
+	
 	protected IProject[] build(int kind, Map args, IProgressMonitor monitor)
 			throws CoreException {
 		
-		if(project == null) {
-			initialiseProject();
+		if(whileyProject == null) {
+			initialise();
 		}
 		
 		if (kind == IncrementalProjectBuilder.FULL_BUILD) {
-			fullBuild(monitor);
+			whileyProject.buildAll();
 		} else if (kind == IncrementalProjectBuilder.INCREMENTAL_BUILD
 				|| kind == IncrementalProjectBuilder.AUTO_BUILD) {
 			IResourceDelta delta = getDelta(getProject());			
 			if (delta == null) {
-				fullBuild(monitor);
+				whileyProject.buildAll();
 			} else {
 				incrementalBuild(delta, monitor);
 			}
@@ -116,383 +96,75 @@ public class Builder extends IncrementalProjectBuilder {
 		return null;
 	}
 
-	protected void fullBuild(IProgressMonitor monitor) throws CoreException {
-		// Force a complete reinitialisation of the compiler. This is necessary
-		// in case things changed, such as the CLASSPATH, etc.		
-		initialiseProject();
-					
-		ArrayList<IFile> sourceFiles = identifyAllCompileableResources(); 
-		clearSourceFileMarkers(sourceFiles);
-				
-		compile(sourceFiles);
-	}
-
 	protected void incrementalBuild(IResourceDelta delta,
 			IProgressMonitor monitor) throws CoreException {
-		ArrayList<IResource> resources = identifyChangedResources(delta);
 		
-		// First, check whether any important resources have changed (e.g.
-		// classpath). If so, then we need to reinitialise the compiler
-		// accordingly.
-		for(IResource resource : resources) {
-			if(isClassPath(resource)) {				
-				fullBuild(monitor);
-				return;
-			}
-		}
+		actionChangedResources(delta);
+
+		// finally, give the whiley project a changed to recompile any whiley
+		// files that are affected the by changes. 
 		
-		ArrayList<IFile> sourceFiles = identifyCompileableResources(resources); 
-		clearSourceFileMarkers(sourceFiles);
-		
-		compile(sourceFiles);
+		whileyProject.build();		
 	}
 	
 	/**
 	 * Clean all derived files from this project.
 	 */
 	protected void clean(IProgressMonitor monitor) throws CoreException {
-		IProject project = getProject();
-		IWorkspace workspace = project.getWorkspace();
-		IWorkspaceRoot workspaceRoot = workspace.getRoot();
-		IJavaProject javaProject = (IJavaProject) project
-				.getNature(JavaCore.NATURE_ID);
-
-		// =====================================================
-		// first, delete everything in the default output folder
-		// =====================================================
-		
-		IPath defaultOutputLocation = javaProject.getOutputLocation();
-		IFolder defaultOutputContainer = workspaceRoot
-				.getFolder(defaultOutputLocation);
-
-		if (defaultOutputContainer != null) {
-			ArrayList<IFile> files = new ArrayList<IFile>();
-			addMatchingFiles(defaultOutputContainer, "class", files);
-			for (IFile file : files) {
-				file.delete(true, monitor);
-			}
+		if(whileyProject == null) {
+			initialise();
 		}
-
-		// ========================================================
-		// second, delete everything in the specific output folders.
-		// ========================================================
-
-		// TODO
-
-	}
-
-	protected void initialisePaths(ArrayList<Path.Root> externalRoots,
-			ArrayList<IContainerRoot> sourceRoots)
-			throws CoreException {
-		IProject project = (IProject) getProject();	
-		IJavaProject javaProject = (IJavaProject) project
-				.getNature(JavaCore.NATURE_ID);
-		IWorkspace workspace = project.getWorkspace();
-		IWorkspaceRoot workspaceRoot = workspace.getRoot();
-				
-		
-		if (javaProject != null) {
-			initialisePaths(javaProject.getRawClasspath(), externalRoots,
-					sourceRoots, workspaceRoot, javaProject);
-		}
-	}
-
-	protected void initialisePaths(IClasspathEntry[] entries,
-			ArrayList<Path.Root> externalRoots, ArrayList<IContainerRoot> sourceRoots,
-			IWorkspaceRoot workspaceRoot, IJavaProject javaProject)
-			throws CoreException {
-		for (IClasspathEntry e : entries) {
-			switch (e.getEntryKind()) {
-				case IClasspathEntry.CPE_LIBRARY : {
-					IPath location = e.getPath();
-					try {
-						externalRoots.add(new JarFileRoot(location.toOSString(),
-								registry));
-					} catch (IOException ex) {
-						// ignore entries which don't exist
-					}
-					break;
-				}
-				case IClasspathEntry.CPE_SOURCE : {
-					IPath location = e.getPath();
-					IFolder folder = workspaceRoot.getFolder(location);
-					sourceRoots.add(new IContainerRoot(folder, registry));
-					break;
-				}
-				case IClasspathEntry.CPE_CONTAINER :
-					IPath location = e.getPath();
-					IClasspathContainer container = JavaCore
-							.getClasspathContainer(location, javaProject);				
-					if(container instanceof JREContainer) {
-						// Ignore JRE container
-					} else if(container != null){	
-						//	Now, recursively add paths
-						initialisePaths(container.getClasspathEntries(),
-							externalRoots, sourceRoots, workspaceRoot, javaProject);
-					} 
-					break;
-			}
-		}
-	}
-	
-	protected void initialiseProject() throws CoreException {		
-		IProject iproject = (IProject) getProject();
-		IJavaProject javaProject = (IJavaProject) iproject
-				.getNature(JavaCore.NATURE_ID);
-
-		IWorkspace workspace = iproject.getWorkspace();
-		IWorkspaceRoot workspaceRoot = workspace.getRoot();		
-
-		// =========================================================
-		// Initialise whiley and source paths
-		// =========================================================
-		IContainer defaultOutputDirectory = workspaceRoot.getFolder(javaProject.getOutputLocation());
-		IContainerRoot outputRoot = defaultOutputDirectory != null ? new IContainerRoot(defaultOutputDirectory,registry) : null;
-		
-		ArrayList<Path.Root> externalRoots = new ArrayList();
-		sourceRoots = new ArrayList<IContainerRoot>();
-		if(outputRoot != null) {
-			externalRoots.add(outputRoot);
-		}
-		initialisePaths(externalRoots,sourceRoots);		
-		
-		// =========================================================
-		// Construct Namespace
-		// =========================================================
-		
-		NameSpace namespace = new StandardNameSpace((ArrayList) sourceRoots, externalRoots) {        		
-			public Path.ID create(String s) {
-				return Trie.fromString(s);
-			}
-		};
-
-		// =========================================================
-		// Construct and Configure Project
-		// =========================================================
-
-		project = new Project(namespace);			
-
-		if(verbose) {			
-			project.setLogger(new Logger.Default(System.err));
-		}		
-
-		// now, initialise builder appropriately
-		Pipeline pipeline = new Pipeline(Pipeline.defaultPipeline);
-		WhileyBuilder builder = new WhileyBuilder(project,pipeline);
-		Content.Filter<WhileyFile> includes = Content.filter(Trie.fromString("**"),WhileyFile.ContentType);
-		StandardBuildRule rule = new StandardBuildRule(builder);
-		
-		for(Path.Root source : sourceRoots) {	
-			if(outputRoot != null) {
-				rule.add(source, includes, outputRoot, WyilFile.ContentType);
-			} else {
-				// default backup
-				rule.add(source, includes, source, WyilFile.ContentType);
-			}
-		}
-		
-		project.add(rule);
-		
-	}
-
-	protected void compile(List<IFile> compileableResources)
-			throws CoreException {		
-		
-		HashMap<String, IFile> resourceMap = new HashMap<String, IFile>();
-		try {
-			ArrayList<Path.Entry<?>> files = new ArrayList();
-			for (IFile resource : compileableResources) {
-				for(IContainerRoot root : sourceRoots) {
-					IContainerRoot.IEntry<?> e = root.get(resource);
-					if(e != null) {
-						// Refresh the entry since it's changed.
-						e.refresh();
-						
-						files.add(e);						
-						// FIXME: following is broken and needs to be fixed.
-						File file = resource.getLocation().toFile();
-						resourceMap.put(file.getAbsolutePath(), resource);						
-					}
-				}
-			}
-									
-			project.build(files);
-
-		} catch (SyntaxError e) {					
-			IFile resource = resourceMap.get(e.filename());
-			if(resource != null) { // saftey
-				highlightSyntaxError(resource, e);
-			} else {
-				System.out.println("SKIPPING ERROR");
-			}
-		} catch (Exception e) {			
-			e.printStackTrace();
-		}
+		whileyProject.clean();
+		whileyProject.build();
 	}
 
 	/**
-	 * This simply recurses the delta and strips out the resources which have
-	 * changed.
+	 * This simply recurses the delta and actions all changes to the whiley
+	 * project. The whiley project will then decide whether or not those changes
+	 * are actually relevant.
 	 * 
 	 * @param delta
 	 * @return
 	 */
-	protected ArrayList<IResource> identifyChangedResources(IResourceDelta delta) {
-		final ArrayList<IResource> files = new ArrayList<IResource>();
+	protected void actionChangedResources(IResourceDelta delta) throws CoreException {		
 		try {
 			delta.accept(new IResourceDeltaVisitor() {
-				public boolean visit(IResourceDelta delta) {
+				public boolean visit(IResourceDelta delta) throws CoreException {					
 					IResource resource = delta.getResource();
 					if (resource != null) {
-						files.add(resource);
+						switch(delta.getKind()) {
+							case IResourceDelta.ADDED:
+								whileyProject.added(resource);
+								break;
+							case IResourceDelta.REMOVED:
+								whileyProject.removed(resource);
+								break;
+							case IResourceDelta.CHANGED:
+								if(isClassPath(resource)) {
+									// In this case, the ".classpath" file has
+									// changed. This could be as a result of a
+									// jar file being added or removed from the
+									// classpath. Basically, we don't know in
+									// what way exactly it has changed.
+									// Therefore, we must assume the worst-case
+									// and recompile *everything*.
+									initialise(); 			 
+									whileyProject.clean();
+								} else {									
+									whileyProject.changed(resource);
+								}
+								break;
+						}						
 					}
 					return true; // visit children as well.
 				}
 			});
 		} catch (CoreException e) {
 			e.printStackTrace();
-		}
-		return files;
-	}
-
-	/**
-	 * Identify those resources which have changed, and which are allowed to be
-	 * compiled. Resources which cannot be compiled include those which are not
-	 * source files, or are not located in a designated source folder.
-	 * 
-	 * @param resources
-	 * @return
-	 */
-	protected ArrayList<IFile> identifyCompileableResources(
-			List<IResource> resources) throws CoreException {
-		
-		// First, identify source folders		
-		
-		IProject project = (IProject) getProject();
-		IJavaProject javaProject = (IJavaProject) project
-				.getNature(JavaCore.NATURE_ID);		
-		IWorkspace workspace = project.getWorkspace();
-		IWorkspaceRoot workspaceRoot = workspace.getRoot();
-		
-		// FIXME: the following information about source folders could be
-		// extracted from the compiler?
-		
-		ArrayList<IPath> sourceFolders = new ArrayList<IPath>(); 
-				
-		if (javaProject != null) {			
-			for (IClasspathEntry e : javaProject.getRawClasspath()) {
-				switch (e.getEntryKind()) {
-					case IClasspathEntry.CPE_SOURCE :			
-						IFolder folder = workspaceRoot.getFolder(e.getPath());						
-						sourceFolders.add(folder.getLocation());
-						break;					
-				}
-			}
-		}
-		
-		ArrayList<IFile> files = new ArrayList<IFile>();
-		for (IResource resource : resources) {
-			if (resource.getType() == IResource.FILE
-					&& resource.getFileExtension().equals("whiley")
-					&& containedInFolders(resource.getLocation(), sourceFolders)) {
-				files.add((IFile) resource);
-			}
-		}
-		return files;
-	}
-
-	/**
-	 * Identify those resources which have changed, and which are allowed to be
-	 * compiled. Resources which cannot be compiled include those which are not
-	 * source files, or are not located in a designated source folder.
-	 * 
-	 * @param resources
-	 * @return
-	 */
-	protected ArrayList<IFile> identifyAllCompileableResources()
-			throws CoreException {
-		
-		// First, identify source folders		
-		
-		IProject project = (IProject) getProject();
-		IJavaProject javaProject = (IJavaProject) project
-				.getNature(JavaCore.NATURE_ID);		
-		IWorkspace workspace = project.getWorkspace();
-		IWorkspaceRoot workspaceRoot = workspace.getRoot();
-		
-		ArrayList<IContainer> sourceFolders = new ArrayList<IContainer>(); 
-				
-		if (javaProject != null) {			
-			for (IClasspathEntry e : javaProject.getRawClasspath()) {
-				switch (e.getEntryKind()) {
-					case IClasspathEntry.CPE_SOURCE :			
-						IFolder folder = workspaceRoot.getFolder(e.getPath());						
-						sourceFolders.add(folder);
-						break;					
-				}
-			}
-		}
-		
-		ArrayList<IFile> files = new ArrayList<IFile>();
-		for(IContainer root : sourceFolders) {		
-			addMatchingFiles(root,"whiley",files);							
-		}
-		
-		return files;
-	}
-	
-	protected boolean containedInFolders(IPath path,
-			ArrayList<IPath> folders) {
-		for(IPath folder : folders) {			
-			if(folder.isPrefixOf(path)) {
-				return true;
-			}
-		}
-		return false;
-	}
-
-	/**
-	 * Remove all markers on those resources to be compiled. It is assumed that
-	 * those resources supplied are only whiley source files.
-	 * 
-	 * @param resources
-	 * @throws CoreException
-	 */
-	protected void clearSourceFileMarkers(List<IFile> resources) throws CoreException {
-		for (IResource resource : resources) {			
-			resource.deleteMarkers(IMarker.PROBLEM, true,
-					IResource.DEPTH_INFINITE);			
-		}
-	}	
-	
-	protected void highlightSyntaxError(IResource resource, SyntaxError err)
-			throws CoreException {
-		IMarker m = resource.createMarker("wyclipse.whileymarker");
-		System.out.println("START: " + err.start());
-		m.setAttribute(IMarker.CHAR_START, err.start());
-		m.setAttribute(IMarker.CHAR_END, err.end() + 1);
-		m.setAttribute(IMarker.MESSAGE, err.msg());
-		m.setAttribute(IMarker.LOCATION, "Whiley File");
-		m.setAttribute(IMarker.PRIORITY, IMarker.PRIORITY_HIGH);
-		m.setAttribute(IMarker.SEVERITY, IMarker.SEVERITY_ERROR);			
+		}		
 	}
 	
 	private static boolean isClassPath(IResource resource) {
 		return resource instanceof IFile && resource.getName().equals(".classpath");
-	}
-	
-	private static void addMatchingFiles(IContainer resource,
-			final String extension, final ArrayList<IFile> files) throws CoreException {
-		IResourceVisitor visitor = new IResourceVisitor() {
-			public boolean visit(IResource resource) {
-				String suffix = resource.getFileExtension();
-				if (resource.getType() == IResource.FILE
-						&& suffix != null && suffix.equals(extension)) {
-					files.add((IFile) resource);
-				}
-				return true; // visit children as well.
-			}
-		};
-		resource.accept(visitor);
-	}
+	}	
 }
