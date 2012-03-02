@@ -142,10 +142,15 @@ public class IContainerRoot extends AbstractRoot {
 		contents = null;
 	}
 		
-	protected Entry[] contents() throws CoreException {
-		ArrayList<Entry> contents = new ArrayList<Entry>();
-		traverse(dir,Trie.ROOT,contents);
-		return contents.toArray(new Entry[contents.size()]);		
+	public IFileEntry<?>[] contents() throws CoreException {
+		// using instanceof is a bit of a hack here.
+		if(contents instanceof IFileEntry<?>[]) {
+			return (IFileEntry<?>[]) contents;
+		} else {
+			ArrayList<IFileEntry> contents = new ArrayList<IFileEntry>();
+			traverse(dir,Trie.ROOT,contents);
+			return contents.toArray(new IFileEntry[contents.size()]);
+		}
 	}
 		
 	public String toString() {
@@ -163,7 +168,7 @@ public class IContainerRoot extends AbstractRoot {
 	}
 	
 	private void traverse(IContainer container, Trie id,
-			ArrayList<Entry> entries) throws CoreException {
+			ArrayList<IFileEntry> entries) throws CoreException {
 
 		for (IResource file : container.members()) {			
 			if(file instanceof IFile) {

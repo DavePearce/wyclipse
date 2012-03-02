@@ -308,7 +308,7 @@ public class WhileyProject implements NameSpace {
 	 */
 	public void changed(IResource resource) throws CoreException {		
 		for(IContainerRoot srcRoot : sourceRoots) {
-			IFileEntry ife = srcRoot.getResource(resource);
+			IFileEntry<?> ife = srcRoot.getResource(resource);
 			if(ife != null) {
 				// Ok, this file is managed by a source root; therefore, mark it
 				// for recompilation. Note that we must refresh the entry as
@@ -391,7 +391,7 @@ public class WhileyProject implements NameSpace {
 			} while (allTargets.size() != oldSize);
 
 			// Thirdly, remove all markers from those entries
-			for(Path.Entry<?> _e : allTargets) {
+			for(Path.Entry<?> _e : delta) {
 				IFileEntry e = (IFileEntry) _e;
 				e.getFile().deleteMarkers(IMarker.PROBLEM, true,
 						IResource.DEPTH_INFINITE);
@@ -411,7 +411,18 @@ public class WhileyProject implements NameSpace {
 		} catch(CoreException e) {
 			throw e;
 		} catch(SyntaxError e) {
-			System.out.println("GOT SYNTAX ERROR: " + e.filename());
+			// FIXME: this is a hack because syntax error doesn't retain the
+			// correct information.
+			for(IContainerRoot srcRoot : sourceRoots) {
+				for(IFileEntry entry : srcRoot.contents()) {
+					IFile file = entry.getFile();
+					if(file.getLocation().toFile().getAbsolutePath().equals(e.filename())) {
+						// hit
+						highlightSyntaxError(file,e);
+						break;
+					}
+				}
+			}
 		} catch(Exception e) {
 			// hmmm, obviously I don't like doing this probably the best way
 			// around it is to not extend abstract root. 
@@ -428,15 +439,16 @@ public class WhileyProject implements NameSpace {
 
 	}
 
-	/**
-	 * Remove all markers on those resources to be compiled. It is assumed that
-	 * those resources supplied are only whiley source files.
-	 * 
-	 * @param resources
-	 * @throws CoreException
-	 */
-	protected void clearSourceFileMarkers(IFile file) throws CoreException {		
-		
+	
+	protected void highlightSyntaxError(IResource resource, SyntaxError err)
+			throws CoreException {
+		IMarker m = resource.createMarker("wyclipse.whileymarker");
+		m.setAttribute(IMarker.CHAR_START, err.start());
+		m.setAttribute(IMarker.CHAR_END, err.end() + 1);
+		m.setAttribute(IMarker.MESSAGE, err.msg());
+		m.setAttribute(IMarker.LOCATION, "Whiley File");
+		m.setAttribute(IMarker.PRIORITY, IMarker.PRIORITY_HIGH);
+		m.setAttribute(IMarker.SEVERITY, IMarker.SEVERITY_ERROR);			
 	}	
 	
 	/**

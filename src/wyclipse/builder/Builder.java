@@ -162,20 +162,7 @@ public class Builder extends IncrementalProjectBuilder {
 			e.printStackTrace();
 		}		
 	}
-				
-	protected void highlightSyntaxError(IResource resource, SyntaxError err)
-			throws CoreException {
-		IMarker m = resource.createMarker("wyclipse.whileymarker");
-		System.out.println("START: " + err.start());
-		m.setAttribute(IMarker.CHAR_START, err.start());
-		m.setAttribute(IMarker.CHAR_END, err.end() + 1);
-		m.setAttribute(IMarker.MESSAGE, err.msg());
-		m.setAttribute(IMarker.LOCATION, "Whiley File");
-		m.setAttribute(IMarker.PRIORITY, IMarker.PRIORITY_HIGH);
-		m.setAttribute(IMarker.SEVERITY, IMarker.SEVERITY_ERROR);			
-	}	
 	
-
 	private static boolean isClassPath(IResource resource) {
 		return resource instanceof IFile && resource.getName().equals(".classpath");
 	}	
