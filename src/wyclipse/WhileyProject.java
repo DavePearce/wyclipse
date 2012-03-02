@@ -306,7 +306,8 @@ public class WhileyProject implements NameSpace {
 	 * 
 	 * @param delta
 	 */
-	public void changed(IResource resource) throws CoreException {		
+	public void changed(IResource resource) throws CoreException {	
+		System.out.println("CHANGE NOTIFICATION - " + resource.getFullPath());
 		for(IContainerRoot srcRoot : sourceRoots) {
 			IFileEntry<?> ife = srcRoot.getResource(resource);
 			if(ife != null) {
@@ -376,7 +377,6 @@ public class WhileyProject implements NameSpace {
 			delta.clear();
 			
 			// first, identify all source files
-			
 			for(IContainerRoot srcRoot : sourceRoots) {
 				for(IFileEntry<?> e : srcRoot.contents()) {
 					delta.add(e);
@@ -384,7 +384,6 @@ public class WhileyProject implements NameSpace {
 			}
 			
 			// second, determine all target files
-			
 			for (BuildRule r : rules) {
 				for (IFileEntry<?> source : delta) {
 					allTargets.addAll(r.dependentsOf(source));
@@ -412,14 +411,14 @@ public class WhileyProject implements NameSpace {
 	 */
 	public void build() throws CoreException {		
 		HashSet<Path.Entry<?>> allTargets = new HashSet();
-		try {
+		try {			
 			// Firstly, initialise list of targets to rebuild.		
 			for (BuildRule r : rules) {
 				for (IFileEntry<?> source : delta) {
 					allTargets.addAll(r.dependentsOf(source));
 				}
 			}
-
+			
 			// Secondly, add all dependents on those being rebuilt.
 			int oldSize;
 			do {
@@ -461,6 +460,8 @@ public class WhileyProject implements NameSpace {
 					}
 				}
 			}
+			// this is temporary hack, for now.
+			throw new RuntimeException("Unable to assign syntax error");
 		} catch(RuntimeException e) {
 			throw e;
 		} catch(Exception e) {
