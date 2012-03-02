@@ -4,8 +4,9 @@ import java.io.IOException;
 import java.util.*;
 
 import org.eclipse.core.resources.IContainer;
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
-import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.IWorkspaceRoot;
@@ -52,7 +53,7 @@ public class WhileyProject implements NameSpace {
 	 * The roots of all external entries known to the builder. This includes all
 	 * external archives (e.g. jars), as well as the standard library.
 	 */
-	protected final ArrayList<IContainerRoot> externalRoots;
+	protected final ArrayList<Path.Root> externalRoots;
 
 	/**
 	 * The roots of all binary entries known to the builder. This is essentially
@@ -82,7 +83,7 @@ public class WhileyProject implements NameSpace {
 	 * their target types are and where their binaries should be written.
 	 * </p>
 	 */
-	private final WhileyBuilder builder;
+	private WhileyBuilder builder;
 
 	/**
 	 * The build rules identify how source files are converted into binary
@@ -99,21 +100,22 @@ public class WhileyProject implements NameSpace {
 	 * 
 	 * @param project
 	 */
-	public WhileyProject(IWorkspace workspace, IJavaProject project)
+	public WhileyProject(IWorkspace workspace, IJavaProject javaProject)
 			throws CoreException {
-		IWorkspaceRoot workspaceRoot = workspace.getRoot();
 
-		externalRoots = new ArrayList<IContainerRoot>();
+		externalRoots = new ArrayList<Path.Root>();
 		binaryRoots = new ArrayList<IContainerRoot>();
 		sourceRoots = new ArrayList<IContainerRoot>();
 		this.delta = new ArrayList<IFileEntry>();
 		this.rules = new ArrayList<BuildRule>();
-
+		
+		IWorkspaceRoot workspaceRoot = workspace.getRoot();
+		
 		// ===============================================================
 		// First, initialise roots
 		// ===============================================================
 
-		IContainer defaultOutputDirectory = workspaceRoot.getFolder(project
+		IContainer defaultOutputDirectory = workspaceRoot.getFolder(javaProject
 				.getOutputLocation());
 
 		IContainerRoot outputRoot = null;
@@ -126,7 +128,7 @@ public class WhileyProject implements NameSpace {
 					"Whiley Plugin currently unable to handle projects without default output folder");
 		}
 
-		initialise(workspace.getRoot(), project, project.getRawClasspath());
+		initialise(workspace.getRoot(), javaProject, javaProject.getRawClasspath());
 
 		// ===============================================================
 		// Second, initialise builder + rules
@@ -147,7 +149,7 @@ public class WhileyProject implements NameSpace {
 			}
 		}
 
-		rules.add(rule);
+		rules.add(rule);		
 	}
 
 	private void initialise(IWorkspaceRoot workspaceRoot,
@@ -156,7 +158,9 @@ public class WhileyProject implements NameSpace {
 		for (IClasspathEntry e : entries) {
 			switch (e.getEntryKind()) {
 				case IClasspathEntry.CPE_LIBRARY : {
-					IPath location = e.getPath();
+					IPath location = e.getPath();							
+					// IFile file = workspaceRoot.getFile(location);
+										
 					try {
 						externalRoots.add(new JarFileRoot(
 								location.toOSString(), registry));
@@ -172,7 +176,7 @@ public class WhileyProject implements NameSpace {
 					break;
 				}
 				case IClasspathEntry.CPE_CONTAINER :
-					IPath location = e.getPath();
+					IPath location = e.getPath();									
 					IClasspathContainer container = JavaCore
 							.getClasspathContainer(location, javaProject);
 					if (container instanceof JREContainer) {
@@ -180,13 +184,17 @@ public class WhileyProject implements NameSpace {
 					} else if (container != null) {
 						// Now, recursively add paths
 						initialise(workspaceRoot, javaProject,
-								container.getClasspathEntries());
+								container.getClasspathEntries());						
 					}
 					break;
 			}
 		}
 	}
 
+	public void setLogger(Logger logger) {
+		builder.setLogger(logger);
+	}
+	
 	// ======================================================================
 	// Accessors
 	// ======================================================================
@@ -298,8 +306,17 @@ public class WhileyProject implements NameSpace {
 	 * 
 	 * @param delta
 	 */
-	public void changed(IResource delta) {
-
+	public void changed(IResource resource) throws CoreException {		
+		for(IContainerRoot srcRoot : sourceRoots) {
+			IFileEntry ife = srcRoot.getResource(resource);
+			if(ife != null) {
+				// Ok, this file is managed by a source root; therefore, mark it
+				// for recompilation. Note that we must refresh the entry as
+				// well, since it has clearly changed.
+				ife.refresh();
+				delta.add(ife);
+			}
+		}
 	}
 
 	/**
@@ -310,8 +327,18 @@ public class WhileyProject implements NameSpace {
 	 * 
 	 * @param delta
 	 */
-	public void added(IResource delta) {
-
+	public void added(IResource resource) throws CoreException {
+		IPath location = resource.getLocation();
+		System.out.println("ADDED: " + resource.getFullPath() + " : " + delta.getClass().getName());
+		for(IContainerRoot srcRoot : sourceRoots) {
+			IFileEntry e = srcRoot.create(resource);
+			if(e != null) {
+				delta.add(e);
+				return; // done
+			}
+		}		
+		
+		// otherwise, what is this file that we've added??
 	}
 
 	/**
@@ -322,24 +349,75 @@ public class WhileyProject implements NameSpace {
 	 * 
 	 * @param delta
 	 */
-	public void removed(IResource delta) {
-
+	public void removed(IResource resource) throws CoreException {
+		// We could actually do better here, in some cases. For example, if a
+		// source file is removed then we only need to recompile those which
+		// depend upon it. 
+		clean(); 			
 	}
 
 	/**
 	 * Delete all entries and corresponding IFiles from all binary roots. That
-	 * is, delete all output files.
+	 * is, delete all output files. An immediate consequence of this is that all
+	 * known source files are marked for recompilation.
 	 */
 	public void clean() {
-
+		
 	}
 
 	/**
 	 * Build those source files which are known to have changed, and their
 	 * dependencies.
 	 */
-	public void build() {
+	public void build() throws CoreException {		
+		HashSet<Path.Entry<?>> allTargets = new HashSet();
+		try {
+			// Firstly, initialise list of targets to rebuild.		
+			for (BuildRule r : rules) {
+				for (IFileEntry<?> source : delta) {
+					allTargets.addAll(r.dependentsOf(source));
+				}
+			}
 
+			// Secondly, add all dependents on those being rebuilt.
+			int oldSize;
+			do {
+				oldSize = allTargets.size();
+				for (BuildRule r : rules) {
+					for (Path.Entry<?> target : allTargets) {
+						allTargets.addAll(r.dependentsOf(target));
+					}
+				}
+			} while (allTargets.size() != oldSize);
+
+			// Thirdly, remove all markers from those entries
+			for(Path.Entry<?> _e : allTargets) {
+				IFileEntry e = (IFileEntry) _e;
+				e.getFile().deleteMarkers(IMarker.PROBLEM, true,
+						IResource.DEPTH_INFINITE);
+			}
+			
+			System.out.println("COMPILING: " + allTargets.size() + " source file(s).");
+			
+			// Finally, build all identified targets!		
+			do {
+				oldSize = allTargets.size();
+				for(BuildRule r : rules) {
+					r.apply(allTargets);
+				}
+			} while(allTargets.size() < oldSize);
+			
+			System.out.println("DONE");
+		} catch(CoreException e) {
+			throw e;
+		} catch(SyntaxError e) {
+			System.out.println("GOT SYNTAX ERROR: " + e.filename());
+		} catch(Exception e) {
+			// hmmm, obviously I don't like doing this probably the best way
+			// around it is to not extend abstract root. 
+		}
+		
+		delta.clear();
 	}
 
 	/**
@@ -350,6 +428,17 @@ public class WhileyProject implements NameSpace {
 
 	}
 
+	/**
+	 * Remove all markers on those resources to be compiled. It is assumed that
+	 * those resources supplied are only whiley source files.
+	 * 
+	 * @param resources
+	 * @throws CoreException
+	 */
+	protected void clearSourceFileMarkers(IFile file) throws CoreException {		
+		
+	}	
+	
 	/**
 	 * The master project content type registry.
 	 */

@@ -34,6 +34,7 @@ import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceVisitor;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 
 import wycore.lang.Content;
@@ -63,12 +64,59 @@ public class IContainerRoot extends AbstractRoot {
 		this.dir = dir;
 	}
 	
-	public IFileEntry<?> get(IFile file) throws Exception {		
-		for(int i=0;i!=size();++i) {
-			IFileEntry e = (IFileEntry) get(i);			
-			if(e.file.equals(file)) {
-				return e;
+	public IContainer getContainer() {
+		return dir;
+	}
+	
+	public IFileEntry<?> getResource(IResource file) throws CoreException {		
+		try {
+			for(int i=0;i!=size();++i) {
+				IFileEntry e = (IFileEntry) get(i);			
+				if(e.file.equals(file)) {
+					return e;
+				}
 			}
+		} catch(CoreException e) {
+			throw e;
+		} catch(Exception other) {
+			// hmmm, obviously I don't like doing this probably the best way
+			// around it is to not extend abstract root.
+		}
+		return null;
+	}
+	
+	/**
+	 * Create an entry for the given resource (if appropriate). If the entry is
+	 * of no interest to this root, then nothing is created and it returned
+	 * null.
+	 * 
+	 * @param resource
+	 * @return
+	 * @throws CoreException
+	 */
+	public IFileEntry create(IResource resource) throws CoreException {
+		IPath path = resource.getFullPath();
+		try {
+			if (dir.getFullPath().isPrefixOf(path)
+					&& resource instanceof IFile) {
+				IFile file = (IFile) resource;
+				ID id = path2ID(path);			
+				String suffix = file.getFileExtension();
+				if (suffix != null
+						&& (suffix.equals("class") || suffix.equals("whiley"))) {
+					String filename = file.getName();
+					String name = filename.substring(0, filename.lastIndexOf('.'));
+					IFileEntry entry = new IFileEntry(id.append(name), (IFile) file);			
+					contentTypes.associate(entry);
+					insert(entry);
+					return entry;
+				}
+			}
+		} catch(CoreException e) {
+			throw e;
+		} catch(Exception e) {
+			// hmmm, obviously I don't like doing this probably the best way
+			// around it is to not extend abstract root. 
 		}
 		return null;
 	}
@@ -102,6 +150,16 @@ public class IContainerRoot extends AbstractRoot {
 		
 	public String toString() {
 		return dir.toString();
+	}
+	
+	public ID path2ID(IPath path) {		
+		path = path.removeFileExtension();
+		Trie id = Trie.ROOT;
+		for(int i=0;i!=path.segmentCount();++i) {
+			id = id.append(path.segment(i));
+		}
+		System.out.println("CONVERTED: " + path + " TO: " + id);
+		return id;
 	}
 	
 	private void traverse(IContainer container, Trie id,
@@ -141,6 +199,10 @@ public class IContainerRoot extends AbstractRoot {
 			this.file = file;
 		}
 		
+		public IFile getFile() {
+			return file;
+		}
+		
 		public String location() {
 			return file.getLocation().toFile().toString();			
 		}
@@ -175,11 +237,17 @@ public class IContainerRoot extends AbstractRoot {
 			}
 		}
 		
-		public InputStream inputStream() throws Exception {
+		public void refresh() {
+			if(!modified) {
+				contents = null; // reset contents
+			}
+		}
+		
+		public InputStream inputStream() throws CoreException {
 			return file.getContents();		
 		}
 		
-		public OutputStream outputStream() throws Exception {
+		public OutputStream outputStream() throws CoreException {
 			// BUMMER
 			return null;		
 		}

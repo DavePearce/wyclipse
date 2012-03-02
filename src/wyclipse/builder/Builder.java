@@ -54,9 +54,7 @@ import wyjc.io.ClassFileLoader;
 
 public class Builder extends IncrementalProjectBuilder {
 	private static final boolean verbose = true;
-	
-			
-	private Project project;
+		
 	private WhileyProject whileyProject;
 	
 	public Builder() {
@@ -68,19 +66,18 @@ public class Builder extends IncrementalProjectBuilder {
 		IJavaProject javaProject = (IJavaProject) iproject
 				.getNature(JavaCore.NATURE_ID);
 
-		IWorkspace workspace = iproject.getWorkspace();
-		IWorkspaceRoot workspaceRoot = workspace.getRoot();		
+		IWorkspace workspace = iproject.getWorkspace();	
 		whileyProject = new WhileyProject(workspace,javaProject);
 		
 		if(verbose) {			
-			// whileyProject.setLogger(new Logger.Default(System.err));
+			whileyProject.setLogger(new Logger.Default(System.err));
 		}		
 	}
 	
 	protected IProject[] build(int kind, Map args, IProgressMonitor monitor)
 			throws CoreException {
 		
-		if(project == null) {
+		if(whileyProject == null) {
 			initialise();
 		}
 		
@@ -114,6 +111,9 @@ public class Builder extends IncrementalProjectBuilder {
 	 * Clean all derived files from this project.
 	 */
 	protected void clean(IProgressMonitor monitor) throws CoreException {
+		if(whileyProject == null) {
+			initialise();
+		}
 		whileyProject.clean();
 	}
 
@@ -125,10 +125,10 @@ public class Builder extends IncrementalProjectBuilder {
 	 * @param delta
 	 * @return
 	 */
-	protected void actionChangedResources(IResourceDelta delta) {		
+	protected void actionChangedResources(IResourceDelta delta) throws CoreException {		
 		try {
 			delta.accept(new IResourceDeltaVisitor() {
-				public boolean visit(IResourceDelta delta) {					
+				public boolean visit(IResourceDelta delta) throws CoreException {					
 					IResource resource = delta.getResource();
 					if (resource != null) {
 						switch(delta.getKind()) {
@@ -139,7 +139,19 @@ public class Builder extends IncrementalProjectBuilder {
 								whileyProject.removed(resource);
 								break;
 							case IResourceDelta.CHANGED:
-								whileyProject.changed(resource);
+								if(isClassPath(resource)) {
+									// In this case, the ".classpath" file has
+									// changed. This could be as a result of a
+									// jar file being added or removed from the
+									// classpath. Basically, we don't know in
+									// what way exactly it has changed.
+									// Therefore, we must assume the worst-case
+									// and recompile *everything*.
+									initialise(); 			 
+									whileyProject.clean();
+								} else {									
+									whileyProject.changed(resource);
+								}
 								break;
 						}						
 					}
@@ -150,21 +162,7 @@ public class Builder extends IncrementalProjectBuilder {
 			e.printStackTrace();
 		}		
 	}
-		
-	/**
-	 * Remove all markers on those resources to be compiled. It is assumed that
-	 * those resources supplied are only whiley source files.
-	 * 
-	 * @param resources
-	 * @throws CoreException
-	 */
-	protected void clearSourceFileMarkers(List<IFile> resources) throws CoreException {
-		for (IResource resource : resources) {			
-			resource.deleteMarkers(IMarker.PROBLEM, true,
-					IResource.DEPTH_INFINITE);			
-		}
-	}	
-	
+				
 	protected void highlightSyntaxError(IResource resource, SyntaxError err)
 			throws CoreException {
 		IMarker m = resource.createMarker("wyclipse.whileymarker");
@@ -175,5 +173,10 @@ public class Builder extends IncrementalProjectBuilder {
 		m.setAttribute(IMarker.LOCATION, "Whiley File");
 		m.setAttribute(IMarker.PRIORITY, IMarker.PRIORITY_HIGH);
 		m.setAttribute(IMarker.SEVERITY, IMarker.SEVERITY_ERROR);			
+	}	
+	
+
+	private static boolean isClassPath(IResource resource) {
+		return resource instanceof IFile && resource.getName().equals(".classpath");
 	}	
 }
