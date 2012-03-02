@@ -456,7 +456,7 @@ public class WhileyProject implements NameSpace {
 					if(file.getLocation().toFile().getAbsolutePath().equals(e.filename())) {
 						// hit
 						highlightSyntaxError(file,e);
-						break;
+						return;
 					}
 				}
 			}
