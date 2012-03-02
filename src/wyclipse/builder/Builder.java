@@ -36,9 +36,9 @@ import org.eclipse.jdt.internal.launching.JREContainer;
 import org.eclipse.jdt.launching.*;
 import org.osgi.framework.Bundle;
 
-import wycore.lang.*;
-import wycore.lang.Path;
-import wycore.util.*;
+import wybs.lang.*;
+import wybs.lang.Path;
+import wybs.util.*;
 import wyil.Pipeline;
 import wyil.Pipeline.Template;
 import wyc.builder.WhileyBuilder;

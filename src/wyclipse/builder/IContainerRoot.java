@@ -37,11 +37,11 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 
-import wycore.lang.Content;
-import wycore.lang.Path.*;
-import wycore.util.AbstractRoot;
-import wycore.util.AbstractEntry;
-import wycore.util.Trie;
+import wybs.lang.Content;
+import wybs.lang.Path.*;
+import wybs.util.AbstractRoot;
+import wybs.util.AbstractEntry;
+import wybs.util.Trie;
 
 /**
  * A Directory represents a directory on the file system. Using this, we can

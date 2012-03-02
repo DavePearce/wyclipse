@@ -25,14 +25,16 @@
 
 package wyclipse.editor;
 
+import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
+import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.ui.editors.text.TextEditor;
 
 
-public class Editor extends CompilationUnitEditor {
+public class Editor extends TextEditor {
 	public Editor() {
 		super();
-		setSourceViewerConfiguration(new Configuration());	
+		setSourceViewerConfiguration(new Configuration());
 		setDocumentProvider(new DocumentProvider());		
 	}
 	public void dispose() {

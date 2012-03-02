@@ -22,10 +22,10 @@ import wyc.builder.WhileyBuilder;
 import wyc.lang.WhileyFile;
 import wyclipse.builder.IContainerRoot;
 import wyclipse.builder.IContainerRoot.IFileEntry;
-import wycore.lang.*;
-import wycore.util.JarFileRoot;
-import wycore.util.StandardBuildRule;
-import wycore.util.Trie;
+import wybs.lang.*;
+import wybs.util.JarFileRoot;
+import wybs.util.StandardBuildRule;
+import wybs.util.Trie;
 import wyil.Pipeline;
 import wyil.lang.WyilFile;
 
@@ -39,9 +39,9 @@ import wyil.lang.WyilFile;
  * </p>
  * 
  * <p>
- * The key issue is that when a resource changes which is relevant to the
- * builder (e.g. a Whiley file, etc) then we need to update the namespace to
- * reflect that change.
+ * When a resource changes which is relevant to the builder (e.g. a Whiley file,
+ * etc) then the WhileyProject must be notified of this. In turn, it updates its
+ * knowledge of the system accordingly and may schedule files to be rebuilt.
  * </p>
  * 
  * @author David J. Pearce
@@ -307,7 +307,6 @@ public class WhileyProject implements NameSpace {
 	 * @param delta
 	 */
 	public void changed(IResource resource) throws CoreException {	
-		System.out.println("CHANGE NOTIFICATION - " + resource.getFullPath());
 		for(IContainerRoot srcRoot : sourceRoots) {
 			IFileEntry<?> ife = srcRoot.getResource(resource);
 			if(ife != null) {
@@ -406,12 +405,14 @@ public class WhileyProject implements NameSpace {
 	}
 
 	/**
-	 * Build those source files which are known to have changed, and their
-	 * dependencies.
+	 * Build those source files which are known to have changed (i.e. those
+	 * entries found in delta). To do this, we must identify all corresponding
+	 * targets, as well as any other dependencies.
 	 */
 	public void build() throws CoreException {		
 		HashSet<Path.Entry<?>> allTargets = new HashSet();
 		try {			
+			System.out.println("BUILDING: " + delta.size() + " source file(s).");
 			// Firstly, initialise list of targets to rebuild.		
 			for (BuildRule r : rules) {
 				for (IFileEntry<?> source : delta) {
@@ -449,7 +450,8 @@ public class WhileyProject implements NameSpace {
 			throw e;
 		} catch(SyntaxError e) {
 			// FIXME: this is a hack because syntax error doesn't retain the
-			// correct information.
+			// correct information (i.e. it should store an Path.Entry, not a
+			// String filename).
 			for(IContainerRoot srcRoot : sourceRoots) {
 				for(IFileEntry entry : srcRoot.contents()) {
 					IFile file = entry.getFile();
