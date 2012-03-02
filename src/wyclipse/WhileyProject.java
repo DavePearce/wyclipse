@@ -398,6 +398,8 @@ public class WhileyProject implements NameSpace {
 			}		
 		} catch(CoreException e) {
 			throw e;
+		} catch(RuntimeException e) {
+			throw e;
 		} catch(Exception e) {
 			// hmmm, obviously I don't like doing this probably the best way
 			// around it is to not extend abstract root. 
@@ -459,6 +461,8 @@ public class WhileyProject implements NameSpace {
 					}
 				}
 			}
+		} catch(RuntimeException e) {
+			throw e;
 		} catch(Exception e) {
 			// hmmm, obviously I don't like doing this probably the best way
 			// around it is to not extend abstract root. 

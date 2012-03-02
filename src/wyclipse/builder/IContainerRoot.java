@@ -78,6 +78,8 @@ public class IContainerRoot extends AbstractRoot {
 			}
 		} catch(CoreException e) {
 			throw e;
+		} catch(RuntimeException e) {
+			throw e;
 		} catch(Exception other) {
 			// hmmm, obviously I don't like doing this probably the best way
 			// around it is to not extend abstract root.
@@ -113,6 +115,8 @@ public class IContainerRoot extends AbstractRoot {
 				}
 			}
 		} catch(CoreException e) {
+			throw e;
+		} catch(RuntimeException e) {
 			throw e;
 		} catch(Exception e) {
 			// hmmm, obviously I don't like doing this probably the best way
