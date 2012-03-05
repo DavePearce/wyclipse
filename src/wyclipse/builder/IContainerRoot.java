@@ -28,6 +28,8 @@ package wyclipse.builder;
 import java.io.*;
 import java.util.*;
 
+import org.eclipse.core.filesystem.EFS;
+import org.eclipse.core.filesystem.IFileStore;
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
@@ -47,7 +49,7 @@ import wybs.util.Trie;
  * A Directory represents a directory on the file system. Using this, we can
  * list items on the path and see what is there.
  * 
- * @author djp
+ * @author David J. Pearce
  * 
  */
 public class IContainerRoot extends AbstractRoot {	
@@ -199,7 +201,7 @@ public class IContainerRoot extends AbstractRoot {
 	 * module. The file may be encoded in a range of different formats. For
 	 * example, it may be a source file and/or a binary wyil file.
 	 * 
-	 * @author djp
+	 * @author David J. Pearce
 	 * 
 	 */
 	public static class IFileEntry<T> extends AbstractEntry<T> {		
@@ -240,12 +242,14 @@ public class IContainerRoot extends AbstractRoot {
 			ByteArrayInputStream input = new ByteArrayInputStream(bytes);
 			
 			if(file.exists()) {
-				// I don't really understand why I need to do this. I would have
-				// expected the create method below to be sufficient.
+				// File already exists, so update contents.
 				file.setContents(input, IResource.FORCE | IResource.DERIVED, null);
-			} else {				
+			} else {
+				// first, ensure containing folder exists
+				create(file.getParent());
+				// finally, create file
 				file.create(input, IResource.FORCE | IResource.DERIVED, null);
-			}
+			} 
 		}
 		
 		public void refresh() {
@@ -261,6 +265,20 @@ public class IContainerRoot extends AbstractRoot {
 		public OutputStream outputStream() throws CoreException {
 			// BUMMER
 			return null;		
+		}
+		
+		private void create(IContainer container) throws CoreException {			
+			if(container.exists()) {
+				return;
+			}
+			IContainer parent = container.getParent();
+			if(parent instanceof IFolder) {
+				create((IFolder)parent);
+			} 
+			if(container instanceof IFolder) {
+				IFolder folder = (IFolder) container;
+				folder.create(IResource.FORCE | IResource.DERIVED, true, null);
+			}
 		}
 	}	
 }

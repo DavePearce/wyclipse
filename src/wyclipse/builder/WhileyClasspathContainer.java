@@ -37,7 +37,7 @@ import wyclipse.WhileyCore;
  * Holds the necessary runtime library files for compiling and running Whiley
  * files (the Whiley standard library).
  * 
- * @author djp
+ * @author David J. Pearce
  * 
  */
 public class WhileyClasspathContainer implements IClasspathContainer {	

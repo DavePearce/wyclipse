@@ -52,7 +52,7 @@ import wyclipse.WhileyCore;
  * the minor addition of appending the Whiley Nature and Builder onto the
  * project.
  * 
- * @author djp
+ * @author David J. Pearce
  * 
  */
 public class NewProjectWizard extends NewElementWizard implements IExecutableExtension {
