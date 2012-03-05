@@ -46,8 +46,8 @@ import wybs.util.AbstractEntry;
 import wybs.util.Trie;
 
 /**
- * A Directory represents a directory on the file system. Using this, we can
- * list items on the path and see what is there.
+ * An implementation of <code>Path.Root</code> which is backed by an Eclipse
+ * <code>IContainer</code>.
  * 
  * @author David J. Pearce
  * 
@@ -267,6 +267,13 @@ public class IContainerRoot extends AbstractRoot {
 			return null;		
 		}
 		
+		/**
+		 * The following method traverses the folder hierarchy from a given
+		 * point and creates all IFolders that it encounters.  
+		 * 
+		 * @param container
+		 * @throws CoreException
+		 */
 		private void create(IContainer container) throws CoreException {			
 			if(container.exists()) {
 				return;
