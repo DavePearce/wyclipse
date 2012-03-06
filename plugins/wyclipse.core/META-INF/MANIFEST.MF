@@ -1,7 +1,7 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Wyclipse Core
-Bundle-SymbolicName: wyclipse.core;singleton:=true
+Bundle-SymbolicName: wyclipse;singleton:=true
 Bundle-Version: 0.1.0
 Bundle-ClassPath: lib/wyjc.jar,
  .
