@@ -65,7 +65,7 @@ public class IContainerRoot extends AbstractRoot {
 		super(contentTypes);		
 		this.dir = dir;
 	}
-	
+
 	public IContainer getContainer() {
 		return dir;
 	}
@@ -127,7 +127,7 @@ public class IContainerRoot extends AbstractRoot {
 		return null;
 	}
 	
-	public <T> Entry<T> create(ID id, Content.Type<T> contentType) throws Exception {
+	public <T> Entry<T> create(ID id, Content.Type<T> contentType, Entry<?>... sources) throws Exception {
 		Entry<T> entry = get(id,contentType);
 		if(entry != null) {
 			return entry;
