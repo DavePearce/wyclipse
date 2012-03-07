@@ -53,7 +53,7 @@ public class Activator extends AbstractUIPlugin {
 	public static final String WYCLIPSE_MARKER_ID = "wyclipse.whileymarker";
 
 	// URL for Whiley Runtime Library
-	public static final String WHILEY_RUNTIME_JAR = "lib/wyrt.jar";
+	public static final String WHILEY_RUNTIME_JAR = "/lib/wyrt.jar";
 	public static IPath WHILEY_RUNTIME_JAR_IPATH;
 	
 	// The shared instance
