@@ -2,7 +2,7 @@
 <feature
       id="wyclipse.feature"
       label="Whiley Eclipse Plugin"
-      version="0.1.2"
+      version="0.1.3"
       provider-name="whiley.org">
 
    <description url="http://whiley.org">
@@ -51,7 +51,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS &quot;AS IS&
          id="wyclipse"
          download-size="0"
          install-size="0"
-         version="0.1.1"
+         version="0.1.2"
          unpack="false"/>
 
 </feature>
