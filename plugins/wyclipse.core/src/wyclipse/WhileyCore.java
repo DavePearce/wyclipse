@@ -25,30 +25,16 @@
 
 package wyclipse;
 
-import java.io.IOException;
-import java.net.URISyntaxException;
-import java.net.URL;
 import java.util.Arrays;
-import java.util.Enumeration;
 
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.FileLocator;
-import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.Path;
-import org.eclipse.core.runtime.Platform;
-import org.eclipse.core.runtime.Status;
-import org.eclipse.core.filesystem.URIUtil;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.core.JavaModelException;
-import org.osgi.framework.Bundle;
 
 import wyclipse.builder.WhileyClasspathContainer;
 
 public class WhileyCore {
-	
-	private static final String WHILEY_RUNTIME_JAR = "wyrt.jar";
 	
 	/**
 	 * Add the Whiley Classpath Container to a given project.

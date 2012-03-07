@@ -25,13 +25,9 @@
 
 package wyclipse.builder;
 
-import java.io.IOException;
-
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.*;
 import org.eclipse.jdt.core.*;
-
-import wyclipse.WhileyCore;
 
 /**
  * Holds the necessary runtime library files for compiling and running Whiley
