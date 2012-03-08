@@ -26,28 +26,35 @@
 
 package wyclipse.launchers;
 
+import java.util.*;
+
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IAdaptable;
+import org.eclipse.debug.core.DebugPlugin;
+import org.eclipse.debug.core.ILaunchConfiguration;
+import org.eclipse.debug.core.ILaunchConfigurationType;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.debug.ui.launchConfigurations.JavaApplicationLaunchShortcut;
 import org.eclipse.jdt.internal.core.CompilationUnit;
 import org.eclipse.jface.operation.IRunnableContext;
+import org.eclipse.jface.viewers.ISelection;
 
 public class WhileyLaunchShortcut extends JavaApplicationLaunchShortcut {
 
 	@Override
 	public IType[] findTypes(Object[] elements, IRunnableContext context) {
-		IType[] types = new IType[1];
-		for (Object o : elements) {
-			try {
-				if (o instanceof CompilationUnit) {
-					CompilationUnit unit = (CompilationUnit) o;
-					return unit.getAllTypes();
+		for(Object o : elements) {
+			if(o instanceof IAdaptable) {
+				IAdaptable adaptor = (IAdaptable) o;
+				IJavaElement e = (IJavaElement) adaptor.getAdapter(IJavaElement.class);
+				if(e != null) {
+					// I've got here, and I'm trying to figure out what exactly is going on.
 				}
-			} catch (JavaModelException e) {
-
 			}
 		}
-		return types;
+		return new IType[] {};
 	}
-	
 }

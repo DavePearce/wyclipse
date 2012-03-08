@@ -6,7 +6,7 @@
 		<perspective
 			name ="Whiley"
 			class="wyclipse.perspective.Perspective"
-			id="org.eclipse.ui.articles.perspective.Whiley"
+			id="wyclipse.whileyPerspective"
 			icon="icons/whiley_perspective.gif">
 		</perspective>
 	</extension>
@@ -95,8 +95,8 @@
            	hasPages="true"
            	
             id="wyclipse.newModuleWizard"
-            finalPerspective="org.eclipse.ui.articles.perspective.Whiley"
-            preferredPerspectives="org.eclipse.ui.articles.perspective.Whiley"
+            finalPerspective="wyclipse.whileyPerspective"
+            preferredPerspectives="wyclipse.whileyPerspective"
             name="Whiley Module"
             project="false">
             
@@ -106,11 +106,11 @@
             category="wyclipse.WhileyCategory"
             class="wyclipse.wizards.NewProjectWizard"
             icon="icons/newwprj_wiz.gif"
-            finalPerspective="org.eclipse.ui.articles.perspective.Whiley"
+            finalPerspective="wyclipse.whileyPerspective"
             hasPages="true"
             id="wyclipse.newProjectWizard"
             name="Whiley Project"
-            preferredPerspectives="org.eclipse.ui.articles.perspective.Whiley"
+            preferredPerspectives="wyclipse.whileyPerspective"
             project="true"
            >
        </wizard>	
@@ -159,7 +159,7 @@
         
         modes="run, debug">
 			<perspective id ="org.eclipse.jdt.ui.JavaPerspective"/>
-			<perspective id="org.eclipse.ui.articles.perspective.Whiley"/>
+			<perspective id="wyclipse.whileyPerspective"/>
 		<contextualLaunch>
 			<enablement>
 			 	<with variable="selection">
@@ -249,6 +249,15 @@
       <classpathContainerInitializer
           id="wyclipse.WHILEY_CONTAINER"
           class="wyclipse.builder.WhileyClasspathContainerInitialiser"/>
+   </extension>
+   <extension
+         name="Whiley Perspective Extension"
+         point="org.eclipse.ui.perspectiveExtensions">
+      <perspectiveExtension targetID="wyclipse.whileyPerspective">
+         <actionSet 
+         	id="org.eclipse.debug.ui.launchActionSet">
+		 </actionSet>
+      </perspectiveExtension>
    </extension>
 
 	
