@@ -26,52 +26,28 @@
 
 package wyclipse.launchers;
 
-import org.eclipse.core.internal.resources.File;
-import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.debug.core.ILaunchConfiguration;
-import org.eclipse.debug.ui.ILaunchShortcut;
 import org.eclipse.jdt.core.IType;
-import org.eclipse.jface.viewers.ISelection;
-import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.viewers.TreeSelection;
-import org.eclipse.ui.IEditorPart;
+import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.debug.ui.launchConfigurations.JavaApplicationLaunchShortcut;
+import org.eclipse.jdt.internal.core.CompilationUnit;
+import org.eclipse.jface.operation.IRunnableContext;
 
-
-public class WhileyLaunchShortcut implements ILaunchShortcut {
-
-	@Override
-	public void launch(ISelection selection, String mode) {
-		IProject proj = ResourcesPlugin.getWorkspace().getRoot().getProject();
-		//IJavaProject jprog = (IJavaProject) proj;
-		TreeSelection tree = (TreeSelection) selection;
-		IStructuredSelection struct = (IStructuredSelection) selection;
-		//Struct gives the file that needs to be executeed. 
-		File f = (File)struct.toArray()[0];
-		//System.out.println(jprog);
-		//IType t =(IType) jprog.getJavaProject();
-		//TODO Still working on.
-		
-		
-	}
+public class WhileyLaunchShortcut extends JavaApplicationLaunchShortcut {
 
 	@Override
-	public void launch(IEditorPart editor, String mode) {
-		// TODO Auto-generated method stub
-		
+	public IType[] findTypes(Object[] elements, IRunnableContext context) {
+		IType[] types = new IType[1];
+		for (Object o : elements) {
+			try {
+				if (o instanceof CompilationUnit) {
+					CompilationUnit unit = (CompilationUnit) o;
+					return unit.getAllTypes();
+				}
+			} catch (JavaModelException e) {
+
+			}
+		}
+		return types;
 	}
-	protected void launch(IType type, String mode) {
-        try {
-          ILaunchConfiguration config  = null; //TODO
-            if (config != null) {
-             config.launch(mode, null);
-            }
-        } catch (CoreException e) {
-            /* Handle exceptions*/
-        }
-    }
-	
-	
 	
 }
