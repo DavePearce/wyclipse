@@ -53,7 +53,7 @@ public class Activator extends AbstractUIPlugin {
 	public static final String WYCLIPSE_MARKER_ID = "wyclipse.whileymarker";
 
 	// URL for Whiley Runtime Library
-	public static final String WHILEY_RUNTIME_JAR = "/lib/wyrt.jar";
+	public static final String WHILEY_RUNTIME_JAR = "lib/wyrt.jar";
 	public static IPath WHILEY_RUNTIME_JAR_IPATH;
 	
 	// The shared instance
@@ -76,6 +76,7 @@ public class Activator extends AbstractUIPlugin {
 			URL url = FileLocator.resolve(context.getBundle().getEntry(
 					WHILEY_RUNTIME_JAR));
 			WHILEY_RUNTIME_JAR_IPATH = URIUtil.toPath(url.toURI());
+			System.out.println("WYRT PATH: " + WHILEY_RUNTIME_JAR_IPATH);
 		} catch (Exception e) {
 			getLog().log(
 					new Status(IStatus.ERROR, PLUGIN_ID,
