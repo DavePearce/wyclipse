@@ -41,6 +41,7 @@ import org.eclipse.core.runtime.Path;
 
 import wybs.lang.Content;
 import wybs.lang.Path.*;
+import wybs.util.AbstractFolder;
 import wybs.util.AbstractRoot;
 import wybs.util.AbstractEntry;
 import wybs.util.Trie;
@@ -70,24 +71,24 @@ public class IContainerRoot extends AbstractRoot {
 		return dir;
 	}
 	
-	public IFileEntry<?> getResource(IResource file) throws CoreException {		
-		try {
-			for(int i=0;i!=size();++i) {
-				IFileEntry e = (IFileEntry) get(i);			
-				if(e.file.equals(file)) {
-					return e;
-				}
-			}
-		} catch(CoreException e) {
-			throw e;
-		} catch(RuntimeException e) {
-			throw e;
-		} catch(Exception other) {
-			// hmmm, obviously I don't like doing this probably the best way
-			// around it is to not extend abstract root.
-		}
-		return null;
-	}
+//	public IFileEntry<?> getResource(IResource file) throws CoreException {		
+//		try {
+//			for(int i=0;i!=size();++i) {
+//				IFileEntry e = (IFileEntry) get(i);			
+//				if(e.file.equals(file)) {
+//					return e;
+//				}
+//			}
+//		} catch(CoreException e) {
+//			throw e;
+//		} catch(RuntimeException e) {
+//			throw e;
+//		} catch(Exception other) {
+//			// hmmm, obviously I don't like doing this probably the best way
+//			// around it is to not extend abstract root.
+//		}
+//		return null;
+//	}
 	
 	/**
 	 * Create an entry for the given resource (if appropriate). If the entry is
@@ -98,72 +99,45 @@ public class IContainerRoot extends AbstractRoot {
 	 * @return
 	 * @throws CoreException
 	 */
-	public IFileEntry create(IResource resource) throws CoreException {
-		IPath path = resource.getFullPath();
-		try {
-			if (dir.getFullPath().isPrefixOf(path)
-					&& resource instanceof IFile) {
-				IFile file = (IFile) resource;
-				ID id = path2ID(path);			
-				String suffix = file.getFileExtension();
-				if (suffix != null
-						&& (suffix.equals("class") || suffix.equals("whiley"))) {
-					String filename = file.getName();
-					String name = filename.substring(0, filename.lastIndexOf('.'));
-					IFileEntry entry = new IFileEntry(id.append(name), (IFile) file);			
-					contentTypes.associate(entry);
-					insert(entry);
-					return entry;
-				}
-			}
-		} catch(CoreException e) {
-			throw e;
-		} catch(RuntimeException e) {
-			throw e;
-		} catch(Exception e) {
-			// hmmm, obviously I don't like doing this probably the best way
-			// around it is to not extend abstract root. 
-		}
-		return null;
+//	public IFileEntry create(IResource resource) throws CoreException {
+//		IPath path = resource.getFullPath();
+//		try {
+//			if (dir.getFullPath().isPrefixOf(path)
+//					&& resource instanceof IFile) {
+//				IFile file = (IFile) resource;
+//				ID id = path2ID(path);			
+//				String suffix = file.getFileExtension();
+//				if (suffix != null
+//						&& (suffix.equals("class") || suffix.equals("whiley"))) {
+//					String filename = file.getName();
+//					String name = filename.substring(0, filename.lastIndexOf('.'));
+//					IFileEntry entry = new IFileEntry(id.append(name), (IFile) file);			
+//					contentTypes.associate(entry);
+//					insert(entry);
+//					return entry;
+//				}
+//			}
+//		} catch(CoreException e) {
+//			throw e;
+//		} catch(RuntimeException e) {
+//			throw e;
+//		} catch(Exception e) {
+//			// hmmm, obviously I don't like doing this probably the best way
+//			// around it is to not extend abstract root. 
+//		}
+//		return null;
+//	}
+	
+	public IFolderFolder root() {
+		return new IFolderFolder(Trie.ROOT);
 	}
 	
-	public <T> Entry<T> create(ID id, Content.Type<T> contentType, Entry<?>... sources) throws Exception {
-		Entry<T> entry = get(id,contentType);
-		if(entry != null) {
-			return entry;
-		}
-		Path path = new Path(id.toString() + "." + contentTypes.suffix(contentType)); 
-		IFile file = dir.getFile(path);		
-		entry = new IFileEntry<T>(id,file);
-		insert(entry);
-		entry.associate(contentType,null);		
-		return entry;
-	}
-	
-	public void flush() {
-		
+	public String toString() {
+		return dir.toString();
 	}
 	
 	public void refresh() {
-		contents = null;
-	}
-		
-	public IFileEntry<?>[] contents() throws CoreException {
-		// using instanceof is a bit of a hack here.
-		if(contents instanceof IFileEntry<?>[]) {
-			return (IFileEntry<?>[]) contents;
-		} else {
-			ArrayList<IFileEntry> contents = new ArrayList<IFileEntry>();			
-			traverse(dir,Trie.ROOT,contents);
-			IFileEntry<?>[] tmp = contents.toArray(new IFileEntry[contents.size()]);
-			this.contents = tmp;
-			this.nentries = contents.size();
-			return tmp;
-		}
-	}
-		
-	public String toString() {
-		return dir.toString();
+		// TODO
 	}
 	
 	public ID path2ID(IPath path) {		
@@ -175,23 +149,61 @@ public class IContainerRoot extends AbstractRoot {
 		return id;
 	}
 	
-	private void traverse(IContainer container, Trie id,
-			ArrayList<IFileEntry> entries) throws CoreException {
+	
+	
+	public class IFolderFolder extends AbstractFolder {
+		public IFolderFolder(ID id) {
+			super(id);
+		}
+		
+		public Item[] contents() throws IOException {
+			// using instanceof is a bit of a hack here.
+			ArrayList<Item> contents = new ArrayList<Item>();			
 
-		for (IResource file : container.members()) {			
-			if(file instanceof IFile) {
-				String suffix = file.getFileExtension();
-				if (suffix != null
-						&& (suffix.equals("class") || suffix.equals("whiley"))) {
-					String filename = file.getName();
-					String name = filename.substring(0, filename.lastIndexOf('.'));
-					IFileEntry entry = new IFileEntry(id.append(name), (IFile) file);
-					entries.add(entry);
-					contentTypes.associate(entry);
+			for (IResource file : dir.members()) {			
+				if(file instanceof IFile) {
+					String suffix = file.getFileExtension();
+					if (suffix != null
+							&& (suffix.equals("class") || suffix.equals("whiley"))) {
+						String filename = file.getName();
+						String name = filename.substring(0, filename.lastIndexOf('.'));
+						IFileEntry entry = new IFileEntry(id.append(name), (IFile) file);
+						contents.add(entry);
+						contentTypes.associate(entry);
+					}
+				} else if(file instanceof IFolder) {
+					IFolder folder = (IFolder) file;
+					contents.add(new IFolderFolder(id.append(folder.getName())));
 				}
-			} else if(file instanceof IFolder) {
-				IFolder folder = (IFolder) file;
-				traverse(folder,id.append(folder.getName()),entries);
+			}
+			
+			return contents.toArray(new Item[contents.size()]);
+		}
+				
+		public <T> Entry<T> create(ID nid, Content.Type<T> ct,
+				Entry<?>... sources) throws IOException {
+			if (nid.size() == 1) {
+				// attempting to create an entry in this folder
+				Entry<T> e = super.get(nid.subpath(0, 1), ct);
+				if (e == null) {
+					// Entry doesn't already exist, so create it
+					Path path = new Path(id.toString() + "."
+							+ contentTypes.suffix(ct));
+					IFile file = dir.getFile(path);
+					e = new IFileEntry<T>(id, file);
+					e.associate(ct, null);
+					super.insert(e);
+				}
+				return e;
+			} else {
+				// attempting to create entry in subfolder.
+				Folder folder = getFolder(nid.get(0));
+				if (folder == null) {
+					// Folder doesn't already exist, so create it.
+					folder = new IFolderFolder(id.append(nid.get(0)));
+					super.insert(folder);
+				}
+				return folder.create(nid.subpath(1, nid.size()), ct, sources);
 			}
 		}
 	}
@@ -234,7 +246,7 @@ public class IContainerRoot extends AbstractRoot {
 			return suffix;
 		}
 				
-		public void write(T contents) throws Exception {
+		public void write(T contents) throws IOException {
 			super.write(contents);			
 			ByteArrayOutputStream out = new ByteArrayOutputStream();
 			contentType().write(out,contents);
@@ -258,11 +270,11 @@ public class IContainerRoot extends AbstractRoot {
 			}
 		}
 		
-		public InputStream inputStream() throws CoreException {
+		public InputStream inputStream() throws IOException {
 			return file.getContents();		
 		}
 		
-		public OutputStream outputStream() throws CoreException {
+		public OutputStream outputStream() throws IOException {
 			// BUMMER
 			return null;		
 		}

@@ -56,16 +56,15 @@ public class WhileyProject implements NameSpace {
 	protected final ArrayList<Path.Root> externalRoots;
 
 	/**
-	 * The roots of all binary entries known to the builder. This is essentially
-	 * the list of all output directories.
-	 */
-	protected final ArrayList<IContainerRoot> binaryRoots;
-
-	/**
 	 * The roots of all source entries known to the builder. From this pool of
 	 * resources, the set of files needing recompilation is determined.
 	 */
 	protected final ArrayList<IContainerRoot> sourceRoots;
+	
+	/**
+	 * The roots of all binary entries known to the builder. 
+	 */
+	protected final ArrayList<IContainerRoot> binaryRoots;
 
 	/**
 	 * The delta is a list of entries which require recompilation. As entries
@@ -103,7 +102,7 @@ public class WhileyProject implements NameSpace {
 	public WhileyProject(IWorkspace workspace, IJavaProject javaProject)
 			throws CoreException {
 
-		externalRoots = new ArrayList<Path.Root>();
+		externalRoots = new ArrayList<Path.Root>();		
 		binaryRoots = new ArrayList<IContainerRoot>();
 		sourceRoots = new ArrayList<IContainerRoot>();
 		this.delta = new ArrayList<IFileEntry>();
@@ -142,10 +141,11 @@ public class WhileyProject implements NameSpace {
 
 		for (Path.Root source : sourceRoots) {
 			if (outputRoot != null) {
-				rule.add(source, includes, outputRoot, WyilFile.ContentType);
+				rule.add(source, includes, outputRoot, WhileyFile.ContentType,
+						WyilFile.ContentType);
 			} else {
-				// default backup
-				rule.add(source, includes, source, WyilFile.ContentType);
+				rule.add(source, includes, source, WhileyFile.ContentType,
+						WyilFile.ContentType);
 			}
 		}
 
