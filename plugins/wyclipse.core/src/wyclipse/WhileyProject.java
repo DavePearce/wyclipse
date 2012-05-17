@@ -381,10 +381,7 @@ public class WhileyProject implements NameSpace {
 		try {
 			delta.clear();
 			
-			// first, identify all source files
-			for(BuildRule br : rules) {
-				
-			}
+			// first, identify all source files			
 			for(IContainerRoot srcRoot : sourceRoots) {
 				for(Path.Entry<?> e : srcRoot.get(includes)) {
 					delta.add((IFileEntry) e);

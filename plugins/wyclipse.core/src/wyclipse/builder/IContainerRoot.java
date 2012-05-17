@@ -115,7 +115,8 @@ public class IContainerRoot extends AbstractRoot {
 				String suffix = file.getFileExtension();
 				if (suffix != null
 						&& (suffix.equals("class") || suffix.equals("whiley"))) {
-					return (IFileEntry) ((IFolderFolder)root).create(id,file);
+					// FIXME: file types should not be hard coded above
+					return (IFileEntry) ((IFolderFolder) root).create(id, file);
 				}
 			}
 		} catch(CoreIOException e) {
