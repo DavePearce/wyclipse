@@ -53,7 +53,7 @@ import wybs.util.Trie;
  * @author David J. Pearce
  * 
  */
-public class IContainerRoot extends AbstractRoot {	
+public class IContainerRoot extends AbstractRoot<IContainerRoot.Folder> {	
 	private final IContainer dir;		
 		
 	/**
@@ -72,26 +72,20 @@ public class IContainerRoot extends AbstractRoot {
 	}
 	
 	public IFileEntry<?> getResource(IResource file) throws CoreException {		
-		try {
-			return getResource((IFolderFolder) root,file);			
+		try {			
+			for(Entry<?> e : root.getAll()) {	
+				if (e instanceof IFileEntry) {
+					IFileEntry ife = (IFileEntry) e;
+					if (ife.file.equals(file)) {
+						return ife;
+					}
+				}
+			}			
 		} catch(RuntimeException e) {
 			throw e;
 		} catch(Exception other) {
 			// hmmm, obviously I don't like doing this probably the best way
 			// around it is to not extend abstract root.
-		}
-		return null;
-	}
-	
-	private IFileEntry<?> getResource(IFolderFolder folder, IResource file) throws IOException {
-		// FIXME: shouldn't use the folder.contents() here.
-		for(Item _e : folder.contents()) {	
-			if (_e instanceof IFileEntry) {
-				IFileEntry e = (IFileEntry) _e;
-				if (e.file.equals(file)) {
-					return e;
-				}
-			}
 		}
 		return null;
 	}
@@ -115,8 +109,8 @@ public class IContainerRoot extends AbstractRoot {
 				String suffix = file.getFileExtension();
 				if (suffix != null
 						&& (suffix.equals("class") || suffix.equals("whiley"))) {
-					// FIXME: file types should not be hard coded above
-					return (IFileEntry) ((IFolderFolder) root).create(id, file);
+					// FIXME: file types should not be hard coded above	
+					return (IFileEntry) root.create(id, file);
 				}
 			}
 		} catch(CoreIOException e) {
@@ -130,8 +124,8 @@ public class IContainerRoot extends AbstractRoot {
 		return null;
 	}
 	
-	public IFolderFolder root() {
-		return new IFolderFolder(Trie.ROOT);
+	public Folder root() {
+		return new Folder(Trie.ROOT);
 	}
 	
 	public String toString() {
@@ -151,8 +145,8 @@ public class IContainerRoot extends AbstractRoot {
 		return id;
 	}
 	
-	public class IFolderFolder extends AbstractFolder {
-		public IFolderFolder(ID id) {
+	public class Folder extends AbstractFolder {
+		public Folder(ID id) {
 			super(id);
 		}
 		
@@ -173,7 +167,9 @@ public class IContainerRoot extends AbstractRoot {
 						}
 					} else if(file instanceof IFolder) {
 						IFolder folder = (IFolder) file;
-						contents.add(new IFolderFolder(id.append(folder.getName())));
+						GOT HERE
+						System.out.println("CREATING FOLDER WITH NAME: " + id.append(folder.getName()));
+						contents.add(new Folder(id.append(folder.getName())));
 					}
 				}
 				
@@ -201,10 +197,10 @@ public class IContainerRoot extends AbstractRoot {
 				return e;
 			} else {
 				// attempting to create entry in subfolder.
-				Folder folder = getFolder(nid.get(0));
+				Folder folder = (Folder) getFolder(nid.get(0));
 				if (folder == null) {
 					// Folder doesn't already exist, so create it.
-					folder = new IFolderFolder(id.append(nid.get(0)));
+					folder = new Folder(id.append(nid.get(0)));
 					super.insert(folder);
 				}
 				return folder.create(nid.subpath(1, nid.size()), ct, sources);
@@ -220,10 +216,10 @@ public class IContainerRoot extends AbstractRoot {
 				return e;
 			} else {
 				// attempting to create entry in subfolder.
-				IFolderFolder folder = (IFolderFolder) getFolder(nid.get(0));
+				Folder folder = (Folder) getFolder(nid.get(0));
 				if (folder == null) {
 					// Folder doesn't already exist, so create it.
-					folder = new IFolderFolder(id.append(nid.get(0)));
+					folder = new Folder(id.append(nid.get(0)));
 					super.insert(folder);
 				}
 				return folder.create(nid.subpath(1, nid.size()), file);

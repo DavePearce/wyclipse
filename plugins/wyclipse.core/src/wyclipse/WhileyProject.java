@@ -312,7 +312,8 @@ public class WhileyProject implements NameSpace {
 	 * 
 	 * @param delta
 	 */
-	public void changed(IResource resource) throws CoreException {	
+	public void changed(IResource resource) throws CoreException {
+		System.out.println("RESOURCE CHANGED");
 		for(IContainerRoot srcRoot : sourceRoots) {
 			IFileEntry<?> ife = srcRoot.getResource(resource);
 			if(ife != null) {
@@ -321,8 +322,10 @@ public class WhileyProject implements NameSpace {
 				// well, since it has clearly changed.
 				ife.refresh();
 				delta.add(ife);
+				return;	
 			}
 		}
+		System.out.println("RESOURCE CHANGE NOT CLAIMED");
 	}
 
 	/**
