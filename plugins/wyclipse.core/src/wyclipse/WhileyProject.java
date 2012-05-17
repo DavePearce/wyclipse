@@ -92,6 +92,13 @@ public class WhileyProject implements NameSpace {
 	protected final ArrayList<BuildRule> rules;
 
 	/**
+	 * This is something of a hack. Basically it's a generic filter to return
+	 * all source files
+	 */
+	protected static final Content.Filter<WhileyFile> includes = Content.filter(
+			Trie.fromString("**"), WhileyFile.ContentType);
+	
+	/**
 	 * Construct a build manager from a given IJavaProject. This will traverse
 	 * the projects raw classpath to identify all classpath entries, such as
 	 * source folders and jar files. These will then be managed by this build
@@ -135,8 +142,7 @@ public class WhileyProject implements NameSpace {
 
 		Pipeline pipeline = new Pipeline(Pipeline.defaultPipeline);
 		this.builder = new WhileyBuilder(this, pipeline);
-		Content.Filter<WhileyFile> includes = Content.filter(
-				Trie.fromString("**"), WhileyFile.ContentType);
+		
 		StandardBuildRule rule = new StandardBuildRule(builder);
 
 		for (Path.Root source : sourceRoots) {
@@ -376,9 +382,12 @@ public class WhileyProject implements NameSpace {
 			delta.clear();
 			
 			// first, identify all source files
+			for(BuildRule br : rules) {
+				
+			}
 			for(IContainerRoot srcRoot : sourceRoots) {
-				for(IFileEntry<?> e : srcRoot.contents()) {
-					delta.add(e);
+				for(Path.Entry<?> e : srcRoot.get(includes)) {
+					delta.add((IFileEntry) e);
 				}
 			}
 			
@@ -392,7 +401,7 @@ public class WhileyProject implements NameSpace {
 			// third, delete all target files
 			for(Path.Entry<?> _e : allTargets) {
 				IFileEntry<?> e = (IFileEntry<?>) _e;
-				//e.delete();
+				e.getFile().delete(true,null);
 			}		
 		} catch(CoreException e) {
 			throw e;
@@ -409,7 +418,7 @@ public class WhileyProject implements NameSpace {
 	 * entries found in delta). To do this, we must identify all corresponding
 	 * targets, as well as any other dependencies.
 	 */
-	public void build() throws CoreException {		
+	public void build() throws IOException,CoreException {		
 		HashSet<Path.Entry<?>> allTargets = new HashSet();
 		try {			
 			System.out.println("BUILDING: " + delta.size() + " source file(s).");
@@ -446,15 +455,13 @@ public class WhileyProject implements NameSpace {
 				}
 			} while(allTargets.size() < oldSize);
 			
-		} catch(CoreException e) {
-			throw e;
 		} catch(SyntaxError e) {
 			// FIXME: this is a hack because syntax error doesn't retain the
 			// correct information (i.e. it should store an Path.Entry, not a
 			// String filename).
 			for(IContainerRoot srcRoot : sourceRoots) {
-				for(IFileEntry entry : srcRoot.contents()) {
-					IFile file = entry.getFile();
+				for(Path.Entry entry : srcRoot.get(includes)) {
+					IFile file = ((IFileEntry)entry).getFile();
 					if(file.getLocation().toFile().getAbsolutePath().equals(e.filename())) {
 						// hit
 						highlightSyntaxError(file,e);
@@ -478,11 +485,11 @@ public class WhileyProject implements NameSpace {
 	 * Build all known source files, regardless of whether they have changed or
 	 * not.
 	 */
-	public void buildAll() throws CoreException {		
+	public void buildAll() throws IOException,CoreException {	
 		delta.clear();
 		for(IContainerRoot srcRoot : sourceRoots) {
-			for(IFileEntry<?> e : srcRoot.contents()) {
-				delta.add(e);
+			for(Path.Entry<?> e : srcRoot.get(includes)) {
+				delta.add((IFileEntry) e);
 			}
 		}
 		build();

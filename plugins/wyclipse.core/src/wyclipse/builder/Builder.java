@@ -76,23 +76,27 @@ public class Builder extends IncrementalProjectBuilder {
 	
 	protected IProject[] build(int kind, Map args, IProgressMonitor monitor)
 			throws CoreException {
-		
-		if(whileyProject == null) {
-			initialise();
-		}
-		
-		if (kind == IncrementalProjectBuilder.FULL_BUILD) {
-			whileyProject.buildAll();
-		} else if (kind == IncrementalProjectBuilder.INCREMENTAL_BUILD
-				|| kind == IncrementalProjectBuilder.AUTO_BUILD) {
-			IResourceDelta delta = getDelta(getProject());			
-			if (delta == null) {
-				whileyProject.buildAll();
-			} else {
-				incrementalBuild(delta, monitor);
+		try {
+			if(whileyProject == null) {
+				initialise();
 			}
+
+			if (kind == IncrementalProjectBuilder.FULL_BUILD) {
+				whileyProject.buildAll();
+			} else if (kind == IncrementalProjectBuilder.INCREMENTAL_BUILD
+					|| kind == IncrementalProjectBuilder.AUTO_BUILD) {
+				IResourceDelta delta = getDelta(getProject());			
+				if (delta == null) {
+					whileyProject.buildAll();
+				} else {
+					incrementalBuild(delta, monitor);
+				}
+			}
+		} catch(CoreIOException e) {
+			throw e.payload;
+		} catch(IOException e) {
+			// dead code
 		}
-		
 		return null;
 	}
 
@@ -103,8 +107,13 @@ public class Builder extends IncrementalProjectBuilder {
 
 		// finally, give the whiley project a changed to recompile any whiley
 		// files that are affected the by changes. 
-		
-		whileyProject.build();		
+		try {
+			whileyProject.build();
+		} catch(CoreIOException e) {
+			throw e.payload;
+		} catch(IOException e) {
+			// dead code
+		}
 	}
 	
 	/**
