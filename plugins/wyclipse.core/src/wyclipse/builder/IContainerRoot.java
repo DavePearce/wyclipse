@@ -84,10 +84,13 @@ public class IContainerRoot extends AbstractRoot {
 	}
 	
 	private IFileEntry<?> getResource(IFolderFolder folder, IResource file) throws IOException {
-		for(Item _e : folder.contents()) {			
-			IFileEntry e = (IFileEntry) _e;			
-			if(e.file.equals(file)) {
-				return e;
+		// FIXME: shouldn't use the folder.contents() here.
+		for(Item _e : folder.contents()) {	
+			if (_e instanceof IFileEntry) {
+				IFileEntry e = (IFileEntry) _e;
+				if (e.file.equals(file)) {
+					return e;
+				}
 			}
 		}
 		return null;
