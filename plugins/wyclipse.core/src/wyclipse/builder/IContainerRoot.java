@@ -169,10 +169,11 @@ public class IContainerRoot extends AbstractRoot<IContainerRoot.IFolderEntry> {
 					if(file instanceof IFile) {
 						String suffix = file.getFileExtension();
 						if (suffix != null
-								&& (suffix.equals("class") || suffix.equals("whiley"))) {
+								&& (suffix.equals("class") || suffix.equals("whiley"))) {							
 							String filename = file.getName();
 							String name = filename.substring(0, filename.lastIndexOf('.'));
-							IFileEntry entry = new IFileEntry(id.append(name), (IFile) file);
+							ID eid = id.append(name);							
+							IFileEntry entry = new IFileEntry(eid, (IFile) file);
 							contents.add(entry);
 							contentTypes.associate(entry);
 						}

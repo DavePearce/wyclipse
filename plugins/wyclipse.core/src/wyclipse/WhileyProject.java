@@ -178,7 +178,7 @@ public class WhileyProject extends SimpleProject {
 	public void setLogger(Logger logger) {
 		builder.setLogger(logger);
 	}
-
+	
 	/**
 	 * A resource of some sort has changed, and we need to update the namespace
 	 * accordingly. Note that the given resource may not actually be managed by
