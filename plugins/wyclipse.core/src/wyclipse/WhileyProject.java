@@ -28,6 +28,7 @@ import wybs.util.StandardBuildRule;
 import wybs.util.Trie;
 import wyil.Pipeline;
 import wyil.lang.WyilFile;
+import wyil.transforms.VerificationCheck;
 
 /**
  * <p>
@@ -141,6 +142,7 @@ public class WhileyProject implements NameSpace {
 		// ===============================================================
 
 		Pipeline pipeline = new Pipeline(Pipeline.defaultPipeline);
+		pipeline.setOption(VerificationCheck.class, "enable", true);
 		this.builder = new WhileyBuilder(this, pipeline);
 		
 		StandardBuildRule rule = new StandardBuildRule(builder);
