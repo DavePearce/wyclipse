@@ -71,13 +71,6 @@ public class WhileyProject extends SimpleProject {
 	private WhileyBuilder builder;
 
 	/**
-	 * The build rules identify how source files are converted into binary
-	 * files. In particular, they determine which whiley files are compiled,
-	 * what their target types are and where their binaries should be written.
-	 */
-	protected final ArrayList<BuildRule> rules;
-
-	/**
 	 * This is something of a hack. Basically it's a generic filter to return
 	 * all source files
 	 */
@@ -96,7 +89,6 @@ public class WhileyProject extends SimpleProject {
 			throws CoreException {
 
 		this.delta = new ArrayList<IFileEntry>();
-		this.rules = new ArrayList<BuildRule>();
 
 		IWorkspaceRoot workspaceRoot = workspace.getRoot();
 
@@ -142,7 +134,7 @@ public class WhileyProject extends SimpleProject {
 			}
 		}
 
-		rules.add(rule);
+		add(rule);
 	}
 
 	private void initialise(IWorkspaceRoot workspaceRoot,
@@ -317,23 +309,23 @@ public class WhileyProject extends SimpleProject {
 		try {
 			System.out
 					.println("BUILDING: " + delta.size() + " source file(s).");
-			// Firstly, initialise list of targets to rebuild.
-			for (BuildRule r : rules) {
-				for (IFileEntry<?> source : delta) {
-					allTargets.addAll(r.dependentsOf(source));
-				}
-			}
-
-			// Secondly, add all dependents on those being rebuilt.
-			int oldSize;
-			do {
-				oldSize = allTargets.size();
-				for (BuildRule r : rules) {
-					for (Path.Entry<?> target : allTargets) {
-						allTargets.addAll(r.dependentsOf(target));
-					}
-				}
-			} while (allTargets.size() != oldSize);
+//			// Firstly, initialise list of targets to rebuild.
+//			for (BuildRule r : rules) {
+//				for (IFileEntry<?> source : delta) {
+//					allTargets.addAll(r.dependentsOf(source));
+//				}
+//			}
+//
+//			// Secondly, add all dependents on those being rebuilt.
+//			int oldSize;
+//			do {
+//				oldSize = allTargets.size();
+//				for (BuildRule r : rules) {
+//					for (Path.Entry<?> target : allTargets) {
+//						allTargets.addAll(r.dependentsOf(target));
+//					}
+//				}
+//			} while (allTargets.size() != oldSize);
 
 			// Thirdly, remove all markers from those entries
 			for (Path.Entry<?> _e : delta) {
@@ -342,13 +334,15 @@ public class WhileyProject extends SimpleProject {
 						IResource.DEPTH_INFINITE);
 			}
 
+			super.build((ArrayList) delta);
+			
 			// Finally, build all identified targets!
-			do {
-				oldSize = allTargets.size();
-				for (BuildRule r : rules) {
-					r.apply(allTargets);
-				}
-			} while (allTargets.size() < oldSize);
+//			do {
+//				oldSize = allTargets.size();
+//				for (BuildRule r : rules) {
+//					r.apply(allTargets);
+//				}
+//			} while (allTargets.size() < oldSize);
 
 		} catch (SyntaxError e) {
 			// FIXME: this is a hack because syntax error doesn't retain the
