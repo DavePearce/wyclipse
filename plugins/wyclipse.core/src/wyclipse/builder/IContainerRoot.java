@@ -77,6 +77,9 @@ public class IContainerRoot extends AbstractRoot<IContainerRoot.IFolderEntry> {
 	
 	public IFileEntry<?> getResource(IResource file) throws CoreException {		
 		try {			
+			// instead of calling getAll, I could just do the traversal right
+			// here. That would save creating lots of objects to hold the
+			// intermediate results from getAll.
 			for(Entry<?> e : root.getAll()) {	
 				if (e instanceof IFileEntry) {
 					IFileEntry ife = (IFileEntry) e;
@@ -210,8 +213,6 @@ public class IContainerRoot extends AbstractRoot<IContainerRoot.IFolderEntry> {
 					// Folder doesn't already exist, so create it.
 					ID fid = id.append(root); 							
 					IPath fpath = dir.getFullPath().append(root);
-					System.out.println("ROOT: " + root);
-					System.out.println("FPATH: " + fpath);
 					folder = new IFolderEntry(fid,dir.getFolder(fpath));
 					super.insert(folder);
 				}
