@@ -313,7 +313,7 @@ public class WhileyProject implements NameSpace {
 	 * @param delta
 	 */
 	public void changed(IResource resource) throws CoreException {
-		System.out.println("RESOURCE CHANGED");
+		System.out.println("RESOURCE CHANGED: " + resource.getFullPath());
 		for(IContainerRoot srcRoot : sourceRoots) {
 			IFileEntry<?> ife = srcRoot.getResource(resource);
 			if(ife != null) {
@@ -321,11 +321,10 @@ public class WhileyProject implements NameSpace {
 				// for recompilation. Note that we must refresh the entry as
 				// well, since it has clearly changed.
 				ife.refresh();
-				delta.add(ife);
+				delta.add(ife);				
 				return;	
 			}
 		}
-		System.out.println("RESOURCE CHANGE NOT CLAIMED");
 	}
 
 	/**
@@ -337,6 +336,7 @@ public class WhileyProject implements NameSpace {
 	 * @param delta
 	 */
 	public void added(IResource resource) throws CoreException {
+		System.out.println("RESOURCE ADDED: " + resource.getFullPath());
 		IPath location = resource.getLocation();		
 		for(IContainerRoot srcRoot : sourceRoots) {
 			IFileEntry e = srcRoot.create(resource);
@@ -358,6 +358,7 @@ public class WhileyProject implements NameSpace {
 	 * @param delta
 	 */
 	public void removed(IResource resource) throws CoreException {
+		System.out.println("RESOURCE REMOVED: " + resource.getFullPath());
 		// We could actually do better here, in some cases. For example, if a
 		// source file is removed then we only need to recompile those which
 		// depend upon it. 
