@@ -41,6 +41,7 @@ import org.eclipse.core.runtime.Path;
 
 import wybs.lang.Content;
 import wybs.lang.Path.*;
+import wybs.util.AbstractFolder;
 import wybs.util.AbstractRoot;
 import wybs.util.AbstractEntry;
 import wybs.util.Trie;
@@ -52,7 +53,7 @@ import wybs.util.Trie;
  * @author David J. Pearce
  * 
  */
-public class IContainerRoot extends AbstractRoot {	
+public class IContainerRoot extends AbstractRoot<IContainerRoot.IFolderEntry> {	
 	private final IContainer dir;		
 		
 	/**
@@ -64,6 +65,10 @@ public class IContainerRoot extends AbstractRoot {
 	public IContainerRoot(IContainer dir, Content.Registry contentTypes) {
 		super(contentTypes);		
 		this.dir = dir;
+		// the following line is necessary because the AbstractFolder
+		// constructor calls root(), all of which will happen before this.dir is
+		// assigned above.
+		root.dir = dir;
 	}
 
 	public IContainer getContainer() {
@@ -71,15 +76,18 @@ public class IContainerRoot extends AbstractRoot {
 	}
 	
 	public IFileEntry<?> getResource(IResource file) throws CoreException {		
-		try {
-			for(int i=0;i!=size();++i) {
-				IFileEntry e = (IFileEntry) get(i);			
-				if(e.file.equals(file)) {
-					return e;
+		try {			
+			// instead of calling getAll, I could just do the traversal right
+			// here. That would save creating lots of objects to hold the
+			// intermediate results from getAll.
+			for(Entry<?> e : root.getAll()) {	
+				if (e instanceof IFileEntry) {
+					IFileEntry ife = (IFileEntry) e;
+					if (ife.file.equals(file)) {
+						return ife;
+					}
 				}
-			}
-		} catch(CoreException e) {
-			throw e;
+			}			
 		} catch(RuntimeException e) {
 			throw e;
 		} catch(Exception other) {
@@ -100,24 +108,22 @@ public class IContainerRoot extends AbstractRoot {
 	 */
 	public IFileEntry create(IResource resource) throws CoreException {
 		IPath path = resource.getFullPath();
+		IPath fullPath = dir.getFullPath();
 		try {
-			if (dir.getFullPath().isPrefixOf(path)
+			if (fullPath.isPrefixOf(path)
 					&& resource instanceof IFile) {
-				IFile file = (IFile) resource;
-				ID id = path2ID(path);			
+				IFile file = (IFile) resource;				
+				ID id = path2ID(path.makeRelativeTo(fullPath));			
+				
 				String suffix = file.getFileExtension();
 				if (suffix != null
 						&& (suffix.equals("class") || suffix.equals("whiley"))) {
-					String filename = file.getName();
-					String name = filename.substring(0, filename.lastIndexOf('.'));
-					IFileEntry entry = new IFileEntry(id.append(name), (IFile) file);			
-					contentTypes.associate(entry);
-					insert(entry);
-					return entry;
+					// FIXME: file types should not be hard coded above	
+					return (IFileEntry) root.create(id, file);
 				}
 			}
-		} catch(CoreException e) {
-			throw e;
+		} catch(CoreIOException e) {
+			throw e.payload;
 		} catch(RuntimeException e) {
 			throw e;
 		} catch(Exception e) {
@@ -127,43 +133,16 @@ public class IContainerRoot extends AbstractRoot {
 		return null;
 	}
 	
-	public <T> Entry<T> create(ID id, Content.Type<T> contentType, Entry<?>... sources) throws Exception {
-		Entry<T> entry = get(id,contentType);
-		if(entry != null) {
-			return entry;
-		}
-		Path path = new Path(id.toString() + "." + contentTypes.suffix(contentType)); 
-		IFile file = dir.getFile(path);		
-		entry = new IFileEntry<T>(id,file);
-		insert(entry);
-		entry.associate(contentType,null);		
-		return entry;
+	public IFolderEntry root() {
+		return new IFolderEntry(Trie.ROOT,null);
 	}
 	
-	public void flush() {
-		
+	public String toString() {
+		return dir.toString();
 	}
 	
 	public void refresh() {
-		contents = null;
-	}
-		
-	public IFileEntry<?>[] contents() throws CoreException {
-		// using instanceof is a bit of a hack here.
-		if(contents instanceof IFileEntry<?>[]) {
-			return (IFileEntry<?>[]) contents;
-		} else {
-			ArrayList<IFileEntry> contents = new ArrayList<IFileEntry>();			
-			traverse(dir,Trie.ROOT,contents);
-			IFileEntry<?>[] tmp = contents.toArray(new IFileEntry[contents.size()]);
-			this.contents = tmp;
-			this.nentries = contents.size();
-			return tmp;
-		}
-	}
-		
-	public String toString() {
-		return dir.toString();
+		// TODO
 	}
 	
 	public ID path2ID(IPath path) {		
@@ -175,23 +154,94 @@ public class IContainerRoot extends AbstractRoot {
 		return id;
 	}
 	
-	private void traverse(IContainer container, Trie id,
-			ArrayList<IFileEntry> entries) throws CoreException {
-
-		for (IResource file : container.members()) {			
-			if(file instanceof IFile) {
-				String suffix = file.getFileExtension();
-				if (suffix != null
-						&& (suffix.equals("class") || suffix.equals("whiley"))) {
-					String filename = file.getName();
-					String name = filename.substring(0, filename.lastIndexOf('.'));
-					IFileEntry entry = new IFileEntry(id.append(name), (IFile) file);
-					entries.add(entry);
-					contentTypes.associate(entry);
+	public class IFolderEntry extends AbstractFolder {	
+		private IContainer dir;
+		
+		public IFolderEntry(ID id, IContainer dir) {
+			super(id);
+			this.dir = dir;
+		}
+		
+		protected Item[] contents() throws IOException {
+			try {
+				ArrayList<Item> contents = new ArrayList<Item>();			
+				for (IResource file : dir.members()) {			
+					if(file instanceof IFile) {
+						String suffix = file.getFileExtension();
+						if (suffix != null
+								&& (suffix.equals("class") || suffix.equals("whiley"))) {							
+							String filename = file.getName();
+							String name = filename.substring(0, filename.lastIndexOf('.'));
+							ID eid = id.append(name);							
+							IFileEntry entry = new IFileEntry(eid, (IFile) file);
+							contents.add(entry);
+							contentTypes.associate(entry);
+						}
+					} else if(file instanceof IFolder) {
+						IFolder folder = (IFolder) file;		
+						ID fid = id.append(folder.getName());
+						contents.add(new IFolderEntry(fid,folder));
+					}
 				}
-			} else if(file instanceof IFolder) {
-				IFolder folder = (IFolder) file;
-				traverse(folder,id.append(folder.getName()),entries);
+				
+				return contents.toArray(new Item[contents.size()]);
+
+			} catch (CoreException e) {
+				throw new CoreIOException(e);
+			}
+		}
+				
+		public <T> Entry<T> create(ID nid, Content.Type<T> ct,
+				Entry<?>... sources) throws IOException {
+			String root = nid.get(0);
+			if (nid.size() == 1) {
+				// attempting to create an entry in this folder
+				Entry<T> e = super.get(nid, ct);
+				if (e == null) {
+					// Entry doesn't already exist, so create it
+					Path path = new Path(nid.toString() + "."
+							+ contentTypes.suffix(ct));
+					IFile file = dir.getFile(path);
+					e = new IFileEntry<T>(id.append(root), file);
+					e.associate(ct, null);
+					super.insert(e);
+				}
+				return e;
+			} else {
+				// attempting to create entry in subfolder.
+				IFolderEntry folder = (IFolderEntry) getFolder(root);
+				if (folder == null) {
+					// Folder doesn't already exist, so create it.
+					ID fid = id.append(root); 							
+					IPath fpath = dir.getFullPath().append(root);
+					folder = new IFolderEntry(fid,dir.getFolder(fpath));
+					super.insert(folder);
+				}
+				return folder.create(nid.subpath(1, nid.size()), ct, sources);
+			}
+		}
+		
+		public <T> Entry<T> create(ID nid, IFile file) throws IOException {
+			String root = nid.get(0);
+			if (nid.size() == 1) {
+				// attempting to create an entry in this folder
+				Entry<T> e = new IFileEntry<T>(id.append(root), file);
+				contentTypes.associate(e);
+				super.insert(e);				
+				return e;
+			} else {
+				// attempting to create entry in subfolder.
+				IFolderEntry folder = (IFolderEntry) getFolder(root);
+				if (folder == null) {
+					// Folder doesn't already exist, so create it.
+					ID fid = id.append(root); 		
+					IPath fpath = dir.getFullPath().append(root);
+					System.out.println("ROOT: " + root);
+					System.out.println("FPATH: " + fpath);
+					folder = new IFolderEntry(fid,dir.getFolder(fpath));
+					super.insert(folder);
+				}
+				return folder.create(nid.subpath(1, nid.size()), file);
 			}
 		}
 	}
@@ -215,7 +265,7 @@ public class IContainerRoot extends AbstractRoot {
 		public IFile getFile() {
 			return file;
 		}
-		
+	
 		public String location() {
 			return file.getLocation().toFile().toString();			
 		}
@@ -234,22 +284,27 @@ public class IContainerRoot extends AbstractRoot {
 			return suffix;
 		}
 				
-		public void write(T contents) throws Exception {
+		public void write(T contents) throws IOException {
 			super.write(contents);			
 			ByteArrayOutputStream out = new ByteArrayOutputStream();
 			contentType().write(out,contents);
 			byte[] bytes = out.toByteArray();
 			ByteArrayInputStream input = new ByteArrayInputStream(bytes);
-			
-			if(file.exists()) {
-				// File already exists, so update contents.
-				file.setContents(input, IResource.FORCE | IResource.DERIVED, null);
-			} else {
-				// first, ensure containing folder exists
-				create(file.getParent());
-				// finally, create file
-				file.create(input, IResource.FORCE | IResource.DERIVED, null);
-			} 
+			try {
+				if (file.exists()) {
+					// File already exists, so update contents.
+					file.setContents(input,
+							IResource.FORCE | IResource.DERIVED, null);
+				} else {
+					// first, ensure containing folder exists
+					create(file.getParent());
+					// finally, create file
+					file.create(input, IResource.FORCE | IResource.DERIVED,
+							null);
+				}
+			} catch (CoreException e) {
+				throw new CoreIOException(e);
+			}
 		}
 		
 		public void refresh() {
@@ -258,11 +313,15 @@ public class IContainerRoot extends AbstractRoot {
 			}
 		}
 		
-		public InputStream inputStream() throws CoreException {
-			return file.getContents();		
+		public InputStream inputStream() throws IOException {
+			try {
+				return file.getContents();
+			} catch (CoreException e) {
+				throw new CoreIOException(e);
+			}
 		}
 		
-		public OutputStream outputStream() throws CoreException {
+		public OutputStream outputStream() throws IOException {
 			// BUMMER
 			return null;		
 		}
