@@ -3,8 +3,8 @@ Bundle-ManifestVersion: 2
 Bundle-Name: Wyclipse Core
 Bundle-SymbolicName: wyclipse;singleton:=true
 Bundle-Version: 0.1.4
-Bundle-ClassPath: lib/wyjc.jar,
- .
+Bundle-ClassPath: .,
+ lib/wyjc-all-v0.3.17.jar
 Bundle-Activator: wyclipse.Activator
 Export-Package: wyclipse;
   uses:="org.eclipse.core.runtime,

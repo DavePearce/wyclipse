@@ -31,6 +31,7 @@ import wybs.util.Trie;
 import wyil.Pipeline;
 import wyil.lang.WyilFile;
 import wyil.transforms.VerificationCheck;
+import wyjvm.lang.ClassFile;
 
 /**
  * <p>
@@ -413,17 +414,10 @@ public class WhileyProject extends StandardProject {
 		public void associate(Path.Entry e) {
 			if (e.suffix().equals("whiley")) {
 				e.associate(WhileyFile.ContentType, null);
+			} else if (e.suffix().equals("wyil")) {
+				e.associate(WyilFile.ContentType, null);
 			} else if (e.suffix().equals("class")) {
-				// this could be either a normal JVM class, or a Wyil class. We
-				// need to determine which.
-				try {
-					WyilFile c = WyilFile.ContentType.read(e, e.inputStream());
-					if (c != null) {
-						e.associate(WyilFile.ContentType, c);
-					}
-				} catch (Exception ex) {
-					// hmmm, not ideal
-				}
+				e.associate(ClassFile.ContentType, null);				
 			}
 		}
 
@@ -431,6 +425,8 @@ public class WhileyProject extends StandardProject {
 			if (t == WhileyFile.ContentType) {
 				return "whiley";
 			} else if (t == WyilFile.ContentType) {
+				return "wyil";
+			} else if (t == ClassFile.ContentType) {
 				return "class";
 			} else {
 				return "dat";
