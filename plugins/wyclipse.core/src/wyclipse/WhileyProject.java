@@ -18,14 +18,14 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.internal.launching.JREContainer;
 
-import wyc.builder.WhileyBuilder;
+import wyc.builder.Whiley2WyilBuilder;
 import wyc.lang.WhileyFile;
 import wyclipse.builder.CoreIOException;
 import wyclipse.builder.IContainerRoot;
 import wyclipse.builder.IContainerRoot.IFileEntry;
 import wybs.lang.*;
 import wybs.util.JarFileRoot;
-import wybs.util.SimpleProject;
+import wybs.util.StandardProject;
 import wybs.util.StandardBuildRule;
 import wybs.util.Trie;
 import wyil.Pipeline;
@@ -50,7 +50,7 @@ import wyil.transforms.VerificationCheck;
  * @author David J. Pearce
  * 
  */
-public class WhileyProject extends SimpleProject {
+public class WhileyProject extends StandardProject {
 
 	/**
 	 * The delta is a list of entries which require recompilation. As entries
@@ -68,7 +68,7 @@ public class WhileyProject extends SimpleProject {
 	 * their target types are and where their binaries should be written.
 	 * </p>
 	 */
-	private WhileyBuilder builder;
+	private Whiley2WyilBuilder builder;
 
 	/**
 	 * This is something of a hack. Basically it's a generic filter to return
@@ -118,7 +118,7 @@ public class WhileyProject extends SimpleProject {
 
 		Pipeline pipeline = new Pipeline(Pipeline.defaultPipeline);
 		pipeline.setOption(VerificationCheck.class, "enable", true);
-		this.builder = new WhileyBuilder(this, pipeline);
+		this.builder = new Whiley2WyilBuilder(this, pipeline);
 
 		StandardBuildRule rule = new StandardBuildRule(builder);
 

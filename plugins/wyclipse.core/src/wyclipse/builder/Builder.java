@@ -26,31 +26,14 @@
 package wyclipse.builder;
 
 import java.io.*;
-import java.net.URL;
 import java.util.*;
 
 import org.eclipse.core.resources.*;
 import org.eclipse.core.runtime.*;
 import org.eclipse.jdt.core.*;
-import org.eclipse.jdt.internal.launching.JREContainer;
-import org.eclipse.jdt.launching.*;
-import org.osgi.framework.Bundle;
 
 import wybs.lang.*;
-import wybs.lang.Path;
-import wybs.util.*;
-import wyil.Pipeline;
-import wyil.Pipeline.Template;
-import wyc.builder.WhileyBuilder;
-import wyc.lang.WhileyFile;
-import wyclipse.Activator;
 import wyclipse.WhileyProject;
-import wyil.io.WyilFileWriter;
-import wyil.lang.WyilFile;
-
-import wyil.Transform;
-import wyil.transforms.*;
-import wyjc.io.ClassFileLoader;
 
 public class Builder extends IncrementalProjectBuilder {
 	private static final boolean verbose = true;
