@@ -30,7 +30,7 @@ import wybs.util.StandardBuildRule;
 import wybs.util.Trie;
 import wyil.Pipeline;
 import wyil.lang.WyilFile;
-import wyil.transforms.VerificationCheck;
+import wyil.checks.VerificationCheck;
 import wyjvm.lang.ClassFile;
 
 /**
