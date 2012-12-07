@@ -68,6 +68,7 @@ public class Configuration extends SourceViewerConfiguration {
 		        ? new WhileyAutoEditStrategy() : new DefaultIndentLineAutoEditStrategy());
 		        return new IAutoEditStrategy[] { new WhileyAutoEditStrategy() };
 		    }
+	
 	public IPresentationReconciler getPresentationReconciler(
 			ISourceViewer sourceViewer) {
 		PresentationReconciler pr = new PresentationReconciler();
