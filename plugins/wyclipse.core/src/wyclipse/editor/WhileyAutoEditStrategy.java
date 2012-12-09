@@ -39,30 +39,34 @@ public class WhileyAutoEditStrategy implements IAutoEditStrategy {
 	@Override
 	public void customizeDocumentCommand(IDocument document,
 			DocumentCommand command) {
-		if(command.length == 0 && command.text != null && TextUtilities.endsWith(document.getLegalLineDelimiters(), command.text) != -1) {
+		if (command.length == 0
+				&& command.text != null
+				&& TextUtilities.endsWith(document.getLegalLineDelimiters(),
+						command.text) != -1) {
 			autoIndentAfterLine(document, command);
-		} else if(command.text.equals("'")) {
-			command.text = "''";
-			configureCommand(command);
-		} else if(command.text.equals("\"")) {
-			command.text = "\"\"";
-			configureCommand(command);
-		} else if(command.text.equals("(")) {
-			command.text="()";
-			configureCommand(command);
-		} else if(command.text.equals("[")) {
-			command.text="[]";
-			configureCommand(command);
-		} else if(command.text.equals("*")) {
-			try {
-				if(document.get(command.offset-1, 1).trim().equals("/")) {
-				command.text = "*\n*/";
-				configureCommand(command);
-				}
-			} catch (BadLocationException e) {
-				e.printStackTrace();
-			}
 		}
+//		 else if(command.text.equals("'")) {
+//			command.text = "''";
+//			configureCommand(command);
+//		} else if(command.text.equals("\"")) {
+//			command.text = "\"\"";
+//			configureCommand(command);
+//		} else if(command.text.equals("(")) {
+//			command.text="()";
+//			configureCommand(command);
+//		} else if(command.text.equals("[")) {
+//			command.text="[]";
+//			configureCommand(command);
+//		} else if(command.text.equals("*")) {
+//			try {
+//				if(document.get(command.offset-1, 1).trim().equals("/")) {
+//				command.text = "*\n*/";
+//				configureCommand(command);
+//				}
+//			} catch (BadLocationException e) {
+//				e.printStackTrace();
+//			}
+//		}
 		
 	}
 	
