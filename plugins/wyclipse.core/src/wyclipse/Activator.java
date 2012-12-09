@@ -72,16 +72,17 @@ public class Activator extends AbstractUIPlugin {
 	 */
 	public void start(BundleContext context) throws Exception {
 		super.start(context);		
-		try {
-			URL url = FileLocator.resolve(context.getBundle().getEntry(
-					WHILEY_RUNTIME_JAR));
-			WHILEY_RUNTIME_JAR_IPATH = URIUtil.toPath(url.toURI());
-			System.out.println("WYRT PATH: " + WHILEY_RUNTIME_JAR_IPATH);
-		} catch (Exception e) {
-			getLog().log(
-					new Status(IStatus.ERROR, PLUGIN_ID,
-							"Error starting wyclipse plugin", e));
-		}
+//		try {
+//			System.out.println("LOOKING FOR SOMETHING");
+//			URL url = FileLocator.resolve(context.getBundle().getEntry(
+//					WHILEY_RUNTIME_JAR));
+//			WHILEY_RUNTIME_JAR_IPATH = URIUtil.toPath(url.toURI());
+//			System.out.println("WYRT PATH: " + WHILEY_RUNTIME_JAR_IPATH);
+//		} catch (Exception e) {
+//			getLog().log(
+//					new Status(IStatus.ERROR, PLUGIN_ID,
+//							"Error starting wyclipse plugin", e));
+//		}
 	}
 
 	/*
