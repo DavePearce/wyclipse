@@ -5,7 +5,7 @@ Bundle-SymbolicName: wyclipse;singleton:=true
 Bundle-Version: 0.0.13
 Bundle-ClassPath: lib/wyjc.jar,
  .,
- lib/wyjc-all-v0.3.17.jar
+ lib/wyjc-all-v0.3.18.jar
 Bundle-Activator: wyclipse.Activator
 Export-Package: wyclipse;
   uses:="org.eclipse.core.runtime,
