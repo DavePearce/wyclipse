@@ -32,7 +32,7 @@ import org.eclipse.ui.IViewActionDelegate;
 import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.IWorkbenchWindowActionDelegate;
-import org.eclipse.swt.widgets.*;
+import org.eclipse.swt.widgets.Shell;
 
 import wyclipse.wizards.NewModuleWizard;
 
