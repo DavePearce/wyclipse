@@ -1,69 +1,36 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: Wyclipse
-Bundle-SymbolicName: wyclipse;singleton:=true
-Bundle-Version: 0.0.13
+Bundle-Name: Wyclipse Core
+Bundle-SymbolicName: wyclipse.core;singleton:=true
+Bundle-Version: 0.1.5
 Bundle-ClassPath: lib/wyjc.jar,
  .,
  lib/wyjc-all-v0.3.18.jar
 Bundle-Activator: wyclipse.Activator
-Export-Package: wyclipse;
-  uses:="org.eclipse.core.runtime,
-   org.eclipse.jdt.core,
-   org.eclipse.ui.plugin,
-   org.osgi.framework",
- wyclipse.actions;uses:="org.eclipse.jface.action,org.eclipse.ui,org.eclipse.jface.viewers",
- wyclipse.builder;
-  uses:="org.eclipse.core.runtime,
-   org.eclipse.jdt.core,
-   wyil,
-   org.eclipse.core.resources,
-   wyil.util,
-   wyil.util.path,
-   wyil.lang",
- wyclipse.editor;
-  uses:="org.eclipse.jface.text,
-   org.eclipse.jface.text.source,
-   org.eclipse.core.filebuffers,
-   org.eclipse.jface.text.presentation,
-   org.eclipse.swt.graphics,
-   org.eclipse.jface.text.rules,
-   org.eclipse.ui.editors.text",
- wyclipse.launchers;
-  uses:="org.eclipse.debug.core,
-   org.eclipse.debug.ui,
-   org.eclipse.jdt.launching,
-   org.eclipse.jdt.core,
-   org.eclipse.ui,
-   org.eclipse.jface.viewers",
- wyclipse.natures;uses:="org.eclipse.core.resources",
- wyclipse.perspective;uses:="org.eclipse.ui",
- wyclipse.wizards;
-  uses:="org.eclipse.jface.wizard,
-   org.eclipse.core.runtime,
-   org.eclipse.jdt.core,
-   org.eclipse.jdt.ui.wizards,
-   org.eclipse.jface.viewers,
-   org.eclipse.swt.widgets,
-   org.eclipse.jdt.internal.ui.wizards"
-Require-Bundle: org.eclipse.ui,
+Export-Package: wyclipse,
+ wyclipse.actions,
+ wyclipse.builder,
+ wyclipse.editor,
+ wyclipse.launchers,
+ wyclipse.natures,
+ wyclipse.perspective,
+ wyclipse.wizards
+Require-Bundle: 
  org.eclipse.core.runtime,
- org.eclipse.jface.text,
- org.eclipse.ui.editors,
  org.eclipse.core.resources;bundle-version="3.5.0",
+ org.eclipse.core.filesystem;bundle-version="1.3.1",
+ org.eclipse.jface.text,
+ org.eclipse.ui,
+ org.eclipse.ui.editors,
+ org.eclipse.ui.navigator;bundle-version="3.5.0",
  org.eclipse.ui.ide;bundle-version="3.5.0",
+ org.eclipse.swt;bundle-version="3.1.0", 
  org.eclipse.debug.core;bundle-version="3.5.0",
+ org.eclipse.debug.ui;bundle-version="3.5.0",
  org.eclipse.jdt.ui;bundle-version="3.5.0",
  org.eclipse.jdt.core;bundle-version="3.5.0",
- org.eclipse.ui.navigator;bundle-version="3.5.0",
  org.eclipse.jdt.launching;bundle-version="3.5.0",
- org.eclipse.debug.ui;bundle-version="3.5.0",
  org.eclipse.jdt.debug;bundle-version="3.5.0",
- org.eclipse.jdt.debug.ui;bundle-version="3.5.0",
- org.eclipse.ui,
- org.eclipse.core.runtime,
- org.eclipse.ui,
- org.eclipse.core.runtime,
- org.eclipse.core.filesystem;bundle-version="1.3.1"
+ org.eclipse.jdt.debug.ui;bundle-version="3.5.0"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ActivationPolicy: lazy
