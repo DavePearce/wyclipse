@@ -334,7 +334,7 @@ public class WhileyProject extends StandardProject {
 				e.getFile().deleteMarkers(IMarker.PROBLEM, true,
 						IResource.DEPTH_INFINITE);
 			}
-
+			
 			super.build((ArrayList) delta);
 			
 			// Finally, build all identified targets!
