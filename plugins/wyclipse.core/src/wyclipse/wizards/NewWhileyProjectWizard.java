@@ -9,10 +9,12 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.ui.INewWizard;
 import org.eclipse.ui.IWorkbench;
+import org.eclipse.ui.dialogs.WizardNewProjectCreationPage;
 
 
 public class NewWhileyProjectWizard extends Wizard implements INewWizard {
-	private NewProjectPage page1;
+	//private NewProjectPage page1;
+	private NewWhileyProjectCreationPage page1;
 	
 	@Override
 	public void init(IWorkbench arg0, IStructuredSelection arg1) {
@@ -22,7 +24,7 @@ public class NewWhileyProjectWizard extends Wizard implements INewWizard {
 
 	@Override
 	public void addPages() {
-		page1 = new NewProjectPage();
+		page1 = new NewWhileyProjectCreationPage();
 		addPage(page1);	
 	}
 

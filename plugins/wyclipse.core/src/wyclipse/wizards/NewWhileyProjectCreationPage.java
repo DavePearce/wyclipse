@@ -42,14 +42,21 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.*;
 import org.eclipse.ui.dialogs.ContainerSelectionDialog;
+import org.eclipse.ui.dialogs.WizardNewProjectCreationPage;
 
 /**
- * The "New" wizard page allows setting the container for the new file as well
- * as the file name. The page will only accept file name without the extension
- * OR with the extension that matches the expected one (mpe).
+ * Implements the first page of the new Whiley project wizard. The main
+ * responsibilities of this page are:
+ * <ol>
+ * <li>Determine the project, and ensure this does not already exist.</li>
+ * <li>Determine the project location, using the default location as the initial
+ * value.</li>
+ * </ol>
+ * 
+ * @author David J. Pearce
+ * 
  */
-
-public class NewProjectPage extends WizardPage {
+public class NewWhileyProjectCreationPage extends WizardNewProjectCreationPage {
 	private Text projectName;
 	private Button defaultLocation;
 	private Text location;
@@ -59,8 +66,8 @@ public class NewProjectPage extends WizardPage {
 	 * 
 	 * @param pageName
 	 */
-	public NewProjectPage() {
-		super("wizardPage");
+	public NewWhileyProjectCreationPage() {
+		super("Create a Whiley Project");
 		setTitle("Create a Whiley Project");
 		setDescription("Enter a project name.");
 	}
