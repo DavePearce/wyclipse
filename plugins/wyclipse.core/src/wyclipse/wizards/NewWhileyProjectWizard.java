@@ -20,7 +20,7 @@ import wyclipse.Activator;
 import wyclipse.WhileyCore;
 
 
-public class NewWhileyProjectWizard extends Wizard implements INewWizard {
+public class NewWhileyProjectWizard extends Wizard implements IExecutableExtension, INewWizard {
 	private IWorkbench workbench;
 	
 	private IConfigurationElement config;
