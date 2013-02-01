@@ -35,6 +35,7 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.wizard.IWizardContainer;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.*;
@@ -57,10 +58,7 @@ import org.eclipse.ui.dialogs.WizardNewProjectCreationPage;
  * 
  */
 public class NewWhileyProjectCreationPage extends WizardNewProjectCreationPage {
-	private Text projectName;
-	private Button defaultLocation;
-	private Text location;
-
+	
 	/**
 	 * Constructor for SampleNewWizardPage.
 	 * 
@@ -75,68 +73,48 @@ public class NewWhileyProjectCreationPage extends WizardNewProjectCreationPage {
 	/**
 	 * @see IDialogPage#createControl(Composite)
 	 */
+	@Override
 	public void createControl(Composite parent) {
-		Composite container = new Composite(parent, SWT.NULL);
-		GridLayout layout = new GridLayout();		
-		container.setLayout(layout);
-		layout.numColumns = 3;
-		layout.verticalSpacing = 9;	
-		layout.marginWidth = 20;
-		Label label = new Label(container, SWT.NULL);
-		label.setText("&Project Name:");
-
-		projectName = new Text(container, SWT.BORDER | SWT.SINGLE);
-		GridData gd = new GridData(GridData.FILL_HORIZONTAL);
-		gd.horizontalSpan = 2;
-		projectName.setLayoutData(gd);
+		super.createControl(parent);		
+		Composite container = (Composite) getControl();
+		// at this point, we can use container to add more widgets onto the main
+		// page. For now, I don't do anything. 
 		
-		defaultLocation = new Button(container, SWT.CHECK);				
-		defaultLocation.setText("Use default location");
-
-		location = new Text(container, SWT.BORDER | SWT.SINGLE);
-		gd = new GridData(GridData.FILL_HORIZONTAL);
-		location.setLayoutData(gd);
-		initialiseLocation();
-		
-		Button button = new Button(container, SWT.PUSH);
-		button.setText("Browse...");
-		button.addSelectionListener(new SelectionAdapter() {
-			public void widgetSelected(SelectionEvent e) {
-				handleBrowseLocation();
-			}
-		});
-		
-		new Label(parent, SWT.SEPARATOR | SWT.HORIZONTAL);
-		
-		setControl(container);
-	}
-
-	/**
-	 * Uses the standard container selection dialog to choose the new value for
-	 * the container field.
-	 */
-
-	private void handleBrowseLocation() {
-		ContainerSelectionDialog dialog = new ContainerSelectionDialog(
-				getShell(), ResourcesPlugin.getWorkspace().getRoot(), false,
-				"Choose a directory for project contents");
-		if (dialog.open() == ContainerSelectionDialog.OK) {
-			Object[] result = dialog.getResult();
-			if (result.length == 1) {
-				location.setText(((Path) result[0]).toString());
-			}
-		}
+//		GridLayout layout = new GridLayout();		
+//		container.setLayout(layout);
+//		layout.numColumns = 3;
+//		layout.verticalSpacing = 9;	
+//		layout.marginWidth = 20;
+//		Label label = new Label(container, SWT.NULL);
+//		label.setText("&Project Name:");
+//
+//		projectName = new Text(container, SWT.BORDER | SWT.SINGLE);
+//		GridData gd = new GridData(GridData.FILL_HORIZONTAL);
+//		gd.horizontalSpan = 2;
+//		projectName.setLayoutData(gd);
+//		
+//		defaultLocation = new Button(container, SWT.CHECK);				
+//		defaultLocation.setText("Use default location");
+//
+//		location = new Text(container, SWT.BORDER | SWT.SINGLE);
+//		gd = new GridData(GridData.FILL_HORIZONTAL);
+//		location.setLayoutData(gd);
+//		initialiseLocation();
+//		
+//		Button button = new Button(container, SWT.PUSH);
+//		button.setText("Browse...");
+//		button.addSelectionListener(new SelectionAdapter() {
+//			public void widgetSelected(SelectionEvent e) {
+//				handleBrowseLocation();
+//			}
+//		});
+//		
+//		new Label(parent, SWT.SEPARATOR | SWT.HORIZONTAL);
+//		
+//		setControl(container);
 	}
 	
-	private void initialiseLocation() {		
-		location.setText(Platform.getLocation().toOSString());		
-	}
-	
-	public String getLocation() {
-		return location.getText();
-	}
-	
-	public String getProjectName() {
-		return projectName.getText();
+	public void dispose() {
+		super.dispose();
 	}
 }
