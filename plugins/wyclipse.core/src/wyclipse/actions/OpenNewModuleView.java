@@ -28,8 +28,11 @@ package wyclipse.actions;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.wizard.WizardDialog;
+import org.eclipse.ui.IViewActionDelegate;
+import org.eclipse.ui.IViewPart;
+import org.eclipse.ui.IWorkbenchWindow;
+import org.eclipse.ui.IWorkbenchWindowActionDelegate;
 import org.eclipse.swt.widgets.Shell;
-import org.eclipse.ui.*;
 
 import wyclipse.wizards.NewModuleWizard;
 

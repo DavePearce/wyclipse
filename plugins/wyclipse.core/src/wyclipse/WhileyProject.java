@@ -147,10 +147,12 @@ public class WhileyProject extends StandardProject {
 				IPath location = e.getPath();
 				// IFile file = workspaceRoot.getFile(location);
 
-				try {
+				try {					
 					roots.add(new JarFileRoot(location.toOSString(), registry));
+					System.out.println("ADDED ROOT: " + location.toOSString());
 				} catch (IOException ex) {
 					// ignore entries which don't exist
+					System.out.println("FAILED ADDING ROOT: " + location.toOSString());
 				}
 				break;
 			}
