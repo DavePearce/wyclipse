@@ -104,7 +104,7 @@
       </wizard>	
        <wizard
             category="wyclipse.WhileyCategory"
-            class="wyclipse.wizards.NewProjectWizard"
+            class="wyclipse.wizards.NewWhileyProjectWizard"
             icon="icons/newwprj_wiz.gif"
             finalPerspective="wyclipse.whileyPerspective"
             hasPages="true"

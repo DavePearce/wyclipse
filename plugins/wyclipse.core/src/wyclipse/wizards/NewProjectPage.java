@@ -53,18 +53,15 @@ public class NewProjectPage extends WizardPage {
 	private Button defaultLocation;
 	private Text location;
 
-	private ISelection selection;
-
 	/**
 	 * Constructor for SampleNewWizardPage.
 	 * 
 	 * @param pageName
 	 */
-	public NewProjectPage(ISelection selection) {
+	public NewProjectPage() {
 		super("wizardPage");
 		setTitle("Create a Whiley Project");
 		setDescription("Enter a project name.");
-		this.selection = selection;
 	}
 
 	/**

@@ -87,7 +87,7 @@ public class NewProjectWizard extends NewElementWizard implements IExecutableExt
 
 	public void finishPage(IProgressMonitor monitor)
 			throws InterruptedException, CoreException {
-		page2.performFinish(monitor);
+		//page2.performFinish(monitor);
 	}
 	
 	public void setInitializationData(IConfigurationElement config,
