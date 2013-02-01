@@ -90,7 +90,7 @@
     </category>
    	<wizard
             category="wyclipse.WhileyCategory"
-            class="wyclipse.wizards.NewModuleWizard"
+            class="wyclipse.wizards.NewWhileyModuleWizard"
             icon="icons/newmodule_wiz.gif"
            	hasPages="true"
            	
