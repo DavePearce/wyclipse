@@ -32,6 +32,7 @@ import org.eclipse.core.resources.*;
 import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.wizard.WizardPage;
@@ -121,10 +122,7 @@ public class NewProjectPage extends WizardPage {
 	}
 	
 	private void initialiseLocation() {		
-		IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
-		//URL path = FileLocator.resolve(new URL("workspace:/"));
-		IPath path = root.getRawLocation();
-		location.setText(path.toOSString());		
+		location.setText(Platform.getLocation().toOSString());		
 	}
 	
 	public String getLocation() {
