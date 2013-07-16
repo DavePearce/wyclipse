@@ -260,13 +260,11 @@
       </perspectiveExtension>
    </extension>
    <extension
-         point="org.eclipse.ui.preferencePages">
+         point="org.eclipse.ui.propertyPages">
       <page
-            class="wyclipse.ui.PreferencePage"
-            id="wyclipse.ui.preferencepage"
-            name="Whiley Preferences">
+            class="wyclipse.ui.WhileyCompilerPropertyPage"
+            id="wyclipse.ui.propertypage"
+            name="Whiley">
       </page>
-   </extension>
-
-	
+   </extension>	
 </plugin>
