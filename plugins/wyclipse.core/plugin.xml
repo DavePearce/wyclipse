@@ -259,6 +259,14 @@
 		 </actionSet>
       </perspectiveExtension>
    </extension>
+   <extension
+         point="org.eclipse.ui.preferencePages">
+      <page
+            class="wyclipse.ui.PreferencePage"
+            id="wyclipse.ui.preferencepage"
+            name="Whiley Preferences">
+      </page>
+   </extension>
 
 	
 </plugin>
