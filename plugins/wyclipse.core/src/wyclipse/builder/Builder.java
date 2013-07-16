@@ -41,7 +41,6 @@ public class Builder extends IncrementalProjectBuilder {
 	private WhileyProject whileyProject;
 	
 	public Builder() {
-		
 	}
 
 	protected void initialise() throws CoreException {		
