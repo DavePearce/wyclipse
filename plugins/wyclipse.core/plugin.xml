@@ -264,7 +264,14 @@
       <page
             class="wyclipse.ui.WhileyCompilerPropertyPage"
             id="wyclipse.ui.propertypage"
-            name="Whiley">
+            name="Whiley Compiler">
+            <enabledWhen>
+         <adapt type="org.eclipse.core.resources.IProject">
+              <test
+                 property="org.eclipse.core.resources.projectNature"
+                 value="wyclipse.whileynature"/>
+         </adapt>         
+</enabledWhen>
       </page>
    </extension>	
 </plugin>
