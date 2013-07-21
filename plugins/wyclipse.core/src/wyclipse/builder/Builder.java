@@ -43,6 +43,13 @@ public class Builder extends IncrementalProjectBuilder {
 	public Builder() {
 	}
 
+	public WhileyProject getWhileyProject() throws CoreException {
+		if (whileyProject == null) {
+			initialise();
+		}
+		return whileyProject;
+	}
+	
 	protected void initialise() throws CoreException {		
 		IProject iproject = (IProject) getProject();
 		IJavaProject javaProject = (IJavaProject) iproject

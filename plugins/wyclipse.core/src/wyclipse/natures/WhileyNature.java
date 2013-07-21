@@ -31,8 +31,12 @@ import org.eclipse.core.resources.IProjectNature;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.ui.actions.WorkspaceAction;
 
+import wyclipse.Activator;
+
 public class WhileyNature implements IProjectNature {
+	
 	IProject project;
+		
 	@Override
 	public void configure() throws CoreException {
 		IProjectDescription desc = project.getDescription();
@@ -40,7 +44,7 @@ public class WhileyNature implements IProjectNature {
 			
 		String[] newNatures = new String[natures.length+1];
 		System.arraycopy(natures, 0, newNatures, 0, natures.length);
-		newNatures[natures.length] = "wyclipse.whileynature";
+		newNatures[natures.length] = Activator.WYCLIPSE_NATURE_ID;
 		desc.setNatureIds(newNatures);
 		project.setDescription(desc, null);
 		

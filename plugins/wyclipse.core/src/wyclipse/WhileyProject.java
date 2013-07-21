@@ -7,11 +7,13 @@ import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IMarker;
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.QualifiedName;
 import org.eclipse.jdt.core.IClasspathContainer;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
@@ -23,6 +25,7 @@ import wyc.lang.WhileyFile;
 import wyclipse.builder.CoreIOException;
 import wyclipse.builder.IContainerRoot;
 import wyclipse.builder.IContainerRoot.IFileEntry;
+import wyclipse.ui.WhileyCompilerPropertyPage;
 import wybs.lang.*;
 import wybs.util.JarFileRoot;
 import wybs.util.StandardProject;
@@ -54,6 +57,15 @@ import wyjvm.lang.ClassFile;
 public class WhileyProject extends StandardProject {
 
 	/**
+	 * The following describe the persistent properties maintained for the
+	 * Whiley Compiler. These are user configurable parameters which contol the
+	 * compilation process. For example, verification can be enabled or disabled
+	 * through the "Whiley Compiler" property page.
+	 */
+	public static final QualifiedName VERIFICATION_PROPERTY = new QualifiedName("", "VERIFICATION");	
+	public static final boolean VERIFICATION_DEFAULT = true;
+	
+	/**
 	 * The delta is a list of entries which require recompilation. As entries
 	 * are changed, they may be added to this list (e.g. Whiley). Entries which
 	 * depend upon them may also be added. Or, if they represent e.g. binary
@@ -79,6 +91,18 @@ public class WhileyProject extends StandardProject {
 			.filter(Trie.fromString("**"), WhileyFile.ContentType);
 
 	/**
+	 * The following provides access to various useful things from the
+	 * workspace, such as persistant properties.
+	 */
+	private IWorkspace workspace;
+	
+	/**
+	 * The following provides access to various useful things from the
+	 * project, such as persistant properties.
+	 */
+	private IProject project;
+	
+	/**
 	 * Construct a build manager from a given IJavaProject. This will traverse
 	 * the projects raw classpath to identify all classpath entries, such as
 	 * source folders and jar files. These will then be managed by this build
@@ -90,7 +114,9 @@ public class WhileyProject extends StandardProject {
 			throws CoreException {
 
 		this.delta = new ArrayList<IFileEntry>();
-
+		this.workspace = workspace;
+		this.project = javaProject.getProject();
+		
 		IWorkspaceRoot workspaceRoot = workspace.getRoot();
 
 		// ===============================================================
@@ -117,8 +143,9 @@ public class WhileyProject extends StandardProject {
 		// Second, initialise builder + rules
 		// ===============================================================
 
-		Pipeline pipeline = new Pipeline(Pipeline.defaultPipeline);
-		pipeline.setOption(VerificationCheck.class, "enable", true);
+		Pipeline pipeline = new Pipeline(Pipeline.defaultPipeline);		
+		System.out.println("VERIFICATION ENABLE - " + getVerificationEnable());
+		pipeline.setOption(VerificationCheck.class, "enable", getVerificationEnable());
 		this.builder = new Whiley2WyilBuilder(this, pipeline);
 
 		StandardBuildRule rule = new StandardBuildRule(builder);
@@ -183,6 +210,34 @@ public class WhileyProject extends StandardProject {
 	}
 	
 	/**
+	 * Check whether verification is enabled or not. Enabling verification means
+	 * the automated theorem prover will be used to check the
+	 * pre-/post-conditions and other invariants of a Whiley module.
+	 * 
+	 * @return
+	 */
+	public boolean getVerificationEnable() throws CoreException {		
+		String property = project.getPersistentProperty(VERIFICATION_PROPERTY);
+		if(property == null) {
+			return VERIFICATION_DEFAULT;
+		} else {
+			return property.equals("true");
+		}
+	}
+	
+	/**
+	 * Set the verification enabled property. Enabling verification means the
+	 * automated theorem prover will be used to check the pre-/post-conditions
+	 * and other invariants of a Whiley module.
+	 * 
+	 * @return
+	 */
+	public void setVerificationEnable(boolean property) throws CoreException {
+		project.setPersistentProperty(VERIFICATION_PROPERTY,
+				Boolean.toString(property));
+	}
+	
+	/**
 	 * A resource of some sort has changed, and we need to update the namespace
 	 * accordingly. Note that the given resource may not actually be managed by
 	 * this namespace manager --- in which case it can be safely ignored.
@@ -191,20 +246,28 @@ public class WhileyProject extends StandardProject {
 	 */
 	public void changed(IResource resource) throws CoreException {
 		System.out.println("RESOURCE CHANGED: " + resource.getFullPath());
-		for (Path.Root root : roots) {
-			if (root instanceof ISourceRoot) {
-				ISourceRoot srcRoot = (ISourceRoot) root;
-				IFileEntry<?> ife = srcRoot.getResource(resource);
-				if (ife != null) {
-					// Ok, this file is managed by a source root; therefore,
-					// mark it
-					// for recompilation. Note that we must refresh the entry as
-					// well, since it has clearly changed.
-					ife.refresh();
-					delta.add(ife);
-					return;
+		if (resource instanceof IFile) {
+			// This indicates a file of some description has changed. What we do
+			// now, is to check whether or not it's a source file and, if it is,
+			// we then recompile it.
+			for (Path.Root root : roots) {
+				if (root instanceof ISourceRoot) {
+					ISourceRoot srcRoot = (ISourceRoot) root;
+					IFileEntry<?> ife = srcRoot.getResource(resource);
+					if (ife != null) {
+						// Ok, this file is managed by a source root; therefore,
+						// mark it
+						// for recompilation. Note that we must refresh the
+						// entry as
+						// well, since it has clearly changed.
+						ife.refresh();
+						delta.add(ife);
+						return;
+					}
 				}
 			}
+		} else {
+			System.out.println("IGNORED REOURCE CHANGE: " + resource.getFullPath());
 		}
 	}
 

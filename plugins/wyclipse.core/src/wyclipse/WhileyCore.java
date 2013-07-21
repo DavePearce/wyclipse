@@ -27,6 +27,9 @@ package wyclipse;
 
 import java.util.Arrays;
 
+import org.eclipse.core.resources.IBuildConfiguration;
+import org.eclipse.core.resources.ICommand;
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
@@ -48,5 +51,5 @@ public class WhileyCore {
         IClasspathEntry[] newEntries = Arrays.copyOf(oldEntries,oldEntries.length+1); 
         newEntries[oldEntries.length] = containerEntry;
         javaProject.setRawClasspath(newEntries, null);
-    }
+    }	
 }
