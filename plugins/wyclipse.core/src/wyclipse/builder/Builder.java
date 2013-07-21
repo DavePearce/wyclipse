@@ -33,6 +33,8 @@ import org.eclipse.core.runtime.*;
 import org.eclipse.jdt.core.*;
 
 import wybs.lang.*;
+import wyclipse.Activator;
+import wyclipse.natures.WhileyNature;
 import wyclipse.WhileyProject;
 
 public class Builder extends IncrementalProjectBuilder {
@@ -52,11 +54,13 @@ public class Builder extends IncrementalProjectBuilder {
 	
 	protected void initialise() throws CoreException {		
 		IProject iproject = (IProject) getProject();
-		IJavaProject javaProject = (IJavaProject) iproject
-				.getNature(JavaCore.NATURE_ID);
+//		IJavaProject javaProject = (IJavaProject) iproject
+//				.getNature(JavaCore.NATURE_ID);
+//
+//		IWorkspace workspace = iproject.getWorkspace();	
+//		whileyProject = new WhileyProject(workspace,javaProject);
 
-		IWorkspace workspace = iproject.getWorkspace();	
-		whileyProject = new WhileyProject(workspace,javaProject);
+		whileyProject = ((WhileyNature) iproject.getNature(Activator.WYCLIPSE_NATURE_ID)).getWhileyProject();
 		
 		if(verbose) {			
 			whileyProject.setLogger(new Logger.Default(System.err));

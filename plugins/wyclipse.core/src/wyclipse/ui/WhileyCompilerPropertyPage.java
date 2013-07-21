@@ -14,7 +14,9 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.ui.dialogs.PropertyPage;
 
+import wyclipse.Activator;
 import wyclipse.WhileyProject;
+import wyclipse.natures.WhileyNature;
 
 public class WhileyCompilerPropertyPage extends PropertyPage {
 	
@@ -99,14 +101,12 @@ public class WhileyCompilerPropertyPage extends PropertyPage {
 	
 	public boolean performOk() {
 		// Store properties persistently.
-		
-		// FIXME: figure out how to update the builder to take the property
-		// change into effect immediately.
-		
 		try {
-			((IResource) getElement()).setPersistentProperty(
-					WhileyProject.VERIFICATION_PROPERTY,
-					Boolean.toString(verificationEnable.getSelection()));
+			IProject project = (IProject) getElement();
+			WhileyNature nature = (WhileyNature) project
+					.getNature(Activator.WYCLIPSE_NATURE_ID);
+			nature.getWhileyProject().setVerificationEnable(
+					verificationEnable.getSelection());
 		} catch (CoreException e) {
 			return false;
 		}

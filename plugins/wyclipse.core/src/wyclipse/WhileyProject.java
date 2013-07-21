@@ -144,7 +144,6 @@ public class WhileyProject extends StandardProject {
 		// ===============================================================
 
 		Pipeline pipeline = new Pipeline(Pipeline.defaultPipeline);		
-		System.out.println("VERIFICATION ENABLE - " + getVerificationEnable());
 		pipeline.setOption(VerificationCheck.class, "enable", getVerificationEnable());
 		this.builder = new Whiley2WyilBuilder(this, pipeline);
 
@@ -235,6 +234,8 @@ public class WhileyProject extends StandardProject {
 	public void setVerificationEnable(boolean property) throws CoreException {
 		project.setPersistentProperty(VERIFICATION_PROPERTY,
 				Boolean.toString(property));
+
+		// FIXME: at this point, we need to notify this.builder of the change.
 	}
 	
 	/**
