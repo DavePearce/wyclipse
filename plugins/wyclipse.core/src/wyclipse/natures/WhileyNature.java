@@ -29,10 +29,18 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.resources.IProjectNature;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.ui.actions.WorkspaceAction;
 
+import wyclipse.Activator;
+import wyclipse.WhileyProject;
+
 public class WhileyNature implements IProjectNature {
-	IProject project;
+	
+	private IProject project;
+	private WhileyProject whileyProject;
+		
 	@Override
 	public void configure() throws CoreException {
 		IProjectDescription desc = project.getDescription();
@@ -40,10 +48,9 @@ public class WhileyNature implements IProjectNature {
 			
 		String[] newNatures = new String[natures.length+1];
 		System.arraycopy(natures, 0, newNatures, 0, natures.length);
-		newNatures[natures.length] = "wyclipse.whileynature";
+		newNatures[natures.length] = Activator.WYCLIPSE_NATURE_ID;
 		desc.setNatureIds(newNatures);
-		project.setDescription(desc, null);
-		
+		project.setDescription(desc, null);		
 	}
 
 	@Override
@@ -60,7 +67,17 @@ public class WhileyNature implements IProjectNature {
 	@Override
 	public void setProject(IProject project) {
 		this.project = project;
-
+		try {
+			IJavaProject javaProject = (IJavaProject) project
+					.getNature(JavaCore.NATURE_ID);
+			this.whileyProject = new WhileyProject(project.getWorkspace(),
+					javaProject);
+		} catch (CoreException e) {
+			System.out.println("UNHANGLED CORE EXCEPTION");
+		}
 	}
-
+	
+	public WhileyProject getWhileyProject() {
+		return whileyProject;
+	}
 }
