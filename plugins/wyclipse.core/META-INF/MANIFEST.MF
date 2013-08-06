@@ -29,6 +29,6 @@ Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.jdt.debug.ui;bundle-version="3.5.0"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ActivationPolicy: lazy
-Bundle-ClassPath: lib/wyjc-all-v0.3.18.jar,
- bin/,
- lib/wyrt.jar
+Bundle-ClassPath: bin/,
+ lib/wyrt.jar,
+ lib/wyjc-all-v0.3.20.jar
