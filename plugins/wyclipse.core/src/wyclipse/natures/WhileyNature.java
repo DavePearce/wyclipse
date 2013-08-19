@@ -206,6 +206,10 @@ public class WhileyNature implements IProjectNature {
 				return "whiley";
 			} else if (t == WyilFile.ContentType) {
 				return "wyil";
+			} else if (t == WyalFile.ContentType) {
+				return "wyal";
+			} else if (t == WycsFile.ContentType) {
+				return "wycs";
 			} else if (t == ClassFile.ContentType) {
 				return "class";
 			} else {
