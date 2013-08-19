@@ -20,7 +20,7 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.internal.launching.JREContainer;
 
-import wyc.builder.Whiley2WyilBuilder;
+import wyc.builder.WhileyBuilder;
 import wyc.lang.WhileyFile;
 import wyclipse.builder.CoreIOException;
 import wyclipse.builder.IContainerRoot;
@@ -31,9 +31,7 @@ import wybs.util.JarFileRoot;
 import wybs.util.StandardProject;
 import wybs.util.StandardBuildRule;
 import wybs.util.Trie;
-import wyil.Pipeline;
 import wyil.lang.WyilFile;
-import wyil.checks.VerificationCheck;
 import wyjvm.lang.ClassFile;
 
 /**
@@ -57,186 +55,19 @@ import wyjvm.lang.ClassFile;
 public class WhileyProject extends StandardProject {
 
 	/**
-	 * The following describe the persistent properties maintained for the
-	 * Whiley Compiler. These are user configurable parameters which contol the
-	 * compilation process. For example, verification can be enabled or disabled
-	 * through the "Whiley Compiler" property page.
-	 */
-	public static final QualifiedName VERIFICATION_PROPERTY = new QualifiedName("", "VERIFICATION");	
-	public static final boolean VERIFICATION_DEFAULT = true;
-	
-	/**
 	 * The delta is a list of entries which require recompilation. As entries
 	 * are changed, they may be added to this list (e.g. Whiley). Entries which
 	 * depend upon them may also be added. Or, if they represent e.g. binary
 	 * dependents (e.g. jar files) then this may force a total recompilation.
 	 */
-	protected final ArrayList<IFileEntry> delta;
-
-	/**
-	 * <p>
-	 * The whiley builder is responsible for actually compiling whiley files
-	 * into binary files (e.g. class files). The builder operates using a given
-	 * set of build rules which determine what whiley files are compiled, what
-	 * their target types are and where their binaries should be written.
-	 * </p>
-	 */
-	private Whiley2WyilBuilder builder;
-
+	protected final ArrayList<IFileEntry> delta = new ArrayList<IFileEntry>();
+	
 	/**
 	 * This is something of a hack. Basically it's a generic filter to return
 	 * all source files
 	 */
 	protected static final Content.Filter<WhileyFile> includes = Content
 			.filter(Trie.fromString("**"), WhileyFile.ContentType);
-
-	/**
-	 * The following provides access to various useful things from the
-	 * workspace, such as persistant properties.
-	 */
-	private IWorkspace workspace;
-	
-	/**
-	 * The following provides access to various useful things from the
-	 * project, such as persistant properties.
-	 */
-	private IProject project;
-	
-	/**
-	 * Construct a build manager from a given IJavaProject. This will traverse
-	 * the projects raw classpath to identify all classpath entries, such as
-	 * source folders and jar files. These will then be managed by this build
-	 * manager.
-	 * 
-	 * @param project
-	 */
-	public WhileyProject(IWorkspace workspace, IJavaProject javaProject)
-			throws CoreException {
-
-		this.delta = new ArrayList<IFileEntry>();
-		this.workspace = workspace;
-		this.project = javaProject.getProject();
-		
-		IWorkspaceRoot workspaceRoot = workspace.getRoot();
-
-		// ===============================================================
-		// First, initialise roots
-		// ===============================================================
-
-		IContainer defaultOutputDirectory = workspaceRoot.getFolder(javaProject
-				.getOutputLocation());
-
-		IContainerRoot outputRoot = null;
-		if (defaultOutputDirectory != null) {
-			// we have a default output directory, so make sure to include it!
-			outputRoot = new IContainerRoot(defaultOutputDirectory, registry);
-			roots.add(outputRoot);
-		} else {
-			throw new RuntimeException(
-					"Whiley Plugin currently unable to handle projects without default output folder");
-		}
-
-		initialise(workspace.getRoot(), javaProject,
-				javaProject.getRawClasspath());
-
-		// ===============================================================
-		// Second, initialise builder + rules
-		// ===============================================================
-
-		Pipeline pipeline = new Pipeline(Pipeline.defaultPipeline);		
-		pipeline.setOption(VerificationCheck.class, "enable", getVerificationEnable());
-		this.builder = new Whiley2WyilBuilder(this, pipeline);
-
-		StandardBuildRule rule = new StandardBuildRule(builder);
-
-		for (Path.Root root : roots) {
-			if (root instanceof ISourceRoot) {
-				if (outputRoot != null) {
-					rule.add(root, includes, outputRoot,
-							WhileyFile.ContentType, WyilFile.ContentType);
-				} else {
-					rule.add(root, includes, root, WhileyFile.ContentType,
-							WyilFile.ContentType);
-				}
-			}
-		}
-
-		add(rule);
-	}
-
-	private void initialise(IWorkspaceRoot workspaceRoot,
-			IJavaProject javaProject, IClasspathEntry[] entries)
-			throws CoreException {
-		for (IClasspathEntry e : entries) {
-			switch (e.getEntryKind()) {
-			case IClasspathEntry.CPE_LIBRARY: {
-				IPath location = e.getPath();
-				// IFile file = workspaceRoot.getFile(location);
-
-				try {					
-					roots.add(new JarFileRoot(location.toOSString(), registry));
-					System.out.println("ADDED ROOT: " + location.toOSString());
-				} catch (IOException ex) {
-					// ignore entries which don't exist
-					System.out.println("FAILED ADDING ROOT: " + location.toOSString());
-				}
-				break;
-			}
-			case IClasspathEntry.CPE_SOURCE: {
-				IPath location = e.getPath();
-				IFolder folder = workspaceRoot.getFolder(location);
-				roots.add(new ISourceRoot(folder, registry));
-				break;
-			}
-			case IClasspathEntry.CPE_CONTAINER:
-				IPath location = e.getPath();
-				IClasspathContainer container = JavaCore.getClasspathContainer(
-						location, javaProject);
-				if (container instanceof JREContainer) {
-					// Ignore JRE container
-				} else if (container != null) {
-					// Now, recursively add paths
-					initialise(workspaceRoot, javaProject,
-							container.getClasspathEntries());
-				}
-				break;
-			}
-		}
-	}
-
-	public void setLogger(Logger logger) {
-		builder.setLogger(logger);
-	}
-	
-	/**
-	 * Check whether verification is enabled or not. Enabling verification means
-	 * the automated theorem prover will be used to check the
-	 * pre-/post-conditions and other invariants of a Whiley module.
-	 * 
-	 * @return
-	 */
-	public boolean getVerificationEnable() throws CoreException {		
-		String property = project.getPersistentProperty(VERIFICATION_PROPERTY);
-		if(property == null) {
-			return VERIFICATION_DEFAULT;
-		} else {
-			return property.equals("true");
-		}
-	}
-	
-	/**
-	 * Set the verification enabled property. Enabling verification means the
-	 * automated theorem prover will be used to check the pre-/post-conditions
-	 * and other invariants of a Whiley module.
-	 * 
-	 * @return
-	 */
-	public void setVerificationEnable(boolean property) throws CoreException {
-		project.setPersistentProperty(VERIFICATION_PROPERTY,
-				Boolean.toString(property));
-
-		// FIXME: at this point, we need to notify this.builder of the change.
-	}
 	
 	/**
 	 * A resource of some sort has changed, and we need to update the namespace
@@ -376,25 +207,8 @@ public class WhileyProject extends StandardProject {
 		try {
 			System.out
 					.println("BUILDING: " + delta.size() + " source file(s).");
-//			// Firstly, initialise list of targets to rebuild.
-//			for (BuildRule r : rules) {
-//				for (IFileEntry<?> source : delta) {
-//					allTargets.addAll(r.dependentsOf(source));
-//				}
-//			}
-//
-//			// Secondly, add all dependents on those being rebuilt.
-//			int oldSize;
-//			do {
-//				oldSize = allTargets.size();
-//				for (BuildRule r : rules) {
-//					for (Path.Entry<?> target : allTargets) {
-//						allTargets.addAll(r.dependentsOf(target));
-//					}
-//				}
-//			} while (allTargets.size() != oldSize);
 
-			// Thirdly, remove all markers from those entries
+			// First, remove all markers from those entries
 			for (Path.Entry<?> _e : delta) {
 				IFileEntry e = (IFileEntry) _e;
 				e.getFile().deleteMarkers(IMarker.PROBLEM, true,
@@ -402,14 +216,6 @@ public class WhileyProject extends StandardProject {
 			}
 			
 			super.build((ArrayList) delta);
-			
-			// Finally, build all identified targets!
-//			do {
-//				oldSize = allTargets.size();
-//				for (BuildRule r : rules) {
-//					r.apply(allTargets);
-//				}
-//			} while (allTargets.size() < oldSize);
 
 		} catch (SyntaxError e) {
 			// FIXME: this is a hack because syntax error doesn't retain the
@@ -472,31 +278,5 @@ public class WhileyProject extends StandardProject {
 		}
 	}
 
-	/**
-	 * The master project content type registry.
-	 */
-	public static final Content.Registry registry = new Content.Registry() {
-
-		public void associate(Path.Entry e) {
-			if (e.suffix().equals("whiley")) {
-				e.associate(WhileyFile.ContentType, null);
-			} else if (e.suffix().equals("wyil")) {
-				e.associate(WyilFile.ContentType, null);
-			} else if (e.suffix().equals("class")) {
-				e.associate(ClassFile.ContentType, null);				
-			}
-		}
-
-		public String suffix(Content.Type<?> t) {
-			if (t == WhileyFile.ContentType) {
-				return "whiley";
-			} else if (t == WyilFile.ContentType) {
-				return "wyil";
-			} else if (t == ClassFile.ContentType) {
-				return "class";
-			} else {
-				return "dat";
-			}
-		}
-	};
+	
 }

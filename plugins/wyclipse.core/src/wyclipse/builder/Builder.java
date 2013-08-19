@@ -60,11 +60,7 @@ public class Builder extends IncrementalProjectBuilder {
 //		IWorkspace workspace = iproject.getWorkspace();	
 //		whileyProject = new WhileyProject(workspace,javaProject);
 
-		whileyProject = ((WhileyNature) iproject.getNature(Activator.WYCLIPSE_NATURE_ID)).getWhileyProject();
-		
-		if(verbose) {			
-			whileyProject.setLogger(new Logger.Default(System.err));
-		}		
+		whileyProject = ((WhileyNature) iproject.getNature(Activator.WYCLIPSE_NATURE_ID)).getWhileyProject();			
 	}
 	
 	protected IProject[] build(int kind, Map args, IProgressMonitor monitor)
