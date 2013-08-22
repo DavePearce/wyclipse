@@ -25,32 +25,13 @@
 
 package wyclipse.natures;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.resources.IProjectNature;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.QualifiedName;
 
-import wybs.lang.Content;
-import wybs.lang.Logger;
-import wybs.lang.Path;
-import wybs.lang.Pipeline;
-import wybs.util.StandardBuildRule;
-import wyc.builder.WhileyBuilder;
-import wyc.lang.WhileyFile;
 import wyclipse.Activator;
-import wyclipse.WhileyProject;
-import wycs.core.WycsFile;
-import wycs.syntax.WyalFile;
-import wyil.checks.*;
-import wyil.io.WyilFilePrinter;
-import wyil.lang.WyilFile;
-import wyil.transforms.*;
-import wyjvm.lang.ClassFile;
 
 /**
  * Represents the fundamental building block of the Wyclipse plugin. Attaching a
@@ -74,9 +55,7 @@ public class WhileyNature implements IProjectNature {
 	public static final boolean VERIFICATION_DEFAULT = true;
 
 	private IProject project;
-		
-	private WhileyProject whileyProject;
-		
+				
 	@Override
 	public void configure() throws CoreException {
 		IProjectDescription desc = project.getDescription();
@@ -101,27 +80,13 @@ public class WhileyNature implements IProjectNature {
 	}
 
 	/**
-	 * Get the WhileyProject associated with this nature.
-	 * 
-	 * @return
-	 */
-	public WhileyProject getWhileyProject() {
-		return whileyProject;
-	}
-	
-	/**
 	 * Set the project that this nature is associated with. This method gets
 	 * called when the nature is first created, and therefore it needs to load
 	 * the build configuration from the ".whileypath" file.
 	 */
 	@Override
 	public void setProject(IProject project) {
-		this.project = project;
-		try {
-			this.whileyProject = createFromWhileyPath();
-		} catch (CoreException e) {
-			System.out.println("UNHANDLED CORE EXCEPTION");
-		}
+		this.project = project;		
 	}	
 	
 	/**
@@ -152,116 +117,5 @@ public class WhileyNature implements IProjectNature {
 				Boolean.toString(property));
 
 		// FIXME: at this point, we need to notify this.builder of the change.
-	}
-	
-	
-	/**
-	 * Create a Whiley Project from the ".whileypath" file. Specifically, we
-	 * create the project then parse the file adding all build rules as
-	 * appropriate.
-	 */
-	private WhileyProject createFromWhileyPath() throws CoreException {
-		WhileyProject project = new WhileyProject();
-
-		// Configure builder
-		Pipeline pipeline = new Pipeline(defaultPipeline);
-		WhileyBuilder builder = new WhileyBuilder(whileyProject, pipeline);
-		StandardBuildRule rule = new StandardBuildRule(builder);
-		builder.setLogger(new Logger.Default(System.err));
-		
-		// FIXME: actually do something to the build rule!
-		
-		project.add(rule);
-		
-		return project;
-	}
-	
-	// =====================================================================
-	// Registry
-	// =====================================================================
-	
-	/**
-	 * The master project content type registry. This associates suffixes with
-	 * the corresponding Object for decoding them. In essence, this determines
-	 * what file kinds are known to the compiler.
-	 */
-	public static final Content.Registry registry = new Content.Registry() {
-
-		public void associate(Path.Entry e) {
-			if (e.suffix().equals("whiley")) {
-				e.associate(WhileyFile.ContentType, null);
-			} else if (e.suffix().equals("wyil")) {
-				e.associate(WyilFile.ContentType, null);
-			} else if (e.suffix().equals("wyal")) {
-				e.associate(WyalFile.ContentType, null);
-			} else if (e.suffix().equals("wycs")) {
-				e.associate(WycsFile.ContentType, null);
-			} else if (e.suffix().equals("class")) {
-				e.associate(ClassFile.ContentType, null);				
-			} 
-		}
-
-		public String suffix(Content.Type<?> t) {
-			if (t == WhileyFile.ContentType) {
-				return "whiley";
-			} else if (t == WyilFile.ContentType) {
-				return "wyil";
-			} else if (t == WyalFile.ContentType) {
-				return "wyal";
-			} else if (t == WycsFile.ContentType) {
-				return "wycs";
-			} else if (t == ClassFile.ContentType) {
-				return "class";
-			} else {
-				return "dat";
-			}
-		}
-	};
-	
-	// =====================================================================
-	// Default Pipeline (for whiley -> wyil)
-	// =====================================================================
-
-	public static final List<Pipeline.Template> defaultPipeline = Collections
-			.unmodifiableList(new ArrayList<Pipeline.Template>() {
-				{
-//					add(new Pipeline.Template(WyilFilePrinter.class,
-//							Collections.EMPTY_MAP));
-					add(new Pipeline.Template(DefiniteAssignmentCheck.class,
-							Collections.EMPTY_MAP));
-					add(new Pipeline.Template(ModuleCheck.class, Collections.EMPTY_MAP));
-					add(new Pipeline.Template(RuntimeAssertions.class,
-							Collections.EMPTY_MAP));
-					add(new Pipeline.Template(BackPropagation.class,
-							Collections.EMPTY_MAP));
-					add(new Pipeline.Template(LoopVariants.class, Collections.EMPTY_MAP));
-					add(new Pipeline.Template(ConstantPropagation.class,
-							Collections.EMPTY_MAP));
-					add(new Pipeline.Template(CoercionCheck.class, Collections.EMPTY_MAP));
-					add(new Pipeline.Template(DeadCodeElimination.class,
-							Collections.EMPTY_MAP));
-					add(new Pipeline.Template(LiveVariablesAnalysis.class,
-							Collections.EMPTY_MAP));
-//					add(new Pipeline.Template(WyilFilePrinter.class,
-//							Collections.EMPTY_MAP));
-				}
-			});
-
-	/**
-	 * Register default transforms. This is necessary so they can be referred to
-	 * from the command-line using abbreviated names, rather than their full
-	 * names.
-	 */
-	static {
-		Pipeline.register(BackPropagation.class);
-		Pipeline.register(DefiniteAssignmentCheck.class);
-		Pipeline.register(LoopVariants.class);
-		Pipeline.register(ConstantPropagation.class);
-		Pipeline.register(ModuleCheck.class);
-		Pipeline.register(RuntimeAssertions.class);
-		Pipeline.register(CoercionCheck.class);
-		Pipeline.register(WyilFilePrinter.class);
-		Pipeline.register(DeadCodeElimination.class);
-		Pipeline.register(LiveVariablesAnalysis.class);
 	}
 }
