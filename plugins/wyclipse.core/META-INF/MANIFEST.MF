@@ -5,12 +5,12 @@ Bundle-SymbolicName: wyclipse.core;singleton:=true
 Bundle-Version: 0.0.15
 Bundle-Activator: wyclipse.Activator
 Export-Package: wyclipse,
- wyclipse.actions,
  wyclipse.builder,
- wyclipse.editor,
- wyclipse.launchers,
  wyclipse.natures,
- wyclipse.perspective,
+ wyclipse.ui.actions,
+ wyclipse.ui.editor,
+ wyclipse.ui.launchers,
+ wyclipse.ui.perspective,
  wyclipse.wizards
 Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.core.resources;bundle-version="3.5.0",
