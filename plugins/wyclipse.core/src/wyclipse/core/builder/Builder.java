@@ -30,7 +30,8 @@ import java.util.*;
 
 import org.eclipse.core.resources.*;
 import org.eclipse.core.runtime.*;
-import org.eclipse.jdt.core.*;
+
+import wyclipse.core.builder.IContainerRoot.IFileEntry;
 
 import wybs.lang.*;
 import wybs.lang.Path;
@@ -39,22 +40,13 @@ import wybs.util.StandardProject;
 import wybs.util.Trie;
 import wyc.builder.WhileyBuilder;
 import wyc.lang.WhileyFile;
-import wyclipse.builder.IContainerRoot.IFileEntry;
-import wyclipse.core.Activator;
-import wyclipse.core.WhileyNature;
+
 import wycs.core.WycsFile;
 import wycs.syntax.WyalFile;
-import wyil.checks.CoercionCheck;
-import wyil.checks.DefiniteAssignmentCheck;
-import wyil.checks.ModuleCheck;
+import wyil.checks.*;
 import wyil.io.WyilFilePrinter;
 import wyil.lang.WyilFile;
-import wyil.transforms.BackPropagation;
-import wyil.transforms.ConstantPropagation;
-import wyil.transforms.DeadCodeElimination;
-import wyil.transforms.LiveVariablesAnalysis;
-import wyil.transforms.LoopVariants;
-import wyil.transforms.RuntimeAssertions;
+import wyil.transforms.*;
 import wyjvm.lang.ClassFile;
 
 /**

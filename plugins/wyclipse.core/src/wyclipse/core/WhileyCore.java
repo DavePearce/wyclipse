@@ -27,15 +27,12 @@ package wyclipse.core;
 
 import java.util.Arrays;
 
-import org.eclipse.core.resources.IBuildConfiguration;
-import org.eclipse.core.resources.ICommand;
-import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 
-import wyclipse.builder.WhileyClasspathContainer;
+import wyclipse.core.builder.WhileyClasspathContainer;
 
 public class WhileyCore {
 	
