@@ -3,9 +3,9 @@ Bundle-ManifestVersion: 2
 Bundle-Name: Wyclipse Core
 Bundle-SymbolicName: wyclipse.core;singleton:=true
 Bundle-Version: 0.0.15
-Bundle-Activator: wyclipse.Activator
-Export-Package: wyclipse,
- wyclipse.builder,
+Bundle-Activator: wyclipse.core.Activator
+Export-Package: wyclipse.builder,
+ wyclipse.core,
  wyclipse.natures,
  wyclipse.ui.actions,
  wyclipse.ui.editor,

@@ -23,7 +23,7 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-package wyclipse.builder;
+package wyclipse.core.builder;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.*;
@@ -36,46 +36,26 @@ import org.eclipse.jdt.core.*;
  * @author David J. Pearce
  * 
  */
-public class WhileyClasspathContainer implements IClasspathContainer {	
-	public static final Path CONTAINER_PATH = new Path("wyclipse.WHILEY_CONTAINER");
-	
-	private IClasspathEntry[] entries;
-	private IProject project;
-	
-	public WhileyClasspathContainer(IProject project) {
-		this.project = project;
+public class WhileyClasspathContainerInitialiser extends ClasspathContainerInitializer {
+	    
+    @Override
+    public boolean canUpdateClasspathContainer(IPath containerPath, IJavaProject project) {    
+        return true;
+    }
+
+    @Override
+    public void requestClasspathContainerUpdate(IPath containerPath, IJavaProject javaProject,
+            IClasspathContainer containerSuggestion) throws CoreException {
+    	// what to do?
+    }
+
+	@Override
+	public void initialize(IPath containerPath, IJavaProject project)
+			throws CoreException {
+		IClasspathContainer container = new WhileyClasspathContainer(
+				project.getProject());
+		JavaCore.setClasspathContainer(containerPath,
+				new IJavaProject[]{project},
+				new IClasspathContainer[]{container}, null);
 	}
-	
-	@Override
-	public IClasspathEntry[] getClasspathEntries() {
-		if (entries == null) {
-			try {
-				IPath wyrtPath = wyclipse.Activator.WHILEY_RUNTIME_JAR_IPATH;
-				IClasspathAttribute[] extraAttributes = new IClasspathAttribute[0];
-				IClasspathEntry entry = JavaCore.newLibraryEntry(wyrtPath,
-						null, null, null, extraAttributes, false);
-				entries = new IClasspathEntry[]{entry};
-			} catch(Exception e) {
-				// could not find runtime jar, so just leave off the class path
-				entries = new IClasspathEntry[0];
-			} 
-		}
-        return entries;
-    }
-
-	@Override
-	public String getDescription() {
-        return "Whiley System Library";
-    }
-
-	@Override
-    public int getKind() {
-        return K_APPLICATION;
-    }
-
-	@Override
-    public IPath getPath() {
-        return CONTAINER_PATH;
-    }
-
 }

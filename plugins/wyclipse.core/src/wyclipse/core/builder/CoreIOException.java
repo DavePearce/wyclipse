@@ -1,4 +1,4 @@
-package wyclipse.builder;
+package wyclipse.core.builder;
 
 import java.io.IOException;
 

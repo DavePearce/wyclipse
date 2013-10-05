@@ -23,33 +23,59 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-package wyclipse;
+package wyclipse.core.builder;
 
-import java.util.Arrays;
-
-import org.eclipse.core.resources.IBuildConfiguration;
-import org.eclipse.core.resources.ICommand;
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.jdt.core.IClasspathEntry;
-import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.core.runtime.*;
+import org.eclipse.jdt.core.*;
 
-import wyclipse.builder.WhileyClasspathContainer;
-
-public class WhileyCore {
+/**
+ * Holds the necessary runtime library files for compiling and running Whiley
+ * files (the Whiley standard library).
+ * 
+ * @author David J. Pearce
+ * 
+ */
+public class WhileyClasspathContainer implements IClasspathContainer {	
+	public static final Path CONTAINER_PATH = new Path("wyclipse.WHILEY_CONTAINER");
 	
-	/**
-	 * Add the Whiley Classpath Container to a given project.
-	 * 
-	 * @param javaProject
-	 */
-	public static void addWhileyClasspathContainer(IJavaProject javaProject) throws CoreException {
-		IClasspathEntry containerEntry = JavaCore.newContainerEntry(
-				WhileyClasspathContainer.CONTAINER_PATH);		
-		IClasspathEntry[] oldEntries = javaProject.getRawClasspath();
-        IClasspathEntry[] newEntries = Arrays.copyOf(oldEntries,oldEntries.length+1); 
-        newEntries[oldEntries.length] = containerEntry;
-        javaProject.setRawClasspath(newEntries, null);
-    }	
+	private IClasspathEntry[] entries;
+	private IProject project;
+	
+	public WhileyClasspathContainer(IProject project) {
+		this.project = project;
+	}
+	
+	@Override
+	public IClasspathEntry[] getClasspathEntries() {
+		if (entries == null) {
+			try {
+				IPath wyrtPath = wyclipse.core.Activator.WHILEY_RUNTIME_JAR_IPATH;
+				IClasspathAttribute[] extraAttributes = new IClasspathAttribute[0];
+				IClasspathEntry entry = JavaCore.newLibraryEntry(wyrtPath,
+						null, null, null, extraAttributes, false);
+				entries = new IClasspathEntry[]{entry};
+			} catch(Exception e) {
+				// could not find runtime jar, so just leave off the class path
+				entries = new IClasspathEntry[0];
+			} 
+		}
+        return entries;
+    }
+
+	@Override
+	public String getDescription() {
+        return "Whiley System Library";
+    }
+
+	@Override
+    public int getKind() {
+        return K_APPLICATION;
+    }
+
+	@Override
+    public IPath getPath() {
+        return CONTAINER_PATH;
+    }
+
 }

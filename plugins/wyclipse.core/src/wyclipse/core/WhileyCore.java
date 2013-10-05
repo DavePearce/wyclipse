@@ -23,39 +23,33 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-package wyclipse.builder;
+package wyclipse.core;
 
+import java.util.Arrays;
+
+import org.eclipse.core.resources.IBuildConfiguration;
+import org.eclipse.core.resources.ICommand;
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.runtime.*;
-import org.eclipse.jdt.core.*;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.jdt.core.IClasspathEntry;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.JavaCore;
 
-/**
- * Holds the necessary runtime library files for compiling and running Whiley
- * files (the Whiley standard library).
- * 
- * @author David J. Pearce
- * 
- */
-public class WhileyClasspathContainerInitialiser extends ClasspathContainerInitializer {
-	    
-    @Override
-    public boolean canUpdateClasspathContainer(IPath containerPath, IJavaProject project) {    
-        return true;
-    }
+import wyclipse.builder.WhileyClasspathContainer;
 
-    @Override
-    public void requestClasspathContainerUpdate(IPath containerPath, IJavaProject javaProject,
-            IClasspathContainer containerSuggestion) throws CoreException {
-    	// what to do?
-    }
-
-	@Override
-	public void initialize(IPath containerPath, IJavaProject project)
-			throws CoreException {
-		IClasspathContainer container = new WhileyClasspathContainer(
-				project.getProject());
-		JavaCore.setClasspathContainer(containerPath,
-				new IJavaProject[]{project},
-				new IClasspathContainer[]{container}, null);
-	}
+public class WhileyCore {
+	
+	/**
+	 * Add the Whiley Classpath Container to a given project.
+	 * 
+	 * @param javaProject
+	 */
+	public static void addWhileyClasspathContainer(IJavaProject javaProject) throws CoreException {
+		IClasspathEntry containerEntry = JavaCore.newContainerEntry(
+				WhileyClasspathContainer.CONTAINER_PATH);		
+		IClasspathEntry[] oldEntries = javaProject.getRawClasspath();
+        IClasspathEntry[] newEntries = Arrays.copyOf(oldEntries,oldEntries.length+1); 
+        newEntries[oldEntries.length] = containerEntry;
+        javaProject.setRawClasspath(newEntries, null);
+    }	
 }

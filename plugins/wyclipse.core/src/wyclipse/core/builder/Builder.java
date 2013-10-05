@@ -23,7 +23,7 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-package wyclipse.builder;
+package wyclipse.core.builder;
 
 import java.io.*;
 import java.util.*;
@@ -39,9 +39,9 @@ import wybs.util.StandardProject;
 import wybs.util.Trie;
 import wyc.builder.WhileyBuilder;
 import wyc.lang.WhileyFile;
-import wyclipse.Activator;
 import wyclipse.builder.IContainerRoot.IFileEntry;
-import wyclipse.natures.WhileyNature;
+import wyclipse.core.Activator;
+import wyclipse.core.WhileyNature;
 import wycs.core.WycsFile;
 import wycs.syntax.WyalFile;
 import wyil.checks.CoercionCheck;
