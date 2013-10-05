@@ -23,7 +23,7 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-package wyclipse.actions;
+package wyclipse.ui.actions;
 
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.viewers.ISelection;
@@ -34,7 +34,7 @@ import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.IWorkbenchWindowActionDelegate;
 import org.eclipse.swt.widgets.Shell;
 
-import wyclipse.wizards.NewModuleWizard;
+import wyclipse.ui.wizards.NewModuleWizard;
 
 public class OpenNewModuleView implements IWorkbenchWindowActionDelegate, IViewActionDelegate {
 	private Shell shell;

@@ -14,9 +14,8 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.ui.dialogs.PropertyPage;
 
-import wyclipse.Activator;
-import wyclipse.WhileyProject;
-import wyclipse.natures.WhileyNature;
+import wyclipse.core.Activator;
+import wyclipse.core.WhileyNature;
 
 public class WhileyCompilerPropertyPage extends PropertyPage {
 	
@@ -42,14 +41,14 @@ public class WhileyCompilerPropertyPage extends PropertyPage {
 		try {
 			String ve =
 					((IResource) getElement()).getPersistentProperty(
-							WhileyProject.VERIFICATION_PROPERTY);
+							WhileyNature.VERIFICATION_PROPERTY);
 			if(ve != null) {
 				verificationEnable.setSelection(ve.equals("true"));
 			} else {
-				verificationEnable.setSelection(WhileyProject.VERIFICATION_DEFAULT);
+				verificationEnable.setSelection(WhileyNature.VERIFICATION_DEFAULT);
 			}
 		} catch (CoreException e) {
-			verificationEnable.setSelection(WhileyProject.VERIFICATION_DEFAULT);
+			verificationEnable.setSelection(WhileyNature.VERIFICATION_DEFAULT);
 		}
 	}
 	
@@ -105,8 +104,7 @@ public class WhileyCompilerPropertyPage extends PropertyPage {
 			IProject project = (IProject) getElement();
 			WhileyNature nature = (WhileyNature) project
 					.getNature(Activator.WYCLIPSE_NATURE_ID);
-			nature.getWhileyProject().setVerificationEnable(
-					verificationEnable.getSelection());
+			nature.setVerificationEnable(verificationEnable.getSelection());
 		} catch (CoreException e) {
 			return false;
 		}

@@ -23,7 +23,7 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-package wyclipse.launchers;
+package wyclipse.ui.launchers;
 
 import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.jdt.launching.JavaLaunchDelegate;

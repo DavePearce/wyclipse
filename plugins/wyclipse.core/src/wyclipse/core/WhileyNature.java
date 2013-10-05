@@ -31,7 +31,6 @@ import org.eclipse.core.resources.IProjectNature;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.QualifiedName;
 
-
 /**
  * Represents the fundamental building block of the Wyclipse plugin. Attaching a
  * Whiley Nature to a project gives it the ability to compile and execute Whiley

@@ -23,13 +23,9 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-package wyclipse.editor;
+package wyclipse.ui.editor;
 
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
-import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.ui.editors.text.TextEditor;
-
 
 public class Editor extends TextEditor {
 	public Editor() {

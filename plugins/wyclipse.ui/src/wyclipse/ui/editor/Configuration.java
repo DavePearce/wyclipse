@@ -24,10 +24,8 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-package wyclipse.editor;
+package wyclipse.ui.editor;
 
-import org.eclipse.jdt.internal.ui.javaeditor.JavaMarkerAnnotation;
-import org.eclipse.jdt.internal.ui.text.java.hover.AnnotationHover;
 import org.eclipse.jface.text.DefaultIndentLineAutoEditStrategy;
 import org.eclipse.jface.text.DefaultTextHover;
 import org.eclipse.jface.text.IAutoEditStrategy;
@@ -42,8 +40,6 @@ import org.eclipse.jface.text.source.IAnnotationHover;
 import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.jface.text.source.SourceViewerConfiguration;
 import org.eclipse.swt.graphics.RGB;
-
-
 
 public class Configuration extends SourceViewerConfiguration {
 	private Scanner scanner;

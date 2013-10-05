@@ -23,13 +23,12 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-package wyclipse.wizards;
+package wyclipse.ui.wizards;
 
 import java.util.Arrays;
 
 import org.eclipse.core.runtime.*;
 
-import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.core.resources.*;
 import org.eclipse.core.runtime.CoreException;
 
@@ -39,12 +38,10 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.internal.ui.wizards.NewElementWizard;
 import org.eclipse.jdt.ui.wizards.NewJavaProjectWizardPageOne;
 import org.eclipse.jdt.ui.wizards.NewJavaProjectWizardPageTwo;
-import org.eclipse.ui.IPerspectiveRegistry;
-import org.eclipse.ui.activities.WorkbenchActivityHelper;
 import org.eclipse.ui.wizards.newresource.BasicNewProjectResourceWizard;
 
-import wyclipse.Activator;
-import wyclipse.WhileyCore;
+import wyclipse.core.Activator;
+import wyclipse.core.WhileyCore;
 
 /**
  * This Wizard is responsible for constructing a new Whiley project. In fact, it
