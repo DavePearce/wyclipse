@@ -78,6 +78,10 @@ public class WhileyProjectBuilder extends IncrementalProjectBuilder {
 	 */
 	private StandardProject whileyProject;
 	
+	public WhileyProjectBuilder() {
+		
+	}
+	
 	/**
 	 * The delta is a list of entries which require recompilation. As entries
 	 * are changed, they may be added to this list (e.g. Whiley). Entries which
@@ -86,7 +90,8 @@ public class WhileyProjectBuilder extends IncrementalProjectBuilder {
 	 */
 	protected final ArrayList<IFileEntry> delta = new ArrayList<IFileEntry>();
 
-	protected void initialise() throws CoreException {	
+	public void initialise() throws CoreException {
+		System.err.println("WHILEY PROJECT BUILDER INITIALISED");
 		// First, get the whileypath from the nature
 		IProject iproject = (IProject) getProject();
 		WhileyNature nature = (WhileyNature) iproject
@@ -97,7 +102,8 @@ public class WhileyProjectBuilder extends IncrementalProjectBuilder {
 		Map<String,Builder> builders = initialiseBuilders();
 		
 		// Finally, initialise the whiley project from whileypath
-		this.whileyProject = initialiseWhileyProject(whileypath,builders); 
+		this.whileyProject = initialiseWhileyProject(whileypath, builders,
+				iproject); 
 	}
 	
 	/**
@@ -109,8 +115,8 @@ public class WhileyProjectBuilder extends IncrementalProjectBuilder {
 	 * @return
 	 */
 	protected StandardProject initialiseWhileyProject(WhileyPath whileypath,
-			Map<String, Builder> builders) {
-		StandardProject project = new StandardProject();
+			Map<String, Builder> builders, IProject project) {
+		StandardProject whileyProject = new StandardProject();
 		HashMap<String, ContainerRoot> rootMap = new HashMap<String, ContainerRoot>();
 		HashMap<String, WhileyPath.Container> containerMap = new HashMap<String, WhileyPath.Container>();
 		
@@ -120,14 +126,17 @@ public class WhileyProjectBuilder extends IncrementalProjectBuilder {
 			if (entry instanceof WhileyPath.Container) {
 				WhileyPath.Container container = (WhileyPath.Container) entry;
 				Content.Filter includes = Content.filter(container.getIncludes(),container.getContentType());
-				IContainer dir = null;
 				ContainerRoot root;
 				if (entry instanceof WhileyPath.SourceFolder) {
 					WhileyPath.SourceFolder src = (WhileyPath.SourceFolder) entry;
-					root = new SourceRoot(dir,includes,registry);					
+					IFolder folder = project.getFolder(container.getLocation());
+					System.err.println("*** INITIALISING SOURCE ROOT: " + container.getLocation());
+					root = new SourceRoot(folder,includes,registry);					
 				} else if (entry instanceof WhileyPath.BinaryFolder) {
 					WhileyPath.BinaryFolder bin = (WhileyPath.BinaryFolder) entry;
-					root = new ContainerRoot(dir,includes,registry);
+					IFolder folder = project.getFolder(container.getLocation());
+					System.err.println("*** INITIALISING BINARY ROOT: " + container.getLocation());
+					root = new ContainerRoot(folder,includes,registry);
 					rootMap.put(bin.getID(),root);
 				} else {
 					WhileyPath.External ext = (WhileyPath.External) entry;					
@@ -137,7 +146,7 @@ public class WhileyProjectBuilder extends IncrementalProjectBuilder {
 				}
 				rootMap.put(container.getID(),root);
 				containerMap.put(container.getID(), container);
-				project.roots().add(root);
+				whileyProject.roots().add(root);
 			}
 		}
 		
@@ -165,7 +174,7 @@ public class WhileyProjectBuilder extends IncrementalProjectBuilder {
 					br.add(sourceRoot, srcIncludes, binaryRoot,
 							sourceContainer.getContentType(),
 							binaryContainer.getContentType());
-					project.add(br);
+					whileyProject.add(br);
 					
 				} else {
 					System.err.println("IGNORING BUILD RULE: "
@@ -176,7 +185,7 @@ public class WhileyProjectBuilder extends IncrementalProjectBuilder {
 			}
 		}
 		
-		return project;
+		return whileyProject;
 	}
 	
 	/**

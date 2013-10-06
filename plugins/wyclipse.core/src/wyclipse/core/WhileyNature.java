@@ -101,8 +101,8 @@ public class WhileyNature implements IProjectNature {
 		WhileyPath whileypath = new WhileyPath();	
 		
 		// The default "whileypath"
-		Path src = new Path("src/");
-		Path bin = new Path("bin/");
+		Path src = new Path("src");
+		Path bin = new Path("bin");
 		
 		whileypath.getEntries().add(
 				new WhileyPath.SourceFolder("src", src, Trie.fromString("**"), WhileyFile.ContentType));
