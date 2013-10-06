@@ -25,17 +25,22 @@
 
 package wyclipse.core;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.resources.IProjectNature;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.QualifiedName;
 
+import wybs.lang.Path;
+
 /**
- * Represents the fundamental building block of the Wyclipse plugin. Attaching a
+ * <p>Represents the fundamental building block of the Wyclipse plugin. Attaching a
  * Whiley Nature to a project gives it the ability to compile and execute Whiley
  * files. The Whiley nature reads its build configuration from the
- * ".whileypath", which operates in a similar fashion as for JDT's ".classpath".
+ * ".whileypath", which operates in a similar fashion as for JDT's ".classpath".</p>
  * 
  * @author David J. Pearce
  * 
@@ -44,12 +49,13 @@ public class WhileyNature implements IProjectNature {
 
 	/**
 	 * The following describe the persistent properties maintained for the
-	 * Whiley Compiler. These are user configurable parameters which contol the
+	 * Whiley Compiler. These are user configurable parameters which control the
 	 * compilation process. For example, verification can be enabled or disabled
 	 * through the "Whiley Compiler" property page.
 	 */
 	public static final QualifiedName VERIFICATION_PROPERTY = new QualifiedName(
 			"", "VERIFICATION");
+	
 	public static final boolean VERIFICATION_DEFAULT = true;
 
 	private IProject project;
@@ -75,6 +81,17 @@ public class WhileyNature implements IProjectNature {
 	@Override
 	public IProject getProject() {
 		return this.project;
+	}
+	
+	/**
+	 * Get the array of roots associated with this project. These are loaded
+	 * from the <code>.whileypath</code> configuration file.
+	 * 
+	 * @return
+	 */
+	public List<Path.Root> getRoots() {
+		// TODO: actually read this from the whileypath file!!
+		return new ArrayList<Path.Root>();
 	}
 
 	/**

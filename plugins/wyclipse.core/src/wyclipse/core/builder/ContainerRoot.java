@@ -53,7 +53,7 @@ import wybs.util.Trie;
  * @author David J. Pearce
  * 
  */
-public class IContainerRoot extends AbstractRoot<IContainerRoot.IFolderEntry> {	
+public class ContainerRoot extends AbstractRoot<ContainerRoot.IFolderEntry> {	
 	private final IContainer dir;		
 		
 	/**
@@ -62,7 +62,7 @@ public class IContainerRoot extends AbstractRoot<IContainerRoot.IFolderEntry> {
 	 * @param file
 	 *            --- location of directory on filesystem.
 	 */
-	public IContainerRoot(IContainer dir, Content.Registry contentTypes) {
+	public ContainerRoot(IContainer dir, Content.Registry contentTypes) {
 		super(contentTypes);		
 		this.dir = dir;
 		// the following line is necessary because the AbstractFolder

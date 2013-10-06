@@ -21,7 +21,7 @@
       	<builder
       		hasNature="true">
          	<run
-            	class="wyclipse.core.builder.Builder">
+            	class="wyclipse.core.builder.WhileyProjectBuilder">
          	</run>
        </builder>
    </extension>

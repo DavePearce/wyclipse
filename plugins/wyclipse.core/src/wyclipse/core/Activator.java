@@ -44,13 +44,13 @@ public class Activator extends AbstractUIPlugin {
 	public static final String PLUGIN_ID = "wyclipse"; //$NON-NLS-1$
 
 	// nature ID
-	public static final String WYCLIPSE_NATURE_ID = "wyclipse.whileynature";
+	public static final String WYCLIPSE_NATURE_ID = "wyclipse.core.whileynature";
 
 	// builder ID
-	public static final String WYCLIPSE_BUILDER_ID = "wyclipse.whileybuilder";
+	public static final String WYCLIPSE_BUILDER_ID = "wyclipse.core.whileybuilder";
 
 	// marker ID
-	public static final String WYCLIPSE_MARKER_ID = "wyclipse.whileymarker";
+	public static final String WYCLIPSE_MARKER_ID = "wyclipse.core.whileymarker";
 
 	// URL for Whiley Runtime Library
 	public static final String WHILEY_RUNTIME_JAR = "lib/wyrt.jar";

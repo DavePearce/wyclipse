@@ -31,7 +31,9 @@ import java.util.*;
 import org.eclipse.core.resources.*;
 import org.eclipse.core.runtime.*;
 
-import wyclipse.core.builder.IContainerRoot.IFileEntry;
+import wyclipse.core.Activator;
+import wyclipse.core.WhileyNature;
+import wyclipse.core.builder.ContainerRoot.IFileEntry;
 
 import wybs.lang.*;
 import wybs.lang.Path;
@@ -66,7 +68,7 @@ import wyjvm.lang.ClassFile;
  * @author David J. Pearce
  * 
  */
-public class Builder extends IncrementalProjectBuilder {
+public class WhileyProjectBuilder extends IncrementalProjectBuilder {
 	private static final boolean verbose = true;
 
 	/**
@@ -83,22 +85,16 @@ public class Builder extends IncrementalProjectBuilder {
 	 * dependents (e.g. jar files) then this may force a total recompilation.
 	 */
 	protected final ArrayList<IFileEntry> delta = new ArrayList<IFileEntry>();
-	
-	/**
-	 * This is something of a hack. Basically it's a generic filter to return
-	 * all source files
-	 */
-	protected static final Content.Filter<WhileyFile> includes = Content
-			.filter(Trie.fromString("**"), WhileyFile.ContentType);
 
 	protected void initialise() throws CoreException {		
 		IProject iproject = (IProject) getProject();
-		this.whileyProject = new StandardProject();
+		WhileyNature nature = (WhileyNature) iproject.getNature(Activator.WYCLIPSE_NATURE_ID);
+		this.whileyProject = new StandardProject(nature.getRoots());
 		
 		Pipeline pipeline = new Pipeline(defaultPipeline);
-		WhileyBuilder builder = new WhileyBuilder(whileyProject, pipeline);
-		StandardBuildRule rule = new StandardBuildRule(builder);
-		builder.setLogger(new Logger.Default(System.err));
+		WhileyBuilder wyc = new WhileyBuilder(whileyProject, pipeline);
+		StandardBuildRule rule = new StandardBuildRule(wyc);
+		wyc.setLogger(new Logger.Default(System.err));
 		
 		// FIXME: actually do something to the build rule!
 		
@@ -160,8 +156,8 @@ public class Builder extends IncrementalProjectBuilder {
 
 			// first, identify all source files
 			for (Path.Root root : whileyProject.roots()) {
-				if (root instanceof ISourceRoot) {
-					ISourceRoot srcRoot = (ISourceRoot) root;
+				if (root instanceof SourceRoot) {
+					SourceRoot srcRoot = (SourceRoot) root;
 					for (Path.Entry<?> e : srcRoot.get(includes)) {
 						delta.add((IFileEntry) e);
 					}
@@ -250,8 +246,8 @@ public class Builder extends IncrementalProjectBuilder {
 			// now, is to check whether or not it's a source file and, if it is,
 			// we then recompile it.
 			for (Path.Root root : whileyProject.roots()) {
-				if (root instanceof ISourceRoot) {
-					ISourceRoot srcRoot = (ISourceRoot) root;
+				if (root instanceof SourceRoot) {
+					SourceRoot srcRoot = (SourceRoot) root;
 					IFileEntry<?> ife = srcRoot.getResource(resource);
 					if (ife != null) {
 						// Ok, this file is managed by a source root; therefore,
@@ -282,8 +278,8 @@ public class Builder extends IncrementalProjectBuilder {
 		System.out.println("RESOURCE ADDED: " + resource.getFullPath());
 		IPath location = resource.getLocation();
 		for (Path.Root root : whileyProject.roots()) {
-			if (root instanceof ISourceRoot) {
-				ISourceRoot srcRoot = (ISourceRoot) root;
+			if (root instanceof SourceRoot) {
+				SourceRoot srcRoot = (SourceRoot) root;
 				IFileEntry e = srcRoot.create(resource);
 				if (e != null) {
 					delta.add(e);
@@ -375,8 +371,8 @@ public class Builder extends IncrementalProjectBuilder {
 	public void buildAll() throws IOException, CoreException {
 		delta.clear();
 		for (Path.Root root : whileyProject.roots()) {
-			if (root instanceof ISourceRoot) {
-				ISourceRoot srcRoot = (ISourceRoot) root;
+			if (root instanceof SourceRoot) {
+				SourceRoot srcRoot = (SourceRoot) root;
 				for (Path.Entry<?> e : srcRoot.get(includes)) {
 					delta.add((IFileEntry) e);
 				}
@@ -396,12 +392,12 @@ public class Builder extends IncrementalProjectBuilder {
 		m.setAttribute(IMarker.SEVERITY, IMarker.SEVERITY_ERROR);
 	}
 
-	private static final class ISourceRoot extends IContainerRoot {
-		public ISourceRoot(IContainer dir, Content.Registry contentTypes) {
+	public class SourceRoot extends ContainerRoot {
+		public SourceRoot(IContainer dir, Content.Registry contentTypes) {
 			super(dir, contentTypes);
 		}
-	}
-		
+	}	
+	
 	private static boolean isClassPath(IResource resource) {
 		return resource instanceof IFile && resource.getName().equals(".classpath");
 	}	
