@@ -4,7 +4,8 @@ Bundle-Name: Wyclipse Core
 Bundle-SymbolicName: wyclipse.core;singleton:=true
 Bundle-Version: 0.0.15
 Bundle-Activator: wyclipse.core.Activator
-Export-Package: wyclipse.core,
+Export-Package: wyc.stages,
+ wyclipse.core,
  wyclipse.core.builder
 Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.core.resources;bundle-version="3.5.0",

@@ -34,7 +34,7 @@ import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.IWorkbenchWindowActionDelegate;
 import org.eclipse.swt.widgets.Shell;
 
-import wyclipse.ui.wizards.NewModuleWizard;
+import wyclipse.ui.wizards.NewWhileyModuleWizard;
 
 public class OpenNewModuleView implements IWorkbenchWindowActionDelegate, IViewActionDelegate {
 	private Shell shell;
@@ -42,7 +42,7 @@ public class OpenNewModuleView implements IWorkbenchWindowActionDelegate, IViewA
 
 	@Override
 	public void run(IAction action) {
-		NewModuleWizard wizard = new NewModuleWizard();		
+		NewWhileyModuleWizard wizard = new NewWhileyModuleWizard();		
         WizardDialog dialog = new WizardDialog(shell, wizard);
         dialog.create();
         dialog.open();
