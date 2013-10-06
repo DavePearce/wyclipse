@@ -40,6 +40,8 @@ import wybs.lang.Content;
 import wybs.util.Trie;
 import wyc.lang.WhileyFile;
 import wyclipse.core.builder.WhileyPath;
+import wycs.core.WycsFile;
+import wycs.syntax.WyalFile;
 import wyil.lang.WyilFile;
 
 /**
@@ -104,12 +106,21 @@ public class WhileyNature implements IProjectNature {
 		Path src = new Path("src");
 		Path bin = new Path("bin");
 		
+		// Hmmm, this is a bit complicated?
+		
 		whileypath.getEntries().add(
-				new WhileyPath.SourceFolder("src", src, Trie.fromString("**"), WhileyFile.ContentType));
+				new WhileyPath.SourceFolder("whiley", src, Trie.fromString("**"), WhileyFile.ContentType));
 		whileypath.getEntries().add(
-				new WhileyPath.BinaryFolder("bin", bin, Trie.fromString("**"), WyilFile.ContentType));
-		whileypath.getEntries().add(new WhileyPath.Rule("wyc", "src", "bin"));
-
+				new WhileyPath.SourceFolder("wyil", bin, Trie.fromString("**"), WyilFile.ContentType));
+		whileypath.getEntries().add(
+				new WhileyPath.SourceFolder("wyal", bin, Trie.fromString("**"), WyalFile.ContentType));
+		whileypath.getEntries().add(
+				new WhileyPath.BinaryFolder("wycs", bin, Trie.fromString("**"), WycsFile.ContentType));
+		
+		whileypath.getEntries().add(new WhileyPath.Rule("wyc", "whiley", "wyil"));
+		whileypath.getEntries().add(new WhileyPath.Rule("wyal", "wyil", "wyal"));
+		whileypath.getEntries().add(new WhileyPath.Rule("wycs", "wyal", "wycs"));
+		
 		return whileypath;
 	}
 

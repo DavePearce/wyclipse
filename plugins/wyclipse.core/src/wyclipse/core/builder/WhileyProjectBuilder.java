@@ -42,9 +42,13 @@ import wybs.util.StandardProject;
 import wybs.util.Trie;
 import wyc.builder.WhileyBuilder;
 import wyc.lang.WhileyFile;
+import wyc.util.WycBuildTask;
 
+import wycs.builders.Wyal2WycsBuilder;
 import wycs.core.WycsFile;
 import wycs.syntax.WyalFile;
+import wycs.util.WycsBuildTask;
+import wyil.builders.Wyil2WyalBuilder;
 import wyil.checks.*;
 import wyil.io.WyilFilePrinter;
 import wyil.lang.WyilFile;
@@ -210,11 +214,25 @@ public class WhileyProjectBuilder extends IncrementalProjectBuilder {
 				
 		// First, add the standard Whiley Compiler (WyC), which compiles Whiley
 		// files to WyIL files.
-		Pipeline pipeline = new Pipeline(defaultPipeline);
+		Pipeline<WyilFile> pipeline = new Pipeline(WycBuildTask.defaultPipeline);
 		WhileyBuilder wyc = new WhileyBuilder(whileyProject, pipeline);
 		wyc.setLogger(new Logger.Default(System.err));
 		builders.put("wyc", wyc);
 		
+		// Second, add the standard WyAL builder, which compiles WyIL files to
+		// WyAL files.
+		Wyil2WyalBuilder wyal = new Wyil2WyalBuilder(whileyProject);
+		wyal.setLogger(new Logger.Default(System.err));
+		builders.put("wyal", wyal);
+		
+		// Third, add the standard WyCS builder, which compiles WyAL files to
+		// WyCS files.
+		Pipeline<WycsFile> wycsPipeline = new Pipeline(WycsBuildTask.defaultPipeline);
+		Wyal2WycsBuilder wycs = new Wyal2WycsBuilder(whileyProject,wycsPipeline);		
+		wycs.setLogger(new Logger.Default(System.err));
+		builders.put("wycs", wycs);
+		
+		// Done.
 		return builders;
 	}
 	
@@ -564,51 +582,4 @@ public class WhileyProjectBuilder extends IncrementalProjectBuilder {
 			}
 		}
 	};
-
-	// =====================================================================
-	// Default Pipeline (for whiley -> wyil)
-	// =====================================================================
-
-	public static final List<Pipeline.Template> defaultPipeline = Collections
-			.unmodifiableList(new ArrayList<Pipeline.Template>() {
-				{
-					//						add(new Pipeline.Template(WyilFilePrinter.class,
-					//								Collections.EMPTY_MAP));
-					add(new Pipeline.Template(DefiniteAssignmentCheck.class,
-							Collections.EMPTY_MAP));
-					add(new Pipeline.Template(ModuleCheck.class, Collections.EMPTY_MAP));
-					add(new Pipeline.Template(RuntimeAssertions.class,
-							Collections.EMPTY_MAP));
-					add(new Pipeline.Template(BackPropagation.class,
-							Collections.EMPTY_MAP));
-					add(new Pipeline.Template(LoopVariants.class, Collections.EMPTY_MAP));
-					add(new Pipeline.Template(ConstantPropagation.class,
-							Collections.EMPTY_MAP));
-					add(new Pipeline.Template(CoercionCheck.class, Collections.EMPTY_MAP));
-					add(new Pipeline.Template(DeadCodeElimination.class,
-							Collections.EMPTY_MAP));
-					add(new Pipeline.Template(LiveVariablesAnalysis.class,
-							Collections.EMPTY_MAP));
-					//						add(new Pipeline.Template(WyilFilePrinter.class,
-					//								Collections.EMPTY_MAP));
-				}
-			});
-
-	/**
-	 * Register default transforms. This is necessary so they can be referred to
-	 * from the command-line using abbreviated names, rather than their full
-	 * names.
-	 */
-	static {
-		Pipeline.register(BackPropagation.class);
-		Pipeline.register(DefiniteAssignmentCheck.class);
-		Pipeline.register(LoopVariants.class);
-		Pipeline.register(ConstantPropagation.class);
-		Pipeline.register(ModuleCheck.class);
-		Pipeline.register(RuntimeAssertions.class);
-		Pipeline.register(CoercionCheck.class);
-		Pipeline.register(WyilFilePrinter.class);
-		Pipeline.register(DeadCodeElimination.class);
-		Pipeline.register(LiveVariablesAnalysis.class);
-	}
 }
