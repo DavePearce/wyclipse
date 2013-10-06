@@ -6,7 +6,7 @@
 		<perspective
 			name ="Whiley"
 			class="wyclipse.ui.perspective.Perspective"
-			id="wyclipse.whileyPerspective"
+			id="wyclipse.ui.whileyPerspective"
 			icon="icons/whiley_perspective.gif">
 		</perspective>
 	</extension>
@@ -38,103 +38,47 @@
 
 <extension point="org.eclipse.ui.newWizards">
 	<category
-            id="wyclipse.WhileyCategory"
+            id="wyclipse.ui.WhileyCategory"
             name="Whiley">
     </category>
    	<wizard
-            category="wyclipse.WhileyCategory"
-            class="wyclipse.wizards.NewModuleWizard"
+            category="wyclipse.ui.WhileyCategory"
+            class="wyclipse.ui.wizards.NewWhileyModuleWizard"
             icon="icons/newmodule_wiz.gif"
            	hasPages="true"
            	
-            id="wyclipse.newModuleWizard"
-            finalPerspective="wyclipse.whileyPerspective"
-            preferredPerspectives="wyclipse.whileyPerspective"
+            id="wyclipse.ui.newModuleWizard"
+            finalPerspective="wyclipse.ui.whileyPerspective"
+            preferredPerspectives="wyclipse.ui.whileyPerspective"
             name="Whiley Module"
             project="false">
             
             
       </wizard>	
        <wizard
-            category="wyclipse.WhileyCategory"
-            class="wyclipse.wizards.NewProjectWizard"
+            category="wyclipse.ui.WhileyCategory"
+            class="wyclipse.ui.wizards.NewProjectWizard"
             icon="icons/newwprj_wiz.gif"
-            finalPerspective="wyclipse.whileyPerspective"
+            finalPerspective="wyclipse.ui.whileyPerspective"
             hasPages="true"
-            id="wyclipse.newProjectWizard"
+            id="wyclipse.ui.newWhileyProjectWizard"
             name="Whiley Project"
-            preferredPerspectives="wyclipse.whileyPerspective"
+            preferredPerspectives="wyclipse.ui.whileyPerspective"
             project="true"
            >
        </wizard>	
  </extension>
  
-   <extension
-        id="wyclipse.whileymarker"
-       	name="Whiley Syntax Marker"
-        point="org.eclipse.core.resources.markers">
-      	<super type="org.eclipse.core.resources.textmarker"/>
-		<super type="org.eclipse.core.resources.problemmarker"/>
-		<persistent value="true"/>
-		
-   </extension>
    
-   <extension point="org.eclipse.debug.core.launchConfigurationTypes">
-      <launchConfigurationType
-            delegate="wyclipse.launchers.WhileyLauncher"
-            delegateDescription="Run a Whiley Application"
-            
-            delegateName="Whiley Application Launcher"
-            id="wyclipse.whileyLaunchConfiguration"
-            modes="run"
-            name="Whiley Application"
-            public="true"
-            sourceLocatorId="org.eclipse.jdt.launching.sourceLocator.JavaSourceLookupDirector"
-            sourcePathComputerId="org.eclipse.jdt.launching.sourceLookup.javaSourcePathComputer">
-      </launchConfigurationType>
-   </extension>
    
-   <extension point="org.eclipse.debug.ui.launchConfigurationTypeImages">
-		<launchConfigurationTypeImage
-			icon ="icons/whiley_app.gif"
-			configTypeID="wyclipse.whileyLaunchConfiguration"
-			
-			id="wyclipse.launch.launchProgram">
-		</launchConfigurationTypeImage>
-	</extension>
 	
-	<extension point="org.eclipse.debug.ui.launchShortcuts">
-		<shortcut
-        class="wyclipse.launchers.WhileyLaunchShortcut"
-        icon="icons/whiley_file.gif"
-        id="wyclipse.launch.launchProgram"
-        label="Whiley Application"
-        
-        modes="run, debug">
-			<perspective id ="org.eclipse.jdt.ui.JavaPerspective"/>
-			<perspective id="wyclipse.whileyPerspective"/>
-		<contextualLaunch>
-			<enablement>
-			 	<with variable="selection">
-			 	<count value="1"/>
-			 	<iterate>
-			 		<or>
-			 		<test property="org.eclipse.debug.ui.matchesPattern" value="*.whiley"/>
-                    </or>
-                </iterate>
-               	</with>
-            </enablement>
-             </contextualLaunch>
-             </shortcut>
-			 	
-	</extension>
 		
    <extension
          point="org.eclipse.ui.navigator.navigatorContent">
         <commonWizard
       	type = "new"
       	
-      	wizardId="wyclipse.newModuleWizard">
+      	wizardId="wyclipse.ui.newModuleWizard">
       	<enablement>
       		<or>
 	      		<adapt type="org.eclipse.core.resources.IResource"/>
@@ -144,69 +88,13 @@
       	</enablement>
       	
       </commonWizard>
-      <commonFilter
-            activeByDefault="true"
-            id="wyclipse.wyilCommonFilter"
-            
-            name="Wyil Files">
-	<filterExpression>
-	  <and>
-	    <adapt type="org.eclipse.core.resources.IResource">
-	      <test property="org.eclipse.core.resources.name" value="*.wyil"/>
-	    </adapt>
-	  </and>
-        </filterExpression>
-      </commonFilter>
    
    </extension>
-   <extension
-         point="org.eclipse.ui.navigator.viewer">
-      <viewerContentBinding
-	  viewerId="org.eclipse.ui.navigator.ProjectExplorer">
-	<includes>
-	  <contentExtension pattern="wyclipse.wyilCommonFilter"/> 
-	</includes>	
-      </viewerContentBinding>
-   </extension>
-   <extension
-         point="org.eclipse.ui.ide.resourceFilters">
-      <filter
-      
-            pattern="*.wyil"
-            selected="true">
-      </filter>
-   </extension>
-   <extension
-         point="org.eclipse.jdt.ui.javaElementFilters">
-      <filter
-            description="Hide Whiley Intermediate Language files.  These are generated by the compiler and should generally be considered for internal use only."
-            enabled="true"
-            
-            id="wyclipse.wyilPackageExplorerFilter"
-            name="Wyil Files"
-            pattern="*.wyil">
-      </filter>
-   </extension>
    
-   <extension
-         point="org.eclipse.debug.ui.launchConfigurationTabGroups">
-      <launchConfigurationTabGroup
-      
-            class="wyclipse.launchers.WhileyLauncherTabGroup"
-            id="wyclipse.whileyLaunchConfigurationTabGroup"
-            type="wyclipse.whileyLaunchConfiguration">
-      </launchConfigurationTabGroup>
-   </extension>
-   <extension
-         point="org.eclipse.jdt.core.classpathContainerInitializer">
-      <classpathContainerInitializer
-          id="wyclipse.WHILEY_CONTAINER"
-          class="wyclipse.builder.WhileyClasspathContainerInitialiser"/>
-   </extension>
    <extension
          name="Whiley Perspective Extension"
          point="org.eclipse.ui.perspectiveExtensions">
-      <perspectiveExtension targetID="wyclipse.whileyPerspective">
+      <perspectiveExtension targetID="wyclipse.ui.whileyPerspective">
          <actionSet 
          	id="org.eclipse.debug.ui.launchActionSet">
 		 </actionSet>
