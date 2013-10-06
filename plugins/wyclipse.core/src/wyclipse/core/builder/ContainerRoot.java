@@ -53,8 +53,9 @@ import wybs.util.Trie;
  * @author David J. Pearce
  * 
  */
-public class ContainerRoot extends AbstractRoot<ContainerRoot.IFolderEntry> {	
-	private final IContainer dir;		
+public class ContainerRoot<T extends Content.Type> extends AbstractRoot<ContainerRoot.IFolderEntry> {	
+	private final IContainer dir;	
+	private final Content.Filter<T> includes;
 		
 	/**
 	 * Construct a directory root from a given directory and file filter.
@@ -62,17 +63,27 @@ public class ContainerRoot extends AbstractRoot<ContainerRoot.IFolderEntry> {
 	 * @param file
 	 *            --- location of directory on filesystem.
 	 */
-	public ContainerRoot(IContainer dir, Content.Registry contentTypes) {
-		super(contentTypes);		
+	public ContainerRoot(IContainer dir, Content.Filter<T> includes,
+			Content.Registry contentTypes) {
+		super(contentTypes);
 		this.dir = dir;
 		// the following line is necessary because the AbstractFolder
 		// constructor calls root(), all of which will happen before this.dir is
 		// assigned above.
 		root.dir = dir;
+		this.includes = includes;
 	}
 
 	public IContainer getContainer() {
 		return dir;
+	}
+	
+	public Content.Filter<T> getIncludes() {
+		return includes;
+	}
+	
+	public List<wybs.lang.Path.Entry<T>> get() throws IOException {
+		return super.get(includes);
 	}
 	
 	public IFileEntry<?> getResource(IResource file) throws CoreException {		

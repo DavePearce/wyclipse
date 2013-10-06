@@ -7,6 +7,7 @@ import java.util.List;
 import org.eclipse.core.runtime.IPath;
 
 import wybs.lang.Content;
+import wybs.lang.Path;
 
 /**
  * The <code>whileypath</code> controls the way in which files and folders in a
@@ -55,19 +56,34 @@ public final class WhileyPath {
 	public static abstract class Container extends Entry {
 		
 		/**
+		 * A unique identifier for this container. This enables the container to
+		 * be referenced from a build rule.
+		 */
+		private String ID;
+		
+		/**
 		 * The location of this "container". Observe that this may be relative
 		 * to the project root, or an absolute location.
 		 */
 		private IPath location;
 		
 		/**
-		 * A unique identifier for this container. This enables the container to
-		 * be referenced from a build rule.
+		 * Describes the set of files which are included in this
+		 * container.
 		 */
-		private String ID;
+		private Path.Filter includes;
 		
-		public Container(IPath location) {
+		/**
+		 * Describes the kind of files which are included in this container.
+		 */
+		private Content.Type contentType;
+
+		public Container(String ID, IPath location, Path.Filter includes,
+				Content.Type contentType) {
 			this.location = location;
+			this.ID = ID;
+			this.includes = includes;
+			this.contentType = contentType;
 		}
 		
 		public IPath getLocation() {
@@ -76,6 +92,14 @@ public final class WhileyPath {
 		
 		public String getID() {
 			return ID;
+		}
+		
+		public Path.Filter getIncludes() {
+			return includes;
+		}
+		
+		public Content.Type getContentType() {
+			return contentType;
 		}
 	}
 	
@@ -89,19 +113,9 @@ public final class WhileyPath {
 	 * 
 	 */
 	public static final class SourceFolder extends Container {
-		/**
-		 * Describes the set of files which are included in this
-		 * "source folder".
-		 */
-		protected final Content.Filter<?> includes;
-
-		public SourceFolder(IPath location, Content.Filter<?> includes) {
-			super(location);
-			this.includes = includes; 
-		}
-		
-		public Content.Filter<?> getIncludes() {
-			return includes;
+		public SourceFolder(String ID, IPath location,
+				Path.Filter includes, Content.Type contentType) {
+			super(ID, location, includes, contentType);
 		}
 	}
 	
@@ -114,44 +128,24 @@ public final class WhileyPath {
 	 * 
 	 */
 	public static final class BinaryFolder extends Container {
-		/**
-		 * Describes the set of files which are included in this
-		 * "source folder".
-		 */
-		private Content.Filter<?> includes;
-
-		public BinaryFolder(IPath location, Content.Filter<?> includes) {
-			super(location);
-			this.includes = includes;
-		}
-		
-		public Content.Filter<?> getIncludes() {
-			return includes;
+		public BinaryFolder(String ID, IPath location,
+				Path.Filter includes, Content.Type contentType) {
+			super(ID, location, includes, contentType);
 		}
 	}
 	
 	/**
-	 * Represents an external folder on the whilepath which contains various
-	 * files needed for compilation. External files are not modified in any way
-	 * by the builder.
+	 * Represents an external folder or library on the whilepath which contains
+	 * various files needed for compilation. External files are not modified in
+	 * any way by the builder.
 	 * 
 	 * @author David J. Pearce
 	 * 
 	 */
-	public static final class ExternalFolder extends Container {
-		/**
-		 * Describes the set of files which are included in this
-		 * "source folder".
-		 */
-		private Content.Filter<?> includes;
-
-		public ExternalFolder(IPath location, Content.Filter<?> includes) {
-			super(location);
-			this.includes = includes;
-		}
-		
-		public Content.Filter<?> getIncludes() {
-			return includes;
+	public static final class External extends Container {
+		public External(String ID, IPath location, Path.Filter includes,
+				Content.Type contentType) {
+			super(ID, location, includes, contentType);
 		}
 	}
 	

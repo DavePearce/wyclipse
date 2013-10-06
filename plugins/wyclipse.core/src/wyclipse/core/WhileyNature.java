@@ -32,9 +32,15 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.resources.IProjectNature;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.QualifiedName;
 
-import wybs.lang.Path;
+import wybs.lang.Content;
+import wybs.util.Trie;
+import wyc.lang.WhileyFile;
+import wyclipse.core.builder.WhileyPath;
+import wyil.lang.WyilFile;
 
 /**
  * <p>Represents the fundamental building block of the Wyclipse plugin. Attaching a
@@ -84,14 +90,27 @@ public class WhileyNature implements IProjectNature {
 	}
 	
 	/**
-	 * Get the array of roots associated with this project. These are loaded
-	 * from the <code>.whileypath</code> configuration file.
+	 * Get the whileypath associated with this project. This is loaded from the
+	 * <code>.whileypath</code> configuration file.
 	 * 
 	 * @return
 	 */
-	public List<Path.Root> getRoots() {
+	public WhileyPath getWhileyPath() {
 		// TODO: actually read this from the whileypath file!!
-		return new ArrayList<Path.Root>();
+		
+		WhileyPath whileypath = new WhileyPath();	
+		
+		// The default "whileypath"
+		Path src = new Path("src/");
+		Path bin = new Path("bin/");
+		
+		whileypath.getEntries().add(
+				new WhileyPath.SourceFolder("src", src, Trie.fromString("**"), WhileyFile.ContentType));
+		whileypath.getEntries().add(
+				new WhileyPath.BinaryFolder("bin", bin, Trie.fromString("**"), WyilFile.ContentType));
+		whileypath.getEntries().add(new WhileyPath.Rule("wyc", "src", "bin"));
+
+		return whileypath;
 	}
 
 	/**
