@@ -21,7 +21,7 @@
             id="whileyEditor"
             name="Whiley Source File Editor">
         	<contentTypeBinding
-            	contentTypeId="wyclipse.whileySource">
+            	contentTypeId="wyclipse.core.whileySource">
           	</contentTypeBinding>
      	 </editor>
   	 </extension>

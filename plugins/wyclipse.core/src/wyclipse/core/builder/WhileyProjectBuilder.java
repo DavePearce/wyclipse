@@ -503,7 +503,7 @@ public class WhileyProjectBuilder extends IncrementalProjectBuilder {
 
 	protected void highlightSyntaxError(IResource resource, SyntaxError err)
 			throws CoreException {
-		IMarker m = resource.createMarker("wyclipse.whileymarker");
+		IMarker m = resource.createMarker(Activator.WYCLIPSE_MARKER_ID);
 		m.setAttribute(IMarker.CHAR_START, err.start());
 		m.setAttribute(IMarker.CHAR_END, err.end() + 1);
 		m.setAttribute(IMarker.MESSAGE, err.msg());
