@@ -30,7 +30,7 @@
 		point="org.eclipse.core.filebuffers.documentSetup">
 		<participant
 			extensions="whiley"
-			class="wyclipse.ui,editor.DocumentSetup">
+			class="wyclipse.ui.editor.DocumentSetup">
 		</participant>
 	</extension>
    
