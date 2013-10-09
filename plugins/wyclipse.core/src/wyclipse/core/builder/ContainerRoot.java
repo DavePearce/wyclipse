@@ -333,8 +333,7 @@ public class ContainerRoot<T extends Content.Type> extends AbstractRoot<Containe
 		}
 		
 		public OutputStream outputStream() throws IOException {
-			// BUMMER
-			return null;		
+			return new IFileOutputStream(file);		
 		}
 		
 		/**
@@ -357,5 +356,53 @@ public class ContainerRoot<T extends Content.Type> extends AbstractRoot<Containe
 				folder.create(IResource.FORCE | IResource.DERIVED, true, null);
 			}
 		}
-	}	
+	}
+	
+	/**
+	 * An adapator to simplify writing of data to <code>IFile</code> instances.
+	 * 
+	 * @author David J. Pearce
+	 * 
+	 */
+	private final static class IFileOutputStream extends OutputStream {
+		private final IFile file;
+		private final ByteArrayOutputStream out = new ByteArrayOutputStream();
+
+		public IFileOutputStream(IFile file) {
+			this.file = file;
+		}
+
+		public void close() throws IOException {
+			flush();
+			out.close();
+		}
+
+		public void flush() throws IOException {
+			out.flush();
+			InputStream inputStream = new ByteArrayInputStream(
+					out.toByteArray());
+			// update the resource content
+			try {
+				if (file.exists()) {
+					file.setContents(inputStream, IResource.FORCE, null);
+				} else {
+					file.create(inputStream, IResource.FORCE, null);
+				}
+			} catch (CoreException e) {
+				throw new CoreIOException(e);
+			}
+		}
+
+		public void write(byte[] bytes) throws IOException {
+			out.write(bytes);
+		}
+
+		public void write(byte[] bytes, int off, int len) throws IOException {
+			out.write(bytes, off, len);
+		}
+
+		public void write(int byt) throws IOException {
+			out.write(byt);
+		}
+	}
 }
