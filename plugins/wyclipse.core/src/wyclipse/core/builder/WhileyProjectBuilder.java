@@ -99,12 +99,14 @@ public class WhileyProjectBuilder extends IncrementalProjectBuilder {
 				.getNature(Activator.WYCLIPSE_NATURE_ID);
 		WhileyPath whileypath = nature.getWhileyPath();
 		
+		this.whileyProject = new StandardProject();
+		
 		// Second, initialise the list of available builders
 		Map<String,Builder> builders = initialiseBuilders();
 		
 		// Finally, initialise the whiley project from whileypath
-		this.whileyProject = initialiseWhileyProject(whileypath, builders,
-				iproject); 
+		initialiseWhileyProject(whileypath, builders,
+				iproject);				
 	}
 	
 	/**
@@ -115,9 +117,9 @@ public class WhileyProjectBuilder extends IncrementalProjectBuilder {
 	 * @param builders
 	 * @return
 	 */
-	protected StandardProject initialiseWhileyProject(WhileyPath whileypath,
+	protected void initialiseWhileyProject(WhileyPath whileypath,
 			Map<String, Builder> builders, IProject project) {
-		StandardProject whileyProject = new StandardProject();
+		
 		HashMap<String, ContainerRoot> rootMap = new HashMap<String, ContainerRoot>();
 		HashMap<String, WhileyPath.Container> containerMap = new HashMap<String, WhileyPath.Container>();
 		
@@ -181,9 +183,7 @@ public class WhileyProjectBuilder extends IncrementalProjectBuilder {
 							+ rule.getBinaryFolderID());
 				}
 			}
-		}
-		
-		return whileyProject;
+		}		
 	}
 	
 	/**
