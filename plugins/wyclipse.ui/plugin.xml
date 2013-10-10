@@ -47,7 +47,7 @@
             icon="icons/newmodule_wiz.gif"
            	hasPages="true"
            	
-            id="wyclipse.ui.newModuleWizard"
+            id="wyclipse.ui.newWhileyModuleWizard"
             finalPerspective="wyclipse.ui.whileyPerspective"
             preferredPerspectives="wyclipse.ui.whileyPerspective"
             name="Whiley Module"
@@ -57,7 +57,7 @@
       </wizard>	
        <wizard
             category="wyclipse.ui.WhileyCategory"
-            class="wyclipse.ui.wizards.NewProjectWizard"
+            class="wyclipse.ui.wizards.NewWhileyProjectWizard"
             icon="icons/newwprj_wiz.gif"
             finalPerspective="wyclipse.ui.whileyPerspective"
             hasPages="true"

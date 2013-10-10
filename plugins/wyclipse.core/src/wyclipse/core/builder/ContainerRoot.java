@@ -173,6 +173,12 @@ public class ContainerRoot<T extends Content.Type> extends AbstractRoot<Containe
 			this.dir = dir;
 		}
 		
+		public boolean contains(wybs.lang.Path.Entry<?> e) throws IOException {
+			System.out.println("FOLDER: " + dir.getLocation());
+			System.out.println("LOOKING FOR: " + e.id() + " [" + e.contentType() + "] : " + super.contains(e));
+			return super.contains(e);
+		}
+		
 		protected Item[] contents() throws IOException {
 			try {
 				ArrayList<Item> contents = new ArrayList<Item>();			

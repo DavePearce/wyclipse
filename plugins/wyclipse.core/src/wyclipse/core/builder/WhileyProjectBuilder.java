@@ -53,7 +53,8 @@ import wyil.checks.*;
 import wyil.io.WyilFilePrinter;
 import wyil.lang.WyilFile;
 import wyil.transforms.*;
-import wyjvm.lang.ClassFile;
+import wyjc.util.WyjcBuildTask;
+import jasm.lang.ClassFile;
 
 /**
  * <p>
@@ -81,10 +82,6 @@ public class WhileyProjectBuilder extends IncrementalProjectBuilder {
 	 * been configured.
 	 */
 	private StandardProject whileyProject;
-	
-	public WhileyProjectBuilder() {
-		
-	}
 	
 	/**
 	 * The delta is a list of entries which require recompilation. As entries
@@ -132,16 +129,13 @@ public class WhileyProjectBuilder extends IncrementalProjectBuilder {
 				Content.Filter includes = Content.filter(container.getIncludes(),container.getContentType());
 				ContainerRoot root;
 				if (entry instanceof WhileyPath.SourceFolder) {
-					WhileyPath.SourceFolder src = (WhileyPath.SourceFolder) entry;
 					IFolder folder = project.getFolder(container.getLocation());
 					System.err.println("*** INITIALISING SOURCE ROOT: " + container.getLocation());
 					root = new SourceRoot(folder,includes,registry);					
 				} else if (entry instanceof WhileyPath.BinaryFolder) {
-					WhileyPath.BinaryFolder bin = (WhileyPath.BinaryFolder) entry;
 					IFolder folder = project.getFolder(container.getLocation());
 					System.err.println("*** INITIALISING BINARY ROOT: " + container.getLocation());
 					root = new ContainerRoot(folder,includes,registry);
-					rootMap.put(bin.getID(),root);
 				} else {
 					WhileyPath.External ext = (WhileyPath.External) entry;					
 					// TODO: implement me!
@@ -343,7 +337,7 @@ public class WhileyProjectBuilder extends IncrementalProjectBuilder {
 								removed(resource);
 								break;
 							case IResourceDelta.CHANGED:
-								if(isClassPath(resource)) {
+								if(isWhileyPath(resource)) {
 									// In this case, the ".classpath" file has
 									// changed. This could be as a result of a
 									// jar file being added or removed from the
@@ -537,8 +531,8 @@ public class WhileyProjectBuilder extends IncrementalProjectBuilder {
 		}
 	}
 	
-	private static boolean isClassPath(IResource resource) {
-		return resource instanceof IFile && resource.getName().equals(".classpath");
+	private static boolean isWhileyPath(IResource resource) {
+		return resource instanceof IFile && resource.getName().equals(".whileypath");
 	}	
 	
 	// =====================================================================
@@ -562,7 +556,7 @@ public class WhileyProjectBuilder extends IncrementalProjectBuilder {
 			} else if (e.suffix().equals("wycs")) {
 				e.associate(WycsFile.ContentType, null);
 			} else if (e.suffix().equals("class")) {
-				e.associate(ClassFile.ContentType, null);				
+				e.associate(WyjcBuildTask.ContentType, null);				
 			} 
 		}
 
@@ -575,7 +569,7 @@ public class WhileyProjectBuilder extends IncrementalProjectBuilder {
 				return "wyal";
 			} else if (t == WycsFile.ContentType) {
 				return "wycs";
-			} else if (t == ClassFile.ContentType) {
+			} else if (t == WyjcBuildTask.ContentType) {
 				return "class";
 			} else {
 				return "dat";
