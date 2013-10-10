@@ -15,4 +15,5 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ActivationPolicy: lazy
 Bundle-ClassPath: bin/,
  lib/wyrt.jar,
- lib/wyjc-all-v0.3.20.jar
+ lib/wyjc-all-v0.3.20.jar,
+ lib/jasm-v0.1.1.jar

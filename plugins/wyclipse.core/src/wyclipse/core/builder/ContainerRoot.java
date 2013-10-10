@@ -28,13 +28,10 @@ package wyclipse.core.builder;
 import java.io.*;
 import java.util.*;
 
-import org.eclipse.core.filesystem.EFS;
-import org.eclipse.core.filesystem.IFileStore;
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.IResourceVisitor;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
@@ -173,12 +170,6 @@ public class ContainerRoot<T extends Content.Type> extends AbstractRoot<Containe
 			this.dir = dir;
 		}
 		
-		public boolean contains(wybs.lang.Path.Entry<?> e) throws IOException {
-			System.out.println("FOLDER: " + dir.getLocation());
-			System.out.println("LOOKING FOR: " + e.id() + " [" + e.contentType() + "] : " + super.contains(e));
-			return super.contains(e);
-		}
-		
 		protected Item[] contents() throws IOException {
 			try {
 				ArrayList<Item> contents = new ArrayList<Item>();			
@@ -253,8 +244,6 @@ public class ContainerRoot<T extends Content.Type> extends AbstractRoot<Containe
 					// Folder doesn't already exist, so create it.
 					ID fid = id.append(root); 		
 					IPath fpath = dir.getFullPath().append(root);
-					System.out.println("ROOT: " + root);
-					System.out.println("FPATH: " + fpath);
 					folder = new IFolderEntry(fid,dir.getFolder(fpath));
 					super.insert(folder);
 				}
