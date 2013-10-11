@@ -39,12 +39,21 @@ import org.eclipse.ui.wizards.newresource.BasicNewProjectResourceWizard;
 
 import wyclipse.core.Activator;
 
+/**
+ * Responsible for managing the creation of a new Whiley project. The wizard is
+ * made up from a number of different pages, each of which has a specific role
+ * (e.g. defining the name, the whileypath, etc).
+ * 
+ * @author David J. Pearce
+ * 
+ */
 public class NewWhileyProjectWizard extends Wizard implements IExecutableExtension, INewWizard {
 	private IWorkbench workbench;
 	
 	private IConfigurationElement config;
 	
-	private NewWhileyProjectCreationPage page1;
+	private NewWhileyProjectPageOne page1;
+	private NewWhileyProjectPageTwo page2;	
 	
 	private IProject project;
 	
@@ -55,8 +64,10 @@ public class NewWhileyProjectWizard extends Wizard implements IExecutableExtensi
 
 	@Override
 	public void addPages() {
-		page1 = new NewWhileyProjectCreationPage();
-		addPage(page1);	
+		page1 = new NewWhileyProjectPageOne();
+		addPage(page1);
+		page2 = new NewWhileyProjectPageTwo();
+		addPage(page2);
 	}
 
 	public void setInitializationData(IConfigurationElement config,

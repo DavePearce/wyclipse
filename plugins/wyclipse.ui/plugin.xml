@@ -68,29 +68,27 @@
            >
        </wizard>	
  </extension>
- 
-   
-   
-	
-		
-   <extension
-         point="org.eclipse.ui.navigator.navigatorContent">
-        <commonWizard
-      	type = "new"
-      	
-      	wizardId="wyclipse.ui.newModuleWizard">
-      	<enablement>
-      		<or>
-	      		<adapt type="org.eclipse.core.resources.IResource"/>
-	      		<adapt type="org.eclipse.core.resources.IFolder"/>
-	      		<adapt type="org.eclipse.core.resources.IProject"/>
-      		</or>
-      	</enablement>
-      	
-      </commonWizard>
-   
-   </extension>
-   
+
+ <extension
+     point="org.eclipse.ui.navigator.navigatorContent">
+   <commonWizard
+       type = "new"      	
+       wizardId="wyclipse.ui.newWhileyModuleWizard">
+     <enablement>
+       <or>
+	 <adapt type="org.eclipse.core.resources.IResource"/>
+	 <adapt type="org.eclipse.core.resources.IFolder"/>
+	 <adapt type="org.eclipse.core.resources.IProject"/>
+       </or>
+     </enablement>      	
+   </commonWizard>
+   <commonWizard type = "new" wizardId="wyclipse.ui.newWhileyProjectWizard" menuGroupId="org.eclipse.cdt.ui.newProject">
+     <enablement>
+     </enablement>
+   </commonWizard>   
+ </extension>
+    
+
    <extension
          name="Whiley Perspective Extension"
          point="org.eclipse.ui.perspectiveExtensions">
@@ -114,5 +112,9 @@
          </adapt>         
 </enabledWhen>
       </page>
+   </extension>
+   <extension
+         point="org.eclipse.ui.menus">
+      <Generic></Generic>
    </extension>	
 </plugin>

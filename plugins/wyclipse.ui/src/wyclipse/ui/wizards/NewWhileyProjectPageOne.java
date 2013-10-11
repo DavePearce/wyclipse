@@ -40,14 +40,14 @@ import org.eclipse.ui.dialogs.WizardNewProjectCreationPage;
  * @author David J. Pearce
  * 
  */
-public class NewWhileyProjectCreationPage extends WizardNewProjectCreationPage {
+public class NewWhileyProjectPageOne extends WizardNewProjectCreationPage {
 	
 	/**
 	 * Constructor for SampleNewWizardPage.
 	 * 
 	 * @param pageName
 	 */
-	public NewWhileyProjectCreationPage() {
+	public NewWhileyProjectPageOne() {
 		super("Create a Whiley Project");
 		setTitle("Create a Whiley Project");
 		setDescription("Enter a project name.");
