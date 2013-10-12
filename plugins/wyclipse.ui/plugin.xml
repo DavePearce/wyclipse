@@ -113,8 +113,4 @@
 </enabledWhen>
       </page>
    </extension>
-   <extension
-         point="org.eclipse.ui.menus">
-      <Generic></Generic>
-   </extension>	
 </plugin>
