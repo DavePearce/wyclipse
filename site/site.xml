@@ -1,4 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <site>
-   <feature url="features/wyclipse.feature_0.1.5.jar" id="wyclipse.feature" version="0.1.5"/>
+   <feature url="features/wyclipse.feature_0.1.6.jar" id="wyclipse.feature" version="0.1.6"/>
 </site>
