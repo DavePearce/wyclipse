@@ -28,6 +28,8 @@ package wyclipse.core;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.core.resources.IBuildConfiguration;
+import org.eclipse.core.resources.ICommand;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.resources.IProjectNature;
@@ -160,7 +162,5 @@ public class WhileyNature implements IProjectNature {
 	public void setVerificationEnable(boolean property) throws CoreException {
 		project.setPersistentProperty(VERIFICATION_PROPERTY,
 				Boolean.toString(property));
-
-		// FIXME: at this point, we need to notify this.builder of the change.
 	}
 }
