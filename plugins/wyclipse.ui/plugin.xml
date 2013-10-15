@@ -101,9 +101,9 @@
    <extension
          point="org.eclipse.ui.propertyPages">
       <page
-            class="wyclipse.ui.pages.WhileyCompilerPropertyPage"
+            class="wyclipse.ui.pages.WhileyPathPropertyPage"
             id="wyclipse.ui.propertypage"
-            name="Whiley Compiler">
+            name="Whiley Build Path">
             <enabledWhen>
          <adapt type="org.eclipse.core.resources.IProject">
               <test
