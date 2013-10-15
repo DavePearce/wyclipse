@@ -18,6 +18,7 @@ import org.eclipse.swt.widgets.*;
 import wybs.util.Trie;
 import wyc.lang.WhileyFile;
 import wyclipse.core.builder.WhileyPath;
+import wyclipse.ui.util.WhileyPathViewer;
 import wyil.lang.WyilFile;
 
 public class NewWhileyProjectPageTwo extends WizardPage {
@@ -31,50 +32,44 @@ public class NewWhileyProjectPageTwo extends WizardPage {
 	@Override
 	public void createControl(Composite parent) {				
 		Composite container = new Composite(parent, SWT.NONE);
+		
+		// =====================================================================
+		// Configure Grid
+		// =====================================================================
+		
 		GridLayout layout = new GridLayout();		
 		layout.numColumns = 3;
 		layout.verticalSpacing = 9;	
 		layout.marginWidth = 20;
 		container.setLayout(layout);
-
-		
-//		Button button = new Button(container, SWT.PUSH);
-//		button.setText("Add Folder");		
-//		
 		
 		// =====================================================================
-		// Tree View
-		// =====================================================================
-		GridData gd = new GridData(GridData.FILL_HORIZONTAL);
-		gd.horizontalSpan = 2;
-		gd.verticalSpan = 20;
-		
-		final TreeViewer tree = new TreeViewer(container, SWT.VIRTUAL | SWT.BORDER);
-		tree.setContentProvider(new WhileyPathContentProvider());
-		tree.setLabelProvider(new WhileyPathLabelProvider());
-		tree.setInput(defaultWhileyPath());		
-		  
-		// =====================================================================
-		// Last Row
+		// Middle Section
 		// =====================================================================		
-//		new Label(container, SWT.NULL).setText("Default Output Folder:");
-//		new Label(container, SWT.SEPARATOR | SWT.HORIZONTAL);
-//		Text defaultOutputFolder = new Text(container, SWT.BORDER | SWT.SINGLE);
-//		gd = new GridData(GridData.FILL_HORIZONTAL);
-//		gd.horizontalSpan = 2;
-//		defaultOutputFolder.setText("bin/");
-//		defaultOutputFolder.setLayoutData(gd);
-//		Button broweButton = new Button(container, SWT.PUSH);
-//		broweButton.setText("Browse...");
-//		broweButton.addSelectionListener(new SelectionAdapter() {
-//			public void widgetSelected(SelectionEvent e) {
-//				handleBrowseLocation();
-//			}
-//		});
-//		new Label(parent, SWT.SEPARATOR | SWT.HORIZONTAL);
-//		
+				
+		// Create viewer which is 2 columns wide and 3 rows deep.
+		WhileyPathViewer viewer = createWhileyPathViewer(container, defaultWhileyPath(), 2, 3);						
+		Button srcButton = createButton(container, "Add Folder...");
+		Button editButton = createButton(container, "Edit");
+		Button removeButton = createButton(container, "Remove");		
+		
+		// =====================================================================
+		// Bottom Section
+		// =====================================================================
+		Label defaultOutputFolderLabel = createLabel(container, "Default Output Folder:", 3);		
+		Text defaultOutputFolder = createText(container, "bin/", 2);
+		Button browseButton = createButton(container, "Browse...");
+		
+		browseButton.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				handleBrowseLocation();
+			}
+		});		
+		
+		container.pack();
+		
 		setControl(container);
-	}
+	}		
 	
 	protected void handleBrowseLocation() {
 		
@@ -104,84 +99,46 @@ public class NewWhileyProjectPageTwo extends WizardPage {
 		return whileypath;
 	}
 	
-	protected final static class WhileyPathContentProvider implements ITreeContentProvider {
-
-		@Override
-		public void dispose() {
-			// TODO Auto-generated method stub
-			
-		}
-
-		@Override
-		public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
-			// TODO Auto-generated method stub
-			
-		}
-
-		@Override
-		public Object[] getElements(Object inputElement) {
-			if(inputElement instanceof WhileyPath) {
-				WhileyPath whileyPath = (WhileyPath) inputElement;
-				java.util.List<WhileyPath.Entry> entries = whileyPath.getEntries();
-				return entries.toArray(new Object[entries.size()]);				
-			} else {
-				return new Object[]{};
-			}
-		}
-
-		@Override
-		public Object[] getChildren(Object parentElement) {
-			return new Object[]{};
-		}
-
-		@Override
-		public Object getParent(Object element) {
-			// TODO Auto-generated method stub
-			return null;
-		}
-
-		@Override
-		public boolean hasChildren(Object element) {
-			// TODO Auto-generated method stub
-			return false;
-		}		
+	
+	// ======================================================================
+	// Helpers
+	// ======================================================================
+	
+	protected WhileyPathViewer createWhileyPathViewer(Composite container, Object input, int horizontalSpan, int verticalSpan) {
+		WhileyPathViewer viewer = new WhileyPathViewer(container, SWT.VIRTUAL | SWT.BORDER);
+		GridData gd = new GridData(GridData.FILL_HORIZONTAL);
+		gd.horizontalSpan = horizontalSpan;
+		gd.verticalSpan = verticalSpan;
+		viewer.getTree().setLayoutData(gd);	
+		viewer.setInput(input);
+		return viewer;
 	}
 	
-	protected final static class WhileyPathLabelProvider implements ILabelProvider {
-
-		@Override
-		public void addListener(ILabelProviderListener listener) {
-			// TODO Auto-generated method stub
-			
-		}
-
-		@Override
-		public void dispose() {
-			// TODO Auto-generated method stub
-			
-		}
-
-		@Override
-		public boolean isLabelProperty(Object element, String property) {
-			return false;
-		}
-
-		@Override
-		public void removeListener(ILabelProviderListener listener) {
-			// TODO Auto-generated method stub
-			
-		}
-
-		@Override
-		public Image getImage(Object element) {
-			// TODO Auto-generated method stub
-			return null;
-		}
-
-		@Override
-		public String getText(Object element) {
-			return "Source folder";
-		}
+	protected Button createButton(Composite parent, String text) {
+		GridData gd = new GridData();
+		gd.widthHint = 150;
+		Button button = new Button(parent, SWT.PUSH);
+		button.setText(text);
+		button.setLayoutData(gd);
+		return button;
+	}
+	
+	protected Label createLabel(Composite parent, String text, int horizontalSpan) {
+		GridData gd = new GridData(GridData.FILL_HORIZONTAL);
+		gd.horizontalSpan = horizontalSpan;
+		Label label = new Label(parent, SWT.NULL);
+		label.setText(text);
+		label.setLayoutData(gd);
+		return label;
 		
+	}
+	
+	protected Text createText(Composite parent, String initialText, int horizontalSpan) {
+		GridData gd = new GridData(GridData.FILL_HORIZONTAL);
+		gd.horizontalSpan = horizontalSpan;
+		Text text = new Text(parent, SWT.BORDER | SWT.SINGLE);
+		text.setText(initialText);
+		text.setLayoutData(gd);
+		return text;
 	}
 }

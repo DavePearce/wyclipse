@@ -1,5 +1,10 @@
 package wyclipse.ui;
 
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.Iterator;
+
+import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 
@@ -47,4 +52,16 @@ public class Activator extends AbstractUIPlugin {
 		return plugin;
 	}
 
+
+    public static ImageDescriptor getImageDescriptor(String name) {
+       String iconPath = "icons/";
+       try {
+           URL installURL = getDefault().getDescriptor().getInstallURL();
+           URL url = new URL(installURL, iconPath + name);
+           return ImageDescriptor.createFromURL(url);
+       } catch (MalformedURLException e) {
+           // should not happen
+           return ImageDescriptor.getMissingImageDescriptor();
+       }
+    }
 }
