@@ -101,7 +101,7 @@
    <extension
          point="org.eclipse.ui.propertyPages">
       <page
-            class="wyclipse.ui.WhileyCompilerPropertyPage"
+            class="wyclipse.ui.pages.WhileyCompilerPropertyPage"
             id="wyclipse.ui.propertypage"
             name="Whiley Compiler">
             <enabledWhen>

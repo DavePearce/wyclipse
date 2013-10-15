@@ -1,4 +1,4 @@
-package wyclipse.ui;
+package wyclipse.ui.pages;
 
 import org.eclipse.core.resources.IBuildConfiguration;
 import org.eclipse.core.resources.IProject;
