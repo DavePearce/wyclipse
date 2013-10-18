@@ -74,18 +74,22 @@ public class WhileyPathPropertyPage extends PropertyPage {
 	
 	@Override
 	protected Control createContents(Composite parent) {
-		Composite composite = new Composite(parent, SWT.NONE);
-		GridLayout layout = new GridLayout();
-		composite.setLayout(layout);
-		GridData data = new GridData(GridData.FILL);
-		data.grabExcessHorizontalSpace = true;
-		composite.setLayoutData(data);
-
-		wpControl.create(composite);
+		Composite composite = wpControl.create(parent);
 		
-		addFirstSection(composite);
-		addSeparator(composite);
-		addSecondSection(composite);
+//		Composite composite = new Composite(parent, SWT.NONE);
+//		GridLayout layout = new GridLayout();
+//		composite.setLayout(layout);
+//		GridData data = new GridData(GridData.FILL);
+//		data.grabExcessHorizontalSpace = true;
+//		composite.setLayoutData(data);
+//
+
+		
+//		addFirstSection(composite);
+//		addSeparator(composite);
+//		addSecondSection(composite);
+		
+		composite.pack();
 		return composite;
 	}
 

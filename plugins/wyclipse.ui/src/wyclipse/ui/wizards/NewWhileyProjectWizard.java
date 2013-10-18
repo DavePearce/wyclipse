@@ -25,8 +25,20 @@
 
 package wyclipse.ui.wizards;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.StringBufferInputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URI;
+
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerConfigurationException;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
 
 import org.eclipse.core.resources.*;
 import org.eclipse.core.runtime.*;
@@ -36,8 +48,10 @@ import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.ui.*;
 import org.eclipse.ui.actions.WorkspaceModifyOperation;
 import org.eclipse.ui.wizards.newresource.BasicNewProjectResourceWizard;
+import org.w3c.dom.Document;
 
 import wyclipse.core.Activator;
+import wyclipse.core.builder.WhileyPath;
 
 /**
  * Responsible for managing the creation of a new Whiley project. The wizard is
@@ -54,8 +68,6 @@ public class NewWhileyProjectWizard extends Wizard implements IExecutableExtensi
 	
 	private NewWhileyProjectPageOne page1;
 	private NewWhileyProjectPageTwo page2;	
-	
-	private IProject project;
 	
 	@Override
 	public void init(IWorkbench workbench, IStructuredSelection selection) {
@@ -77,52 +89,54 @@ public class NewWhileyProjectWizard extends Wizard implements IExecutableExtensi
 	
 	@Override
 	public boolean performFinish() {
-		if (project != null) {
-            return true;
-        } 
-
+		
 		final IProject projectHandle = page1.getProjectHandle();
-        IWorkspace workspace = ResourcesPlugin.getWorkspace();
+		IWorkspace workspace = ResourcesPlugin.getWorkspace();
 
 		// Configure project location
 		URI projectURI = (!page1.useDefaults()) ? page1.getLocationURI() : null;
 
-        final IProjectDescription desc = workspace
-                .newProjectDescription(projectHandle.getName());
+		final IProjectDescription desc = workspace
+				.newProjectDescription(projectHandle.getName());
 
-        desc.setLocationURI(projectURI);
+		desc.setLocationURI(projectURI);
 
-        // Create project
-        WorkspaceModifyOperation op = new WorkspaceModifyOperation() {
-            protected void execute(IProgressMonitor monitor)
-                    throws CoreException {
-                createProject(desc, projectHandle, monitor);
-            }
-        };
+		// Create project
+		WorkspaceModifyOperation op = new WorkspaceModifyOperation() {
+			protected void execute(IProgressMonitor monitor)
+					throws CoreException {
+				try {
+					monitor.beginTask("Creating Whiley Project", 3000);
+					createProject(desc, projectHandle, monitor);
+					monitor.worked(1000);
+					WhileyPath whileypath = page2.getWhileyPath();
+					createWhileyPathFile(whileypath,projectHandle,monitor);
+					monitor.worked(1000);
+					instantiateWhileyPath(whileypath,projectHandle,monitor);
+				} finally {
+					monitor.done();
+				}
+				
+			}
+		};
 
-        try {
-            getContainer().run(true, true, op);
-        } catch (InterruptedException e) {
-            return false;
-        } catch (InvocationTargetException e) {
-            Throwable realException = e.getTargetException();
-            MessageDialog.openError(getShell(), "Error", realException
-                    .getMessage());
-            return false;
-        }
+		try {
+			getContainer().run(true, true, op);
+		} catch (InterruptedException e) {
+			return false;
+		} catch (InvocationTargetException e) {
+			Throwable realException = e.getTargetException();
+			MessageDialog.openError(getShell(), "Error", realException
+					.getMessage());
+			return false;
+		}
 
-        project = projectHandle;
-
-        if (project == null) {
-            return false;
-        }
-
-        BasicNewProjectResourceWizard.updatePerspective(config);
-        BasicNewProjectResourceWizard.selectAndReveal(project, workbench
+		BasicNewProjectResourceWizard.updatePerspective(config);
+        BasicNewProjectResourceWizard.selectAndReveal(projectHandle, workbench
                 .getActiveWorkbenchWindow());
 
         return true;
-	}
+	}	
 	
 	/**
 	 * Responsible for actually creating the given project and populating its
@@ -130,43 +144,104 @@ public class NewWhileyProjectWizard extends Wizard implements IExecutableExtensi
 	 * the project description with the appropriate Whiley nature and builder.
 	 * 
 	 * @param description
-	 * @param proj
+	 * @param project
 	 * @param monitor
 	 * @throws CoreException
 	 * @throws OperationCanceledException
 	 */
-	void createProject(IProjectDescription description, IProject proj,
+	void createProject(IProjectDescription description, IProject project,
 			IProgressMonitor monitor) throws CoreException,
 			OperationCanceledException {
 
-		try {
+		// First, add Whiley Nature onto list of natures
+		String[] natures = new String[] { Activator.WYCLIPSE_NATURE_ID };
+		description.setNatureIds(natures);
 
-            monitor.beginTask("Creating Whiley Project", 2000);
+		// Second, add Whiley Builder onto list of builders
+		ICommand buildCommand = description.newCommand();				
+		buildCommand.setBuilderName(Activator.WYCLIPSE_BUILDER_ID);
 
-			// First, add Whiley Nature onto list of natures
-			String[] natures = new String[] { Activator.WYCLIPSE_NATURE_ID };
-			description.setNatureIds(natures);
+		ICommand[] newBuilders = new ICommand[1];
+		newBuilders[0] = buildCommand;
+		description.setBuildSpec(newBuilders);		
 
-			// Second, add Whiley Builder onto list of builders
-			ICommand buildCommand = description.newCommand();				
-			buildCommand.setBuilderName(Activator.WYCLIPSE_BUILDER_ID);
+		// done --- create project
+		project.create(description, new SubProgressMonitor(monitor, 1000));
 
-			ICommand[] newBuilders = new ICommand[1];
-			newBuilders[0] = buildCommand;
-			description.setBuildSpec(newBuilders);		
-			
-			// done --- create project
-            proj.create(description, new SubProgressMonitor(monitor, 1000));
-
-            if (monitor.isCanceled()) {
-                throw new OperationCanceledException();
-            }
-
-            proj.open(IResource.BACKGROUND_REFRESH, new SubProgressMonitor(
-                    monitor, 1000));
-            
-		} finally {
-			monitor.done();
+		if (monitor.isCanceled()) {
+			throw new OperationCanceledException();
 		}
-	}            
+
+		project.open(IResource.BACKGROUND_REFRESH, new SubProgressMonitor(
+				monitor, 1000));
+	}
+	
+	/**
+	 * Create the ".whileypath" file in the project's root.
+	 * 
+	 * @param project
+	 * @param monitor
+	 * @throws CoreException
+	 */
+	void createWhileyPathFile(WhileyPath whileyPath, IProject project, IProgressMonitor monitor)
+			throws CoreException {
+		
+		// ==================================================
+		// First, turn the whileypath into an XML bytestream.
+		// ==================================================
+		Document xmldoc = whileyPath.toXmlDocument();
+		ByteArrayOutputStream bout = new ByteArrayOutputStream();
+
+		try {
+			TransformerFactory transformerFactory = TransformerFactory
+					.newInstance();
+			DOMSource source = new DOMSource(xmldoc);
+			StreamResult result = new StreamResult(bout);
+			Transformer transformer = transformerFactory.newTransformer();
+			// The following two seamingly random lines ensure that the
+			// resulting XML is properly indented, and looks nice. Thanks Stack
+			// Overflow!
+			transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "2");
+			transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+			// Finally, generate the XML byte stream...
+			transformer.transform(source, result);
+		} catch (TransformerConfigurationException e) {
+			// FIXME: throw a CoreException?
+		} catch (TransformerException e) {
+			// FIXME: throw a CoreException?
+		}
+
+		// ==================================================
+		// Second, create the physical .whileypath file
+		// ==================================================
+		IFile whileypath = project.getFile(".whileypath");
+		ByteArrayInputStream bin = new ByteArrayInputStream(bout.toByteArray());
+
+		if (whileypath.exists()) {
+			whileypath.setContents(bin, IResource.NONE, monitor);
+		} else {
+			whileypath.create(bin, IResource.NONE, monitor);
+		}
+	}
+	
+	/**
+	 * Make sure that all folders on the WhileyPath actually exist.
+	 * 
+	 * @param project
+	 * @param monitor
+	 * @throws CoreException
+	 */
+	void instantiateWhileyPath(WhileyPath whileypath, IProject project, IProgressMonitor monitor)
+			throws CoreException {
+		for(WhileyPath.Entry e : whileypath.getEntries()) {
+			if(e instanceof WhileyPath.Container) {
+				WhileyPath.Container container = (WhileyPath.Container) e;
+				// this is a folder of some sort.
+				IFolder folder = project.getFolder(container.getLocation());
+				if(!folder.exists()) {
+					folder.create(true, true, monitor);
+				}
+			}
+		}
+	}
 }

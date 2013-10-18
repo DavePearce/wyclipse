@@ -4,7 +4,12 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+
 import org.eclipse.core.runtime.IPath;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
 import wybs.lang.Content;
 import wybs.lang.Path;
@@ -32,6 +37,23 @@ public final class WhileyPath {
 
 	public List<Entry> getEntries() {
 		return entries;
+	}
+	
+	public Document toXmlDocument() {
+		try {
+			DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
+			DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
+
+			//root elements
+			Document doc = docBuilder.newDocument();
+			Element root = doc.createElement("whileypath");
+			doc.appendChild(root);
+			root.appendChild(doc.createElement("src"));
+			return doc;
+		} catch(Exception e) {
+			// ?
+			return null;
+		}
 	}
 	
 	/**

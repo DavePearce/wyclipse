@@ -29,6 +29,11 @@ public class NewWhileyProjectPageTwo extends WizardPage {
 		setDescription("Configure the Whiley Build Path");
 	}
 
+	public WhileyPath getWhileyPath() {
+		// FIXME
+		return defaultWhileyPath();
+	}
+	
 	@Override
 	public void createControl(Composite parent) {				
 		Composite container = new Composite(parent, SWT.NONE);
