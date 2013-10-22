@@ -97,26 +97,4 @@ public class NewWhileyProjectPageOne extends WizardNewProjectCreationPage {
 //		
 //		setControl(container);
 	}
-	
-	public IWizardPage getNextPage() {
-		System.out.println("GET NEXT PAGE - " + getLocationURI());
-		return super.getNextPage();
-	}
-	
-	public void dispose() {
-		System.out.println("DISPOSE CALLED");
-		super.dispose();
-	}
-	
-	@Override
-	public boolean validatePage() {
-		System.out.println("VALIDATE PAGE");
-		return super.validatePage();
-	}
-	
-	@Override
-	public boolean canFlipToNextPage() {
-		System.out.println("CAN FLIP TO NEXT PAGE");
-		return super.validatePage();
-	}
 }
