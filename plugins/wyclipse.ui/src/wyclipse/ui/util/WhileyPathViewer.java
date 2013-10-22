@@ -132,9 +132,9 @@ public class WhileyPathViewer extends TreeViewer {
 
 		@Override
 		public String getText(Object element) {
-			if (element instanceof WhileyPath.Container) {
-				WhileyPath.Container container = (WhileyPath.Container) element;
-				return container.getLocation().toString();
+			if (element instanceof WhileyPath.Action) {
+				WhileyPath.Action container = (WhileyPath.Action) element;
+				return container.getSourceFolder().toString();
 			}
 			return null;
 		}

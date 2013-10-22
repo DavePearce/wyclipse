@@ -22,6 +22,8 @@ import wyclipse.core.WhileyNature;
 import wyclipse.core.builder.WhileyPath;
 import wyil.lang.WyilFile;
 
+import wyclipse.core.WhileyNature;
+
 public class WhileyPathPropertyPage extends PropertyPage {
 	
 	private final WhileyPathConfigurationControl wpControl;
@@ -30,10 +32,19 @@ public class WhileyPathPropertyPage extends PropertyPage {
 	
 	private Button verificationEnable;
 	
-	public WhileyPathPropertyPage() {
+	public WhileyPathPropertyPage() throws CoreException {
 		super();
 		setDescription("Properties for the Whiley Compiler");
-		wpControl = new WhileyPathConfigurationControl(getWhileyPath());
+		
+		// FIXME: surely, this is broken?
+		
+		// First, get the whileypath from the nature
+		IProject iproject = (IProject) super.getContainer();
+
+		WhileyNature nature = (WhileyNature) iproject
+				.getNature(Activator.WYCLIPSE_NATURE_ID);
+		WhileyPath whileypath = nature.getWhileyPath();
+		wpControl = new WhileyPathConfigurationControl(whileypath);		
 	}
 
 	private void addFirstSection(Composite parent) {
@@ -123,38 +134,5 @@ public class WhileyPathPropertyPage extends PropertyPage {
 			return false;
 		}
 		return true;
-	}
-	
-	/**
-	 * Get the whileypath associated with this project. This is loaded from the
-	 * <code>.whileypath</code> configuration file.
-	 * 
-	 * @return
-	 */
-	public WhileyPath getWhileyPath() {
-		// TODO: actually read this from the whileypath file!!
-		
-		WhileyPath whileypath = new WhileyPath();	
-		
-		// The default "whileypath"
-		Path src = new Path("src");
-		Path bin = new Path("bin");
-		
-		// Hmmm, this is a bit complicated?
-		
-		whileypath.getEntries().add(
-				new WhileyPath.SourceFolder("whiley", src, Trie.fromString("**"), WhileyFile.ContentType));
-		whileypath.getEntries().add(
-				new WhileyPath.SourceFolder("wyil", bin, Trie.fromString("**"), WyilFile.ContentType));
-//		whileypath.getEntries().add(
-//				new WhileyPath.SourceFolder("wyal", bin, Trie.fromString("**"), WyalFile.ContentType));
-//		whileypath.getEntries().add(
-//				new WhileyPath.BinaryFolder("wycs", bin, Trie.fromString("**"), WycsFile.ContentType));
-		
-		whileypath.getEntries().add(new WhileyPath.Rule("wyc", "whiley", "wyil"));
-//		whileypath.getEntries().add(new WhileyPath.Rule("wyal", "wyil", "wyal"));
-//		whileypath.getEntries().add(new WhileyPath.Rule("wycs", "wyal", "wycs"));
-		
-		return whileypath;
 	}
 }

@@ -80,28 +80,20 @@ public class NewWhileyProjectPageTwo extends WizardPage {
 		
 	}
 	
+	/**
+	 * Construct a default whileypath in the case when no whileypath exists
+	 * already, and we can't find anything which helps us to guess a whileypath.
+	 * 
+	 * @return
+	 */
 	protected WhileyPath defaultWhileyPath() {
-		// TODO: actually read this from the whileypath file!!
+		Path sourceFolder = new Path("src");
+		Path defaultOutputFolder = new Path("bin");
 
-		WhileyPath whileypath = new WhileyPath();
-
-		// The default "whileypath"
-		Path src = new Path("src");
-		Path bin = new Path("bin");
-
-		// Hmmm, this is a bit complicated?
-
-		whileypath.getEntries().add(
-				new WhileyPath.SourceFolder("whiley", src, Trie
-						.fromString("**"), WhileyFile.ContentType));
-		whileypath.getEntries().add(
-				new WhileyPath.BinaryFolder("wyil", bin, Trie.fromString("**"),
-						WyilFile.ContentType));
-
-		whileypath.getEntries().add(
-				new WhileyPath.Rule("wyc", "whiley", "wyil"));
-
-		return whileypath;
+		WhileyPath.Action defaultAction = new WhileyPath.Action(sourceFolder, Trie.fromString("**"),
+				null);
+			
+		return new WhileyPath(defaultOutputFolder,defaultAction);
 	}
 	
 	
