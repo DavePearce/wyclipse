@@ -24,6 +24,24 @@ public class WyclipseUI {
 		return button;
 	}
 	
+	public static Button createCheckBox(Composite parent, String text, int horizontalSpan) {
+		GridData gd = new GridData();
+		gd.horizontalSpan = horizontalSpan;
+		Button button = new Button(parent, SWT.CHECK);
+		button.setText(text);
+		button.setLayoutData(gd);
+		return button;
+	}
+	
+	public static Label createSeparator(Composite parent, int horizontalSpan) {
+		GridData gd = new GridData(GridData.FILL_HORIZONTAL);
+		gd.horizontalSpan = horizontalSpan;
+		Label label = new Label(parent, SWT.HORIZONTAL | SWT.SEPARATOR);
+		label.setLayoutData(gd);
+		return label;
+		
+	}
+	
 	public static Label createLabel(Composite parent, String text, int horizontalSpan) {
 		GridData gd = new GridData(GridData.FILL_HORIZONTAL);
 		gd.horizontalSpan = horizontalSpan;

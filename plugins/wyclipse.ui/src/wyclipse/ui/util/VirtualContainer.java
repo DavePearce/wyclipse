@@ -1,7 +1,6 @@
 package wyclipse.ui.util;
 
-import java.util.ArrayList;
-import java.util.List;
+import org.eclipse.jface.viewers.TreeNode;
 
 import wybs.lang.Path;
 import wybs.util.Trie;
@@ -22,8 +21,13 @@ import wybs.util.Trie;
  * want to create the physical folders and files configured for the Whiley build
  * path. Therefore, to implement this, we use a virtual container. This is
  * initially populated with the contents of project folder (if it exists, which
- * it may not).  The user can then select items from this virtual container
- * and/or create new items.   
+ * it may not). The user can then select items from this virtual container
+ * and/or create new items.
+ * </p>
+ * <p>
+ * The fundamental unit of abstraction is the <code>Resource</code>. This
+ * extends <code>TreeNode</code> to simplify viewing a virtual file system
+ * within a container.
  * </p>
  * 
  * @author David J. Pearce
@@ -31,65 +35,46 @@ import wybs.util.Trie;
  */
 public class VirtualContainer {
 	private java.io.File location;
-	private Folder root;
+	private Resource root;
 	
 	public VirtualContainer(java.io.File location) {
 		this.location = location;
-		root = new Folder(Trie.ROOT);
+		root = new Resource(Trie.ROOT);
 	}
 	
-	public Folder getRoot() {
+	public Resource getRoot() {
 		return root;
 	}
 	
-	public static abstract class Resource {
+	public class Resource extends TreeNode {
 		protected Path.ID id;
+		private Resource[] resources;
 		
 		private Resource(Path.ID id) {
+			super(null);
 			this.id = id;
 		}
 		
 		public Path.ID getID() {
 			return id;
 		}
-	}
-	
-	public class Folder extends Resource {
+		
+		@Override
+		public Resource[] getChildren() {
+			if (resources == null) {
+				java.io.File myLocation = new java.io.File(location, id
+						.toString().replace('/', java.io.File.separatorChar));
 
-		private ArrayList<Resource> resources;
-		
-		private Folder(Path.ID id) {
-			super(id);
-		}
-		
-		public List<Resource> getResources() {
-			if(resources == null) {
-				populate();
-			}
-			return resources;
-		}
-		
-		private void populate() {
-			resources = new ArrayList<Resource>();
-			java.io.File myLocation = new java.io.File(location, id.toString()
-					.replace('/', java.io.File.separatorChar));
-
-			if (myLocation.exists() && myLocation.isDirectory()) {
-				for (java.io.File f : myLocation.listFiles()) {
-					Path.ID fid = id.append(f.getName());
-					if (f.isDirectory()) {
-						resources.add(new Folder(fid));
-					} else {
-						resources.add(new File(fid));
+				if (myLocation.exists() && myLocation.isDirectory()) {
+					java.io.File[] files = myLocation.listFiles();
+					resources = new Resource[files.length];
+					for (int i = 0; i != files.length; ++i) {
+						Path.ID fid = id.append(files[i].getName());
+						resources[i] = new Resource(fid);
 					}
 				}
 			}
-		}
-	}
-	
-	public static class File extends Resource {
-		private File(Path.ID id) {
-			super(id);
+			return resources;
 		}
 	}
 }
