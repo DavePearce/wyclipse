@@ -168,6 +168,7 @@ public class WhileyProjectBuilder extends IncrementalProjectBuilder {
 				StandardBuildRule br = new StandardBuildRule(whileyBuilder);
 				br.add(sourceRoot, sourceIncludes, outputRoot,
 						WhileyFile.ContentType, WyilFile.ContentType);
+				
 				// FIXME: clearly, need more build rules
 				whileyProject.add(br);
 				
