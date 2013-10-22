@@ -26,7 +26,7 @@ import wyclipse.core.WhileyNature;
 
 public class WhileyPathPropertyPage extends PropertyPage {
 	
-	private final WhileyPathConfigurationControl wpControl;
+	private WhileyPath whileypath;
 	
 	private final String VERIFICATION_TITLE = "Enable Verification";
 	
@@ -35,16 +35,6 @@ public class WhileyPathPropertyPage extends PropertyPage {
 	public WhileyPathPropertyPage() throws CoreException {
 		super();
 		setDescription("Properties for the Whiley Compiler");
-		
-		// FIXME: surely, this is broken?
-		
-		// First, get the whileypath from the nature
-		IProject iproject = (IProject) super.getContainer();
-
-		WhileyNature nature = (WhileyNature) iproject
-				.getNature(Activator.WYCLIPSE_NATURE_ID);
-		WhileyPath whileypath = nature.getWhileyPath();
-		wpControl = new WhileyPathConfigurationControl(whileypath);		
 	}
 
 	private void addFirstSection(Composite parent) {
@@ -85,6 +75,8 @@ public class WhileyPathPropertyPage extends PropertyPage {
 	
 	@Override
 	protected Control createContents(Composite parent) {
+		this.whileypath = getWhileyPath();
+		WhileyPathConfigurationControl wpControl = new WhileyPathConfigurationControl(whileypath);
 		Composite composite = wpControl.create(parent);
 		
 //		Composite composite = new Composite(parent, SWT.NONE);
@@ -125,14 +117,25 @@ public class WhileyPathPropertyPage extends PropertyPage {
 	
 	public boolean performOk() {
 		// Store properties persistently.
-		try {
-			IProject project = (IProject) getElement();
-			WhileyNature nature = (WhileyNature) project
-					.getNature(Activator.WYCLIPSE_NATURE_ID);
-			nature.setVerificationEnable(verificationEnable.getSelection());
+		try {			
+			getWhileyNature().setVerificationEnable(verificationEnable.getSelection());
 		} catch (CoreException e) {
 			return false;
 		}
 		return true;
+	}
+	
+	public WhileyPath getWhileyPath() {
+		try {
+			return getWhileyNature().getWhileyPath();
+		} catch (CoreException e) {
+			// Fail-safe backup --- get the default path.
+			return WhileyNature.getDefaultWhileyPath();
+		}
+	}
+	
+	public WhileyNature getWhileyNature() throws CoreException {
+		IProject project = (IProject) getElement();
+		return (WhileyNature) project.getNature(Activator.WYCLIPSE_NATURE_ID);
 	}
 }
