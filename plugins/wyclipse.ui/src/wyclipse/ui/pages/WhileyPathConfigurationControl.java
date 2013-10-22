@@ -1,24 +1,16 @@
 package wyclipse.ui.pages;
 
-import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.Path;
-import org.eclipse.jface.viewers.ISelection;
-import org.eclipse.jface.viewers.ViewerFilter;
-import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.*;
 import org.eclipse.swt.widgets.*;
-import org.eclipse.ui.dialogs.ContainerSelectionDialog;
-import org.eclipse.ui.dialogs.WizardNewFolderMainPage;
-import org.eclipse.ui.internal.ide.dialogs.FileFolderSelectionDialog;
 
 import wyclipse.core.builder.WhileyPath;
 import wyclipse.ui.dialogs.NewWhileyPathBuildRuleDialog;
 import wyclipse.ui.util.WhileyPathViewer;
+import wyclipse.ui.util.WyclipseUI;
 
 /**
  * Provides an abstract class which constructs the standard page for configuring
@@ -30,7 +22,6 @@ import wyclipse.ui.util.WhileyPathViewer;
  */
 public class WhileyPathConfigurationControl {
 	private Shell shell;
-	private IProject project;
 	private WhileyPath whileypath;
 	
 	// WhileyPath view + controls
@@ -41,10 +32,23 @@ public class WhileyPathConfigurationControl {
 	private Text defaultOutputFolderText; 
 	private Button defaultOutputFolderBrowseButton;
 	
-	public WhileyPathConfigurationControl(Shell shell, IProject project, WhileyPath whileypath) {
+	public WhileyPathConfigurationControl(Shell shell) {
 		this.shell = shell;
-		this.project = project;
+		this.whileypath = new WhileyPath();
+	}
+	
+	public WhileyPathConfigurationControl(Shell shell, WhileyPath whileypath) {
+		this.shell = shell;
 		this.whileypath = whileypath;	
+	}
+	
+	public WhileyPath getWhileyPath() {
+		return whileypath;
+	}
+
+	public void setWhileyPath(WhileyPath whileypath) {
+		this.whileypath = whileypath;
+		this.whileyPathViewer.setInput(whileypath);
 	}
 	
 	public Composite create(Composite parent) {				
@@ -66,9 +70,9 @@ public class WhileyPathConfigurationControl {
 				
 		// Create viewer which is 2 columns wide and 3 rows deep.
 		whileyPathViewer = createWhileyPathViewer(container, whileypath, 2, 3);						
-		Button addButton = createButton(container, "Add Rule...");
-		Button editButton = createButton(container, "Edit");
-		Button removeButton = createButton(container, "Remove");		
+		Button addButton = WyclipseUI.createButton(container, "Add Rule...", 120);
+		Button editButton = WyclipseUI.createButton(container, "Edit", 120);
+		Button removeButton = WyclipseUI.createButton(container, "Remove", 120);		
 		
 		addButton.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
@@ -85,9 +89,9 @@ public class WhileyPathConfigurationControl {
 		// =====================================================================
 		// Bottom Section
 		// =====================================================================
-		defaultOutputFolderLabel = createLabel(container, "Default Output Folder:", 3);		
-		defaultOutputFolderText = createText(container, "", 2);
-		defaultOutputFolderBrowseButton = createButton(container, "Browse...");
+		defaultOutputFolderLabel = WyclipseUI.createLabel(container, "Default Output Folder:", 3);		
+		defaultOutputFolderText = WyclipseUI.createText(container, "", 2);
+		defaultOutputFolderBrowseButton = WyclipseUI.createButton(container, "Browse...", 120);
 
 		defaultOutputFolderBrowseButton
 				.addSelectionListener(new SelectionAdapter() {
@@ -109,7 +113,7 @@ public class WhileyPathConfigurationControl {
 		container.pack();
 		
 		return container;
-	}		
+	}			
 	
 	// ======================================================================
 	// Call Backs
@@ -143,18 +147,8 @@ public class WhileyPathConfigurationControl {
 	 */
 	protected void handleBrowseDefaultOutputFolder() {
 		
-		// This is a fairly simple approach to selecting a folder from the user.
-		// To make it more appealing, we might like to use a simpler (custom)
-		// dialog (like the JDT does). But, for now, this will do!
-		
-		DirectoryDialog dialog = new DirectoryDialog(shell);
-		dialog.setFilterPath(project.getLocation().toString());
-		String result = dialog.open();
-		if(result != null) {
-			IPath path = new Path(result);
-			path = path.makeRelativeTo(project.getLocation());
-			defaultOutputFolderText.setText(path.toString());
-		}
+		// At this point, we need to create a special selection (tree?) dialog
+		// based on what we can see in the WhileyPath.
 	}
 	
 	// ======================================================================
@@ -171,33 +165,5 @@ public class WhileyPathConfigurationControl {
 		viewer.getTree().setLayoutData(gd);
 		viewer.setInput(input);
 		return viewer;
-	}
-	
-	protected Button createButton(Composite parent, String text) {
-		GridData gd = new GridData();
-		gd.widthHint = 150;
-		Button button = new Button(parent, SWT.PUSH);
-		button.setText(text);
-		button.setLayoutData(gd);
-		return button;
-	}
-	
-	protected Label createLabel(Composite parent, String text, int horizontalSpan) {
-		GridData gd = new GridData(GridData.FILL_HORIZONTAL);
-		gd.horizontalSpan = horizontalSpan;
-		Label label = new Label(parent, SWT.NULL);
-		label.setText(text);
-		label.setLayoutData(gd);
-		return label;
-		
-	}
-	
-	protected Text createText(Composite parent, String initialText, int horizontalSpan) {
-		GridData gd = new GridData(GridData.FILL_HORIZONTAL);
-		gd.horizontalSpan = horizontalSpan;
-		Text text = new Text(parent, SWT.BORDER | SWT.SINGLE);
-		text.setText(initialText);
-		text.setLayoutData(gd);
-		return text;
 	}
 }

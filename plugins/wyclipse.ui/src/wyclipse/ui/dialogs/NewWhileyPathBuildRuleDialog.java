@@ -7,6 +7,8 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
 
+import wyclipse.ui.util.WyclipseUI;
+
 public class NewWhileyPathBuildRuleDialog extends Dialog {
 	
 	public NewWhileyPathBuildRuleDialog(Shell parentShell) {
@@ -31,9 +33,9 @@ public class NewWhileyPathBuildRuleDialog extends Dialog {
 		// =====================================================================
 		// Done
 		// =====================================================================
-		createLabel(container, "Source Folder:", 1);		
-		createText(container, "", 2);
-		createButton(container, "Browse...");
+		WyclipseUI.createLabel(container, "Source Folder:", 1);		
+		WyclipseUI.createText(container, "", 1, 200);
+		WyclipseUI.createButton(container, "Browse...", 120);
 
 		return container;
 	}

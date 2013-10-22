@@ -78,7 +78,7 @@ public class NewWhileyProjectWizard extends Wizard implements IExecutableExtensi
 	public void addPages() {
 		page1 = new NewWhileyProjectPageOne();
 		addPage(page1);
-		page2 = new NewWhileyProjectPageTwo(page1);
+		page2 = new NewWhileyProjectPageTwo();
 		addPage(page2);
 	}
 

@@ -23,7 +23,7 @@ public class WhileyPathPropertyPage extends PropertyPage {
 	protected Control createContents(Composite parent) {
 		this.whileypath = getWhileyPath();
 		WhileyPathConfigurationControl wpControl = new WhileyPathConfigurationControl(
-				getShell(), (IProject) getElement(), whileypath);
+				getShell(), whileypath);
 		Composite composite = wpControl.create(parent);
 	
 		composite.pack();
