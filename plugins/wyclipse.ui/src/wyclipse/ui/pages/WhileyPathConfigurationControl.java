@@ -1,11 +1,13 @@
 package wyclipse.ui.pages;
 
+import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.*;
 import org.eclipse.swt.widgets.*;
+import org.eclipse.ui.dialogs.ContainerSelectionDialog;
 
 import wyclipse.core.builder.WhileyPath;
 import wyclipse.ui.dialogs.NewWhileyPathBuildRuleDialog;
@@ -22,6 +24,7 @@ import wyclipse.ui.util.WyclipseUI;
  */
 public class WhileyPathConfigurationControl {
 	private Shell shell;
+	private IContainer container;
 	private WhileyPath whileypath;
 	
 	// WhileyPath view + controls
@@ -37,9 +40,11 @@ public class WhileyPathConfigurationControl {
 		this.whileypath = new WhileyPath();
 	}
 	
-	public WhileyPathConfigurationControl(Shell shell, WhileyPath whileypath) {
+	public WhileyPathConfigurationControl(Shell shell, IContainer container,
+			WhileyPath whileypath) {
 		this.shell = shell;
-		this.whileypath = whileypath;	
+		this.whileypath = whileypath;
+		this.container = container;
 	}
 	
 	public WhileyPath getWhileyPath() {
@@ -49,6 +54,10 @@ public class WhileyPathConfigurationControl {
 	public void setWhileyPath(WhileyPath whileypath) {
 		this.whileypath = whileypath;
 		this.whileyPathViewer.setInput(whileypath);
+	}
+	
+	public void setContainer(IContainer container) {
+		this.container = container;
 	}
 	
 	public Composite create(Composite parent) {				
@@ -148,7 +157,24 @@ public class WhileyPathConfigurationControl {
 	protected void handleBrowseDefaultOutputFolder() {
 		
 		// At this point, we need to create a special selection (tree?) dialog
-		// based on what we can see in the WhileyPath.
+		// based on what we can see in the current project's location. One of
+		// the key problems here is that the current location may not actually
+		// exist! Therefore, we want to show onyl what does exist, and give the
+		// option to create something new (again observing that it's not
+		// actually created yet).
+		
+		// FIXME: as a very temporary solution, I'm using a
+		// ContainerSelectionDialog. This is roughly speaking the kind of dialog
+		// we'll want, although it will require the ability to add new folders.
+		
+		ContainerSelectionDialog dialog = new ContainerSelectionDialog(shell,
+				container, true, "Choose default output folder");
+		if (dialog.open() == ContainerSelectionDialog.OK) {
+			Object[] items = dialog.getResult();
+			if (items.length == 1) {
+				defaultOutputFolderText.setText(items[0].toString());
+			}
+		}
 	}
 	
 	// ======================================================================

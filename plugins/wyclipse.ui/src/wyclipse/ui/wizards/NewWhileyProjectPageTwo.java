@@ -96,9 +96,6 @@ public class NewWhileyProjectPageTwo extends WizardPage {
 	 */
 	protected WhileyPath detectWhileyPath(URI location) {
 		WhileyPath whileypath;
-		Path path = new Path(location.getPath());
-		
-		System.out.println("DETECTING WHILEYPATH");
 		
 		// First, determine whether or not a ".whileypath" file already exists.
 		// If it does, then we simply load that and return it. Observe that we
@@ -107,12 +104,10 @@ public class NewWhileyProjectPageTwo extends WizardPage {
 		File folder = new File(location);
 				
 		if (folder.exists() && folder.isDirectory()) {
-			System.out.println("PROJECT FOLDER EXISTS");
 			// Yes, project location already exists. Therefore, there's a chance
 			// that a ".whileypath" file might already exist.
 			File file = new File(folder,".whileypath");
 			if(file.exists()) {
-				System.out.println("WHILEY PATH EXISTS");
 				// Yes, there is an existing whiley path. Therefore, load and
 				// return it.
 				whileypath = loadWhileyPathFromExistingFile(file);
@@ -124,6 +119,8 @@ public class NewWhileyProjectPageTwo extends WizardPage {
 		
 		// Second, attempt to auto-configure the whiley path from existing
 		// resources.
+		
+		// FIXME: attempt to auto-configure whiley path
 		
 		// Third, return the default whiley path.
 		return WhileyNature.getDefaultWhileyPath();
