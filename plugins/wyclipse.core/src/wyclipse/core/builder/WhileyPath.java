@@ -79,6 +79,10 @@ public final class WhileyPath {
 		}
 	}
 	
+	public static final WhileyPath fromXmlDocument(Document xmldoc) {
+		System.out.println("FROM XML DOCUMENT CALLED");
+		return new WhileyPath();
+	}
 	
 	/**
 	 * Represents an abstract item on the whileypath, which could be a build

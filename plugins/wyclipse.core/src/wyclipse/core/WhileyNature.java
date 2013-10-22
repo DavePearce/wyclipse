@@ -25,18 +25,37 @@
 
 package wyclipse.core;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerConfigurationException;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
+
 import org.eclipse.core.resources.IBuildConfiguration;
 import org.eclipse.core.resources.ICommand;
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.resources.IProjectNature;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.QualifiedName;
+import org.w3c.dom.Document;
+import org.xml.sax.SAXException;
 
 import wybs.lang.Content;
 import wybs.util.Trie;
@@ -94,17 +113,74 @@ public class WhileyNature implements IProjectNature {
 	}
 	
 	/**
-	 * Get the whileypath associated with this project. This is loaded from the
+	 * Load the whileypath associated with this project. This is loaded from the
 	 * <code>.whileypath</code> configuration file.
 	 * 
 	 * @return
 	 */
-	public WhileyPath getWhileyPath() {
-		// TODO: actually read this from the whileypath file!!
-				
-		return null;
+	public WhileyPath loadWhileyPath() throws CoreException {
+		try {
+			IFile file = project.getFile(".whileypath");
+			DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
+			DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
+			Document doc = dBuilder.parse(file.getContents());
+
+			doc.getDocumentElement().normalize();
+			return WhileyPath.fromXmlDocument(doc);
+		} catch (ParserConfigurationException e) {
+			return getDefaultWhileyPath();
+		} catch (SAXException e) {
+			return getDefaultWhileyPath();
+		} catch (IOException e) {
+			return getDefaultWhileyPath();
+		} 
 	}
 
+	/**
+	 * Write the whileypath associated with this project. This is stored in the
+	 * file ".whileypath".
+	 * 
+	 * @param whileyPath
+	 * @param monitor
+	 * @throws CoreException
+	 */
+	public void writeWhileyPath(WhileyPath whileyPath, IProgressMonitor monitor)
+			throws CoreException {
+		Document xmldoc = whileyPath.toXmlDocument();
+		ByteArrayOutputStream bout = new ByteArrayOutputStream();
+
+		try {
+			TransformerFactory transformerFactory = TransformerFactory
+					.newInstance();
+			DOMSource source = new DOMSource(xmldoc);
+			StreamResult result = new StreamResult(bout);
+			Transformer transformer = transformerFactory.newTransformer();
+			// The following two seamingly random lines ensure that the
+			// resulting XML is properly indented, and looks nice. Thanks Stack
+			// Overflow!
+			transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "2");
+			transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+			// Finally, generate the XML byte stream...
+			transformer.transform(source, result);
+		} catch (TransformerConfigurationException e) {
+			// FIXME: throw a CoreException?
+		} catch (TransformerException e) {
+			// FIXME: throw a CoreException?
+		}
+
+		// ==================================================
+		// Second, create the physical .whileypath file
+		// ==================================================
+		IFile whileypath = project.getFile(".whileypath");
+		ByteArrayInputStream bin = new ByteArrayInputStream(bout.toByteArray());
+
+		if (whileypath.exists()) {
+			whileypath.setContents(bin, IResource.NONE, monitor);
+		} else {
+			whileypath.create(bin, IResource.NONE, monitor);
+		}
+	}
+	
 	/**
 	 * Set the project that this nature is associated with. This method gets
 	 * called when the nature is first created, and therefore it needs to load
@@ -142,4 +218,21 @@ public class WhileyNature implements IProjectNature {
 		project.setPersistentProperty(VERIFICATION_PROPERTY,
 				Boolean.toString(property));
 	}
+	
+	/**
+	 * Construct a default whileypath to be used in the case when no whileypath
+	 * exists already, and we can't find anything which helps us to guess a
+	 * whileypath.
+	 * 
+	 * @return
+	 */
+	public static WhileyPath getDefaultWhileyPath() {
+		Path sourceFolder = new Path("src");
+		Path defaultOutputFolder = new Path("bin");
+
+		WhileyPath.Action defaultAction = new WhileyPath.Action(sourceFolder,
+				Trie.fromString("**"), null);
+
+		return new WhileyPath(defaultOutputFolder, defaultAction);
+	}	
 }

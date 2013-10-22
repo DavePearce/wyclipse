@@ -17,12 +17,14 @@ import org.eclipse.swt.widgets.*;
 
 import wybs.util.Trie;
 import wyc.lang.WhileyFile;
+import wyclipse.core.WhileyNature;
 import wyclipse.core.builder.WhileyPath;
 import wyclipse.ui.util.WhileyPathViewer;
 import wyil.lang.WyilFile;
 
 public class NewWhileyProjectPageTwo extends WizardPage {
-
+	protected WhileyPath whileypath;
+	
 	protected NewWhileyProjectPageTwo() {
 		super("Whiley Project Settings");
 		setTitle("Whiley Project Settings");
@@ -30,8 +32,7 @@ public class NewWhileyProjectPageTwo extends WizardPage {
 	}
 
 	public WhileyPath getWhileyPath() {
-		// FIXME
-		return defaultWhileyPath();
+		return whileypath;
 	}
 	
 	@Override
@@ -51,9 +52,12 @@ public class NewWhileyProjectPageTwo extends WizardPage {
 		// =====================================================================
 		// Middle Section
 		// =====================================================================		
-				
+		
+		this.whileypath = detectWhileyPath();
+		
 		// Create viewer which is 2 columns wide and 3 rows deep.
-		WhileyPathViewer viewer = createWhileyPathViewer(container, defaultWhileyPath(), 2, 3);						
+		WhileyPathViewer viewer = createWhileyPathViewer(container, whileypath,
+				2, 3);						
 		Button srcButton = createButton(container, "Add Folder...");
 		Button editButton = createButton(container, "Edit");
 		Button removeButton = createButton(container, "Remove");		
@@ -80,25 +84,23 @@ public class NewWhileyProjectPageTwo extends WizardPage {
 		
 	}
 	
+	// ======================================================================
+	// WhileyPath Helpers
+	// ======================================================================
+
 	/**
-	 * Construct a default whileypath in the case when no whileypath exists
-	 * already, and we can't find anything which helps us to guess a whileypath.
+	 * Determine an appropriate initial whileypath. This is done by first
+	 * checking whether there is already a whileypath; if not, we attempt to
+	 * detect the appropriate whileypath; finally, we fall back to a default;
 	 * 
 	 * @return
 	 */
-	protected WhileyPath defaultWhileyPath() {
-		Path sourceFolder = new Path("src");
-		Path defaultOutputFolder = new Path("bin");
-
-		WhileyPath.Action defaultAction = new WhileyPath.Action(sourceFolder, Trie.fromString("**"),
-				null);
-			
-		return new WhileyPath(defaultOutputFolder,defaultAction);
+	protected WhileyPath detectWhileyPath() {
+		return WhileyNature.getDefaultWhileyPath();
 	}
 	
-	
 	// ======================================================================
-	// Helpers
+	// SWT Helpers
 	// ======================================================================
 	
 	protected WhileyPathViewer createWhileyPathViewer(Composite container, Object input, int horizontalSpan, int verticalSpan) {

@@ -43,7 +43,7 @@ public class WhileyPathPropertyPage extends PropertyPage {
 
 		WhileyNature nature = (WhileyNature) iproject
 				.getNature(Activator.WYCLIPSE_NATURE_ID);
-		WhileyPath whileypath = nature.getWhileyPath();
+		WhileyPath whileypath = nature.loadWhileyPath();
 		wpControl = new WhileyPathConfigurationControl(whileypath);		
 	}
 
