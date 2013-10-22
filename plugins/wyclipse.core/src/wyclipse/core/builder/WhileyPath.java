@@ -64,16 +64,29 @@ public final class WhileyPath {
 	
 	public Document toXmlDocument() {
 		try {
-			DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
+			DocumentBuilderFactory docFactory = DocumentBuilderFactory
+					.newInstance();
 			DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
 
-			//root elements
+			// root elements
 			Document doc = docBuilder.newDocument();
 			Element root = doc.createElement("whileypath");
+			if (defaultOutputFolder != null) {
+				root.setAttribute("defaultOutputFolder",
+						defaultOutputFolder.toString());
+			}
 			doc.appendChild(root);
-			root.appendChild(doc.createElement("src"));
+
+			for (Entry e : entries) {
+				if (e instanceof Action) {
+					Action action = (Action) e;
+					Element child = doc.createElement("action");
+					doc.appendChild(child);
+				}
+			}
+
 			return doc;
-		} catch(Exception e) {
+		} catch (Exception e) {
 			// ?
 			return null;
 		}
