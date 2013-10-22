@@ -1,6 +1,7 @@
 package wyclipse.ui.pages;
 
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -20,6 +21,9 @@ import wyclipse.ui.util.WhileyPathViewer;
  */
 public class WhileyPathConfigurationControl {
 	private WhileyPath whileypath;
+	
+	// WhileyPath view + controls
+	private WhileyPathViewer whileyPathViewer;
 	
 	// Default Output Folder Controls
 	private Label defaultOutputFolderLabel;
@@ -48,10 +52,16 @@ public class WhileyPathConfigurationControl {
 		// =====================================================================		
 				
 		// Create viewer which is 2 columns wide and 3 rows deep.
-		WhileyPathViewer viewer = createWhileyPathViewer(container, whileypath, 2, 3);						
-		Button srcButton = createButton(container, "Add Folder...");
+		whileyPathViewer = createWhileyPathViewer(container, whileypath, 2, 3);						
+		Button addButton = createButton(container, "Add Rule...");
 		Button editButton = createButton(container, "Edit");
 		Button removeButton = createButton(container, "Remove");		
+		
+		removeButton.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				handleRemoveRule();
+			}
+		});
 		
 		// =====================================================================
 		// Bottom Section
@@ -82,6 +92,24 @@ public class WhileyPathConfigurationControl {
 		return container;
 	}		
 	
+	// ======================================================================
+	// Call Backs
+	// ======================================================================
+
+	/**
+	 * This function is called when the remove button is pressed.
+	 */
+	protected void handleRemoveRule() {		
+		TreeItem[] items = whileyPathViewer.getTree().getSelection();
+		for (TreeItem item : items) {
+			Object data = item.getData();
+			if (data instanceof WhileyPath.BuildRule) {
+				whileypath.getEntries().remove(data);
+			}
+		}
+		whileyPathViewer.refresh();
+	}
+	
 	protected void handleBrowseLocation() {
 		
 	}
@@ -90,12 +118,14 @@ public class WhileyPathConfigurationControl {
 	// Helpers
 	// ======================================================================
 	
-	protected WhileyPathViewer createWhileyPathViewer(Composite container, Object input, int horizontalSpan, int verticalSpan) {
-		WhileyPathViewer viewer = new WhileyPathViewer(container, SWT.VIRTUAL | SWT.BORDER);
+	protected WhileyPathViewer createWhileyPathViewer(Composite container,
+			Object input, int horizontalSpan, int verticalSpan) {
+		WhileyPathViewer viewer = new WhileyPathViewer(container, SWT.VIRTUAL
+				| SWT.BORDER);
 		GridData gd = new GridData(GridData.FILL_HORIZONTAL);
 		gd.horizontalSpan = horizontalSpan;
 		gd.verticalSpan = verticalSpan;
-		viewer.getTree().setLayoutData(gd);	
+		viewer.getTree().setLayoutData(gd);
 		viewer.setInput(input);
 		return viewer;
 	}
