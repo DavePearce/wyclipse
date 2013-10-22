@@ -95,7 +95,7 @@ public class WhileyProjectBuilder extends IncrementalProjectBuilder {
 		IProject iproject = (IProject) getProject();
 		WhileyNature nature = (WhileyNature) iproject
 				.getNature(Activator.WYCLIPSE_NATURE_ID);
-		WhileyPath whileypath = nature.loadWhileyPath();
+		WhileyPath whileypath = nature.getWhileyPath();
 		
 		this.whileyProject = new StandardProject();
 		

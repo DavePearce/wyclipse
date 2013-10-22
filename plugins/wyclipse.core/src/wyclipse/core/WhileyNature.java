@@ -118,7 +118,7 @@ public class WhileyNature implements IProjectNature {
 	 * 
 	 * @return
 	 */
-	public WhileyPath loadWhileyPath() throws CoreException {
+	public WhileyPath getWhileyPath() throws CoreException {
 		try {
 			IFile file = project.getFile(".whileypath");
 			DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
@@ -144,7 +144,7 @@ public class WhileyNature implements IProjectNature {
 	 * @param monitor
 	 * @throws CoreException
 	 */
-	public void writeWhileyPath(WhileyPath whileyPath, IProgressMonitor monitor)
+	public void setWhileyPath(WhileyPath whileyPath, IProgressMonitor monitor)
 			throws CoreException {
 		Document xmldoc = whileyPath.toXmlDocument();
 		ByteArrayOutputStream bout = new ByteArrayOutputStream();
