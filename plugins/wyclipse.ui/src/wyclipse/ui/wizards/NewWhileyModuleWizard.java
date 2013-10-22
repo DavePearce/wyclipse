@@ -33,7 +33,6 @@ import org.eclipse.ui.IWorkbench;
 
 public class NewWhileyModuleWizard extends Wizard implements INewWizard{
 	private IWorkbench workbench;
-	
 	private IStructuredSelection selection;
 	
 	private NewWhileyModuleWizardPage page;

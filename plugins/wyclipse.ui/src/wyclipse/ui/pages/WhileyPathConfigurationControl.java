@@ -1,14 +1,23 @@
 package wyclipse.ui.pages;
 
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.ViewerFilter;
+import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.*;
 import org.eclipse.swt.widgets.*;
+import org.eclipse.ui.dialogs.ContainerSelectionDialog;
+import org.eclipse.ui.dialogs.WizardNewFolderMainPage;
+import org.eclipse.ui.internal.ide.dialogs.FileFolderSelectionDialog;
 
 import wyclipse.core.builder.WhileyPath;
+import wyclipse.ui.dialogs.NewWhileyPathBuildRuleDialog;
 import wyclipse.ui.util.WhileyPathViewer;
 
 /**
@@ -20,6 +29,8 @@ import wyclipse.ui.util.WhileyPathViewer;
  * 
  */
 public class WhileyPathConfigurationControl {
+	private Shell shell;
+	private IProject project;
 	private WhileyPath whileypath;
 	
 	// WhileyPath view + controls
@@ -30,8 +41,10 @@ public class WhileyPathConfigurationControl {
 	private Text defaultOutputFolderText; 
 	private Button defaultOutputFolderBrowseButton;
 	
-	public WhileyPathConfigurationControl(WhileyPath whileypath) {
-		this.whileypath = whileypath;
+	public WhileyPathConfigurationControl(Shell shell, IProject project, WhileyPath whileypath) {
+		this.shell = shell;
+		this.project = project;
+		this.whileypath = whileypath;	
 	}
 	
 	public Composite create(Composite parent) {				
@@ -57,6 +70,12 @@ public class WhileyPathConfigurationControl {
 		Button editButton = createButton(container, "Edit");
 		Button removeButton = createButton(container, "Remove");		
 		
+		addButton.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				handleAddRule();
+			}
+		});
+		
 		removeButton.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
 				handleRemoveRule();
@@ -73,7 +92,7 @@ public class WhileyPathConfigurationControl {
 		defaultOutputFolderBrowseButton
 				.addSelectionListener(new SelectionAdapter() {
 					public void widgetSelected(SelectionEvent e) {
-						handleBrowseLocation();
+						handleBrowseDefaultOutputFolder();
 					}
 				});	
 		
@@ -97,6 +116,14 @@ public class WhileyPathConfigurationControl {
 	// ======================================================================
 
 	/**
+	 * This function is called when the add button is pressed.
+	 */
+	protected void handleAddRule() {
+		NewWhileyPathBuildRuleDialog dialog = new NewWhileyPathBuildRuleDialog(shell); 		
+		dialog.open();
+	}
+	
+	/**
 	 * This function is called when the remove button is pressed.
 	 */
 	protected void handleRemoveRule() {		
@@ -110,8 +137,24 @@ public class WhileyPathConfigurationControl {
 		whileyPathViewer.refresh();
 	}
 	
-	protected void handleBrowseLocation() {
+	/**
+	 * This function is called when the browse button for the default output
+	 * folder is called.
+	 */
+	protected void handleBrowseDefaultOutputFolder() {
 		
+		// This is a fairly simple approach to selecting a folder from the user.
+		// To make it more appealing, we might like to use a simpler (custom)
+		// dialog (like the JDT does). But, for now, this will do!
+		
+		DirectoryDialog dialog = new DirectoryDialog(shell);
+		dialog.setFilterPath(project.getLocation().toString());
+		String result = dialog.open();
+		if(result != null) {
+			IPath path = new Path(result);
+			path = path.makeRelativeTo(project.getLocation());
+			defaultOutputFolderText.setText(path.toString());
+		}
 	}
 	
 	// ======================================================================
