@@ -230,7 +230,7 @@ public class WhileyNature implements IProjectNature {
 		Path sourceFolder = new Path("src");
 		Path defaultOutputFolder = new Path("bin");
 
-		WhileyPath.Action defaultAction = new WhileyPath.Action(sourceFolder,
+		WhileyPath.BuildRule defaultAction = new WhileyPath.BuildRule(sourceFolder,
 				Trie.fromString("**"), null);
 
 		return new WhileyPath(defaultOutputFolder, defaultAction);

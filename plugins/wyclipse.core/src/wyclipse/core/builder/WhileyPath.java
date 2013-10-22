@@ -10,6 +10,9 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import org.eclipse.core.runtime.IPath;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.w3c.dom.NamedNodeMap;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 import wybs.lang.Content;
 import wybs.lang.Path;
@@ -72,16 +75,32 @@ public final class WhileyPath {
 			Document doc = docBuilder.newDocument();
 			Element root = doc.createElement("whileypath");
 			if (defaultOutputFolder != null) {
-				root.setAttribute("defaultOutputFolder",
+				root.setAttribute("bindir",
 						defaultOutputFolder.toString());
 			}
 			doc.appendChild(root);
 
 			for (Entry e : entries) {
-				if (e instanceof Action) {
-					Action action = (Action) e;
-					Element child = doc.createElement("action");
-					doc.appendChild(child);
+				if (e instanceof BuildRule) {
+					BuildRule action = (BuildRule) e;
+					Element child = doc.createElement("buildrule");
+					// FIXME: need to do more here!
+					child.setAttribute("target", "wyil");
+					child.setAttribute("srcdir", action.getSourceFolder()
+							.toString());
+					child.setAttribute("includes", action.getSourceIncludes()
+							.toString());
+					if (action.getOutputFolder() != null) {
+						child.setAttribute("bindir", action.getOutputFolder()
+								.toString());
+					}
+					root.appendChild(child);
+				} else if(e instanceof ExternalLibrary) {
+					ExternalLibrary el = (ExternalLibrary) e;
+					Element child = doc.createElement("library");
+					child.setAttribute("path", el.getLocation().toString());
+					child.setAttribute("includes", el.getIncludes().toString());
+					root.appendChild(child);
 				}
 			}
 
@@ -92,9 +111,56 @@ public final class WhileyPath {
 		}
 	}
 	
+	/**
+	 * Construct a WhileyPath object from an XML document. If the document is
+	 * corrupt or invalid in some way, then this will simply return null.
+	 * 
+	 * @param xmldoc
+	 * @return
+	 */
 	public static final WhileyPath fromXmlDocument(Document xmldoc) {
-		System.out.println("FROM XML DOCUMENT CALLED");
-		return new WhileyPath();
+		WhileyPath whileypath = new WhileyPath();
+		
+		// First, check whether or not a bindir attribute is given on the root
+		// of the whileypath file.
+		Node root = xmldoc.getFirstChild();
+		Node globalBinDir = root.getAttributes().getNamedItem("bindir");
+		if (globalBinDir != null) {
+			// Yup, it exists.
+			whileypath
+					.setDefaultOutputFolder(new org.eclipse.core.runtime.Path(
+							globalBinDir.getNodeValue()));
+		}
+		
+		List<Entry> whileyPathEntries = whileypath.getEntries();
+		NodeList children = root.getChildNodes();
+		for (int i = 0; i != children.getLength(); ++i) {
+			Node child = children.item(i);
+			String childName = child.getNodeName();
+			if (childName.equals("buildrule")) {
+				NamedNodeMap attributes = child.getAttributes();
+				IPath sourceFolder = new org.eclipse.core.runtime.Path(
+						attributes.getNamedItem("srcdir").getNodeValue());
+				Path.Filter sourceIncludes = Trie.fromString(attributes
+						.getNamedItem("includes").getNodeValue());
+				Node bindir = attributes.getNamedItem("bindir");
+				IPath outputFolder = bindir == null ? null
+						: new org.eclipse.core.runtime.Path(
+								bindir.getNodeValue());
+				whileyPathEntries.add(new WhileyPath.BuildRule(sourceFolder,
+						sourceIncludes, outputFolder));
+			} else if (childName.equals("library")) {
+				NamedNodeMap attributes = child.getAttributes();
+				IPath location = new org.eclipse.core.runtime.Path(attributes
+						.getNamedItem("srcdir").getNodeValue());
+				Path.Filter includes = Trie.fromString(attributes.getNamedItem(
+						"includes").getNodeValue());
+				whileyPathEntries.add(new WhileyPath.ExternalLibrary(location,
+						includes));
+			}
+		}
+		
+		return whileypath;
 	}
 	
 	/**
@@ -157,7 +223,7 @@ public final class WhileyPath {
 	 * @author David J. Pearce
 	 * 
 	 */
-	public static final class Action extends Entry {
+	public static final class BuildRule extends Entry {
 		
 		/**
 		 * The location of the folder containing whiley source files. Observe
@@ -179,7 +245,7 @@ public final class WhileyPath {
 		 */
 		private IPath outputFolder;
 	
-		public Action(IPath sourceFolder, Path.Filter sourceIncludes, IPath outputFolder) {
+		public BuildRule(IPath sourceFolder, Path.Filter sourceIncludes, IPath outputFolder) {
 			this.sourceFolder = sourceFolder;
 			this.sourceIncludes = sourceIncludes;
 			this.outputFolder = outputFolder;

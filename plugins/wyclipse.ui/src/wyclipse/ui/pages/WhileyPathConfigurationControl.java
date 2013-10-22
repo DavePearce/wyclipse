@@ -1,5 +1,6 @@
 package wyclipse.ui.pages;
 
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -20,6 +21,10 @@ import wyclipse.ui.util.WhileyPathViewer;
 public class WhileyPathConfigurationControl {
 	private WhileyPath whileypath;
 	
+	// Default Output Folder Controls
+	private Label defaultOutputFolderLabel;
+	private Text defaultOutputFolderText; 
+	private Button defaultOutputFolderBrowseButton;
 	
 	public WhileyPathConfigurationControl(WhileyPath whileypath) {
 		this.whileypath = whileypath;
@@ -51,15 +56,26 @@ public class WhileyPathConfigurationControl {
 		// =====================================================================
 		// Bottom Section
 		// =====================================================================
-		Label defaultOutputFolderLabel = createLabel(container, "Default Output Folder:", 3);		
-		Text defaultOutputFolder = createText(container, "bin/", 2);
-		Button browseButton = createButton(container, "Browse...");
+		defaultOutputFolderLabel = createLabel(container, "Default Output Folder:", 3);		
+		defaultOutputFolderText = createText(container, "", 2);
+		defaultOutputFolderBrowseButton = createButton(container, "Browse...");
+
+		defaultOutputFolderBrowseButton
+				.addSelectionListener(new SelectionAdapter() {
+					public void widgetSelected(SelectionEvent e) {
+						handleBrowseLocation();
+					}
+				});	
 		
-		browseButton.addSelectionListener(new SelectionAdapter() {
-			public void widgetSelected(SelectionEvent e) {
-				handleBrowseLocation();
-			}
-		});		
+		IPath defaultOutputFolder = whileypath.getDefaultOutputFolder();
+		if(defaultOutputFolder == null) {
+			// No default output folder
+			defaultOutputFolderLabel.setEnabled(false);
+			defaultOutputFolderText.setEnabled(false);
+			defaultOutputFolderBrowseButton.setEnabled(false);
+		} else {
+			defaultOutputFolderText.setText(defaultOutputFolder.toString());
+		}
 		
 		container.pack();
 		

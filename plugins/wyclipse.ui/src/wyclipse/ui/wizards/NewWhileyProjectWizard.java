@@ -248,8 +248,8 @@ public class NewWhileyProjectWizard extends Wizard implements IExecutableExtensi
 		// Second, iterate through all the entries, looking for actions which
 		// may have folders that don't yet exist.
 		for (WhileyPath.Entry e : whileypath.getEntries()) {
-			if (e instanceof WhileyPath.Action) {
-				WhileyPath.Action container = (WhileyPath.Action) e;
+			if (e instanceof WhileyPath.BuildRule) {
+				WhileyPath.BuildRule container = (WhileyPath.BuildRule) e;
 				IPath sourceLocation = container.getSourceFolder();
 				IPath outputLocation = container.getOutputFolder();
 

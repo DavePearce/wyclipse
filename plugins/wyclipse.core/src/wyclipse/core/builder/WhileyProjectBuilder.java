@@ -136,8 +136,8 @@ public class WhileyProjectBuilder extends IncrementalProjectBuilder {
 		// libraries. 
 		for (WhileyPath.Entry entry : whileypath.getEntries()) {
 			
-			if (entry instanceof WhileyPath.Action) {
-				WhileyPath.Action action = (WhileyPath.Action) entry;
+			if (entry instanceof WhileyPath.BuildRule) {
+				WhileyPath.BuildRule action = (WhileyPath.BuildRule) entry;
 				
 				// ============================================================
 				// First, create the corresponding source root
