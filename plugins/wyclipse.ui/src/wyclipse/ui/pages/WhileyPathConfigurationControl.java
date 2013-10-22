@@ -122,7 +122,7 @@ public class WhileyPathConfigurationControl {
 			Object input, int horizontalSpan, int verticalSpan) {
 		WhileyPathViewer viewer = new WhileyPathViewer(container, SWT.VIRTUAL
 				| SWT.BORDER);
-		GridData gd = new GridData(GridData.FILL_HORIZONTAL);
+		GridData gd = new GridData(GridData.FILL_HORIZONTAL | GridData.FILL_VERTICAL);		
 		gd.horizontalSpan = horizontalSpan;
 		gd.verticalSpan = verticalSpan;
 		viewer.getTree().setLayoutData(gd);

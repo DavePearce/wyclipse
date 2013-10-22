@@ -1,5 +1,6 @@
 package wyclipse.ui.util;
 
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ILabelProviderListener;
@@ -9,6 +10,8 @@ import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Composite;
 
+import wybs.lang.Path;
+import wybs.util.Trie;
 import wyclipse.core.builder.WhileyPath;
 import wyclipse.ui.Activator;
 
@@ -61,18 +64,25 @@ public class WhileyPathViewer extends TreeViewer {
 
 		@Override
 		public Object[] getElements(Object inputElement) {
-			if(inputElement instanceof WhileyPath) {
-				WhileyPath whileyPath = (WhileyPath) inputElement;
-				java.util.List<WhileyPath.Entry> entries = whileyPath.getEntries();
-				return entries.toArray(new Object[entries.size()]);				
-			} else {
-				return new Object[]{};
-			}
+			return getChildren(inputElement);
 		}
 
 		@Override
 		public Object[] getChildren(Object parentElement) {
-			return new Object[]{};
+			if (parentElement instanceof WhileyPath) {
+				WhileyPath whileyPath = (WhileyPath) parentElement;
+				java.util.List<WhileyPath.Entry> entries = whileyPath
+						.getEntries();
+				return entries.toArray(new Object[entries.size()]);
+			} else if (parentElement instanceof WhileyPath.BuildRule) {
+				WhileyPath.BuildRule rule = (WhileyPath.BuildRule) parentElement;
+				Object[] entries = new Object[2];
+				entries[0] = new SourceIncludesElement(rule.getSourceIncludes());
+				entries[1] = new OutputFolderElement(rule.getOutputFolder());
+				return entries;
+			} else {
+				return new Object[] {};
+			}
 		}
 
 		@Override
@@ -83,11 +93,27 @@ public class WhileyPathViewer extends TreeViewer {
 
 		@Override
 		public boolean hasChildren(Object element) {
-			// TODO Auto-generated method stub
-			return false;
+			return element instanceof WhileyPath
+					|| element instanceof WhileyPath.BuildRule;
 		}		
 	}
 	
+	private static class SourceIncludesElement {
+		public Path.Filter includes;
+		
+		public SourceIncludesElement(Path.Filter includes) {
+			this.includes = includes;
+		}
+	}
+	
+	private static class OutputFolderElement {
+		public IPath folder;
+		
+		public OutputFolderElement(IPath folder) {
+			this.folder = folder;
+		}
+	}
+		
 	/**
 	 * The label provider is responsible for associating labels with the objects
 	 * being viewed in the viewer; in this case, that means it associates labels
@@ -124,7 +150,11 @@ public class WhileyPathViewer extends TreeViewer {
 		public Image getImage(Object element) {
 			ImageDescriptor descriptor = null;
 			
-			descriptor = Activator.getImageDescriptor("whiley_modulefolder.gif");			
+			if(element instanceof WhileyPath.BuildRule) { 
+				descriptor = Activator.getImageDescriptor("whiley_modulefolder.gif");
+			} else {
+				return null;
+			}
 		
 			// TODO: use an image cache??
 			return descriptor.createImage();							
@@ -135,7 +165,13 @@ public class WhileyPathViewer extends TreeViewer {
 			if (element instanceof WhileyPath.BuildRule) {
 				WhileyPath.BuildRule container = (WhileyPath.BuildRule) element;
 				return container.getSourceFolder().toString();
-			}
+			} else if (element instanceof SourceIncludesElement) {
+				SourceIncludesElement sie = (SourceIncludesElement) element;
+				return "Includes: " + sie.includes;
+			} else if (element instanceof OutputFolderElement) {
+				OutputFolderElement ofe = (OutputFolderElement) element;
+				return "Output Folder: " + ofe.folder;
+			} 
 			return null;
 		}
 		
