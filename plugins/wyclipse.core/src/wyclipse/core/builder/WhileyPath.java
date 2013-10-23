@@ -10,9 +10,17 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import org.eclipse.core.runtime.IPath;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.w3c.dom.NamedNodeMap;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 import wybs.lang.Content;
 import wybs.lang.Path;
+import wybs.util.Trie;
+import wyc.lang.WhileyFile;
+import wycs.core.WycsFile;
+import wycs.syntax.WyalFile;
+import wyil.lang.WyilFile;
 
 /**
  * The <code>whileypath</code> controls the way in which files and folders in a
@@ -26,34 +34,133 @@ import wybs.lang.Path;
  */
 public final class WhileyPath {
 	private final ArrayList<Entry> entries;
+	private IPath defaultOutputFolder;
 	
 	public WhileyPath() {
 		entries = new ArrayList<Entry>();
 	}
 	
-	public WhileyPath(Collection<Entry> entries) {
+	public WhileyPath(IPath defaultOutputFolder, Entry... entries) {
+		this.defaultOutputFolder = defaultOutputFolder;
+		this.entries = new ArrayList<Entry>();
+		for(Entry e : entries) {
+			this.entries.add(e);
+		}
+	}
+	
+	public WhileyPath(IPath defaultOutputFolder, Collection<Entry> entries) {
+		this.defaultOutputFolder = defaultOutputFolder;
 		this.entries = new ArrayList<Entry>(entries);
 	}
 
+	public IPath getDefaultOutputFolder() {
+		return defaultOutputFolder;
+	}
+	
+	public void setDefaultOutputFolder(IPath defaultOutputFolder) {
+		this.defaultOutputFolder = defaultOutputFolder;
+	}
+	
 	public List<Entry> getEntries() {
 		return entries;
 	}
 	
 	public Document toXmlDocument() {
 		try {
-			DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
+			DocumentBuilderFactory docFactory = DocumentBuilderFactory
+					.newInstance();
 			DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
 
-			//root elements
+			// root elements
 			Document doc = docBuilder.newDocument();
 			Element root = doc.createElement("whileypath");
+			if (defaultOutputFolder != null) {
+				root.setAttribute("bindir",
+						defaultOutputFolder.toString());
+			}
 			doc.appendChild(root);
-			root.appendChild(doc.createElement("src"));
+
+			for (Entry e : entries) {
+				if (e instanceof BuildRule) {
+					BuildRule action = (BuildRule) e;
+					Element child = doc.createElement("buildrule");
+					// FIXME: need to do more here!
+					child.setAttribute("target", "wyil");
+					child.setAttribute("srcdir", action.getSourceFolder()
+							.toString());
+					child.setAttribute("includes", action.getSourceIncludes()
+							.toString());
+					if (action.getOutputFolder() != null) {
+						child.setAttribute("bindir", action.getOutputFolder()
+								.toString());
+					}
+					root.appendChild(child);
+				} else if(e instanceof ExternalLibrary) {
+					ExternalLibrary el = (ExternalLibrary) e;
+					Element child = doc.createElement("library");
+					child.setAttribute("path", el.getLocation().toString());
+					child.setAttribute("includes", el.getIncludes().toString());
+					root.appendChild(child);
+				}
+			}
+
 			return doc;
-		} catch(Exception e) {
+		} catch (Exception e) {
 			// ?
 			return null;
 		}
+	}
+	
+	/**
+	 * Construct a WhileyPath object from an XML document. If the document is
+	 * corrupt or invalid in some way, then this will simply return null.
+	 * 
+	 * @param xmldoc
+	 * @return
+	 */
+	public static final WhileyPath fromXmlDocument(Document xmldoc) {
+		WhileyPath whileypath = new WhileyPath();
+		
+		// First, check whether or not a bindir attribute is given on the root
+		// of the whileypath file.
+		Node root = xmldoc.getFirstChild();
+		Node globalBinDir = root.getAttributes().getNamedItem("bindir");
+		if (globalBinDir != null) {
+			// Yup, it exists.
+			whileypath
+					.setDefaultOutputFolder(new org.eclipse.core.runtime.Path(
+							globalBinDir.getNodeValue()));
+		}
+		
+		List<Entry> whileyPathEntries = whileypath.getEntries();
+		NodeList children = root.getChildNodes();
+		for (int i = 0; i != children.getLength(); ++i) {
+			Node child = children.item(i);
+			String childName = child.getNodeName();
+			if (childName.equals("buildrule")) {
+				NamedNodeMap attributes = child.getAttributes();
+				IPath sourceFolder = new org.eclipse.core.runtime.Path(
+						attributes.getNamedItem("srcdir").getNodeValue());
+				Path.Filter sourceIncludes = Trie.fromString(attributes
+						.getNamedItem("includes").getNodeValue());
+				Node bindir = attributes.getNamedItem("bindir");
+				IPath outputFolder = bindir == null ? null
+						: new org.eclipse.core.runtime.Path(
+								bindir.getNodeValue());
+				whileyPathEntries.add(new WhileyPath.BuildRule(sourceFolder,
+						sourceIncludes, outputFolder));
+			} else if (childName.equals("library")) {
+				NamedNodeMap attributes = child.getAttributes();
+				IPath location = new org.eclipse.core.runtime.Path(attributes
+						.getNamedItem("srcdir").getNodeValue());
+				Path.Filter includes = Trie.fromString(attributes.getNamedItem(
+						"includes").getNodeValue());
+				whileyPathEntries.add(new WhileyPath.ExternalLibrary(location,
+						includes));
+			}
+		}
+		
+		return whileypath;
 	}
 	
 	/**
@@ -68,154 +175,105 @@ public final class WhileyPath {
 	}
 	
 	/**
-	 * Represents an item on the whileypath which (in an abstract sense) holds
-	 * other items (e.g. source files). This includes folders, as well as
-	 * libraries (e.g. jar files).
+	 * <p>
+	 * Represents an external folder or library on the whilepath which contains
+	 * various files needed for compilation. External files are not modified in
+	 * any way by the builder.
+	 * </p>
+	 * <p>
+	 * <b>NOTE:</b> currently, external libraries must hold WyIL files.
+	 * </p>
 	 * 
 	 * @author David J. Pearce
 	 * 
 	 */
-	public static abstract class Container extends Entry {
-		
+	public static final class ExternalLibrary extends Entry {
 		/**
-		 * A unique identifier for this container. This enables the container to
-		 * be referenced from a build rule.
-		 */
-		private String ID;
-		
-		/**
-		 * The location of this "container". Observe that this may be relative
-		 * to the project root, or an absolute location.
+		 * The location of the folder containing whiley source files. Observe
+		 * that this may be relative to the project root, or an absolute
+		 * location.
 		 */
 		private IPath location;
 		
 		/**
-		 * Describes the set of files which are included in this
-		 * container.
+		 * Describes the set of files which are included in this library.
 		 */
 		private Path.Filter includes;
 		
-		/**
-		 * Describes the kind of files which are included in this container.
-		 */
-		private Content.Type contentType;
-
-		public Container(String ID, IPath location, Path.Filter includes,
-				Content.Type contentType) {
+		public ExternalLibrary(IPath location, Path.Filter includes) {	
 			this.location = location;
-			this.ID = ID;
 			this.includes = includes;
-			this.contentType = contentType;
 		}
 		
 		public IPath getLocation() {
 			return location;
 		}
 		
-		public String getID() {
-			return ID;
-		}
-		
 		public Path.Filter getIncludes() {
 			return includes;
 		}
-		
-		public Content.Type getContentType() {
-			return contentType;
-		}
 	}
 	
 	/**
-	 * Represents a source folder on the whilepath which normally contains
-	 * <code>.whiley</code> (although, in fact, this is not necessary the case).
-	 * Source folders determine files which are to be recompiled when a build is
-	 * initiated.
+	 * Represents an action for compiling Whiley source files to a given target.
+	 * An optional output folder may also be supplied. From this action, the
+	 * necessary build rules for generating code for the given target can then
+	 * be created.
 	 * 
 	 * @author David J. Pearce
 	 * 
 	 */
-	public static final class SourceFolder extends Container {
-		public SourceFolder(String ID, IPath location,
-				Path.Filter includes, Content.Type contentType) {
-			super(ID, location, includes, contentType);
-		}
-	}
-	
-	/**
-	 * Represents a binary folder on the whilepath which normally contains
-	 * binary files (e.g. <code>.wyil</code> files). Binary files are temporary
-	 * and are removed when the project is "cleaned".
-	 * 
-	 * @author David J. Pearce
-	 * 
-	 */
-	public static final class BinaryFolder extends Container {
-		public BinaryFolder(String ID, IPath location,
-				Path.Filter includes, Content.Type contentType) {
-			super(ID, location, includes, contentType);
-		}
-	}
-	
-	/**
-	 * Represents an external folder or library on the whilepath which contains
-	 * various files needed for compilation. External files are not modified in
-	 * any way by the builder.
-	 * 
-	 * @author David J. Pearce
-	 * 
-	 */
-	public static final class External extends Container {
-		public External(String ID, IPath location, Path.Filter includes,
-				Content.Type contentType) {
-			super(ID, location, includes, contentType);
-		}
-	}
-	
-	/**
-	 * Represents a build rule which is responsible for compiling files from a
-	 * source folder and writing them to an output folder. A builder must also
-	 * be specified which determines how the files will be compiled.
-	 * 
-	 * @author David J. Pearce
-	 * 
-	 */
-	public static final class Rule extends Entry {
+	public static final class BuildRule extends Entry {
 		
 		/**
-		 * The name of the builder to be used when compiling files according to
-		 * this rule. For example, "wyc" is the standard name of the Whiley
-		 * Compiler, which compiles ".whiley" files to ".wyil" files.
+		 * The location of the folder containing whiley source files. Observe
+		 * that this may be relative to the project root, or an absolute
+		 * location.
 		 */
-		private final String builderID;
+		private IPath sourceFolder;
 		
 		/**
-		 * ID of source folder. Observe that this should be a designated source
-		 * folder.
+		 * Describes the set of source files which are included in this action.
 		 */
-		private final String sourceFolderID;
+		private Path.Filter sourceIncludes;
 		
 		/**
-		 * ID of output (binary) folder. Observe that this should be a
-		 * designated binary folder.
+		 * The location of the folder where binary (i.e. compiled) files are
+		 * placed. Observe that this may be relative to the project root, or an
+		 * absolute location. Note also that this is optional, and may be null
+		 * (in which case the defaultOutputFolder is used).
 		 */
-		private final String binaryFolderID;
+		private IPath outputFolder;
 	
-		public Rule(String builderID, String sourceFolderID, String binaryFolderID) {
-			this.builderID = builderID;
-			this.sourceFolderID = sourceFolderID;
-			this.binaryFolderID = binaryFolderID;
+		public BuildRule(IPath sourceFolder, Path.Filter sourceIncludes, IPath outputFolder) {
+			this.sourceFolder = sourceFolder;
+			this.sourceIncludes = sourceIncludes;
+			this.outputFolder = outputFolder;
+		}	
+		
+		
+		public IPath getSourceFolder() {
+			return sourceFolder;
 		}
 		
-		public String getBuilderID() {
-			return builderID;
+		public void setSourceFolder(IPath sourceFolder) {
+			this.sourceFolder = sourceFolder;
 		}
 		
-		public String getSourceFolderID() {
-			return sourceFolderID;
+		public Path.Filter getSourceIncludes() {
+			return sourceIncludes;
 		}
 		
-		public String getBinaryFolderID() {
-			return binaryFolderID;
+		public void setSourceIncludes(Path.Filter sourceIncludes) {
+			this.sourceIncludes = sourceIncludes;
+		}
+		
+		public IPath getOutputFolder() {
+			return outputFolder;
+		}
+		
+		public void setOutputFolder(IPath outputFolder) {
+			this.outputFolder = outputFolder;
 		}
 	}
 }
