@@ -2,6 +2,7 @@ package wyclipse.ui.pages;
 
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -9,6 +10,7 @@ import org.eclipse.swt.layout.*;
 import org.eclipse.swt.widgets.*;
 import org.eclipse.ui.dialogs.ContainerSelectionDialog;
 
+import wybs.util.Trie;
 import wyclipse.core.builder.WhileyPath;
 import wyclipse.ui.dialogs.NewWhileyPathBuildRuleDialog;
 import wyclipse.ui.util.WhileyPathViewer;
@@ -132,8 +134,11 @@ public class WhileyPathConfigurationControl {
 	 * This function is called when the add button is pressed.
 	 */
 	protected void handleAddRule() {
-		NewWhileyPathBuildRuleDialog dialog = new NewWhileyPathBuildRuleDialog(shell); 		
-		dialog.open();
+		WhileyPath.BuildRule buildRule = new WhileyPath.BuildRule(new Path(""),
+				Trie.fromString("**/*.whiley"), null);
+		NewWhileyPathBuildRuleDialog dialog = new NewWhileyPathBuildRuleDialog(
+				shell, buildRule);
+		dialog.open();		
 	}
 	
 	/**

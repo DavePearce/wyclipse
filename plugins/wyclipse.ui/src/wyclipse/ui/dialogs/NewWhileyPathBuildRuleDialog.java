@@ -4,11 +4,9 @@ import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.*;
 
+import wyclipse.core.builder.WhileyPath;
 import wyclipse.ui.util.WyclipseUI;
 
 /**
@@ -29,10 +27,31 @@ import wyclipse.ui.util.WyclipseUI;
  * 
  */
 public class NewWhileyPathBuildRuleDialog extends Dialog {
+	// Data item being constructed
+	private WhileyPath.BuildRule buildRule;
 	
-	public NewWhileyPathBuildRuleDialog(Shell parentShell) {
+	// Source / Target Group
+	private Text sourceFolderText;	
+	private Text sourceIncludesText;
+	private Text targetText;
+	
+	// Output Folder Group
+	private Button useDefaultOutputFolder;
+	private Text outputFolderText;	
+	private Button outputFolderBrowseButton;
+
+	// Verification Group
+	private Button enableVerification;
+	private Button generateVerificationConditions;
+
+	// Advanced Config Group
+	private Button enableAdvancedConfiguration;
+	private Button generateWyilFiles;
+
+	public NewWhileyPathBuildRuleDialog(Shell parentShell,
+			WhileyPath.BuildRule buildRule) {
 		super(parentShell);
-		// TODO Auto-generated constructor stub
+		this.buildRule = buildRule;
 	}
 
 	@Override
@@ -50,35 +69,99 @@ public class NewWhileyPathBuildRuleDialog extends Dialog {
 		container.setLayout(layout);
 
 		// =====================================================================
-		// Done
+		// Configure Source / Target Group
 		// =====================================================================
 		
 		WyclipseUI.createLabel(container, "Source Folder:", 1);		
-		WyclipseUI.createText(container, "", 1, 200);
+		sourceFolderText = WyclipseUI.createText(container, "", 1, 200);
 		WyclipseUI.createButton(container, "Browse...", 120);
 		
 		WyclipseUI.createLabel(container, "Includes:", 1);		
-		WyclipseUI.createText(container, "", 2);
+		sourceIncludesText = WyclipseUI.createText(container, "", 2);
 		
 		WyclipseUI.createLabel(container, "Target:", 1);
-		WyclipseUI.createText(container, "", 2); // to be removed
-		
+		targetText = WyclipseUI.createText(container, "", 2); // to be removed
+
+		// =====================================================================
+		// Configure Output Folder Group
+		// =====================================================================
+
 		// create check box
-		WyclipseUI.createCheckBox(container, "Use Default Output Folder",3);
+		useDefaultOutputFolder = WyclipseUI.createCheckBox(container, "Use Default Output Folder",3);
 		WyclipseUI.createLabel(container, "Output Folder:", 1);		
-		WyclipseUI.createText(container, "", 1, 200);
-		WyclipseUI.createButton(container, "Browse...", 120);
+		outputFolderText = WyclipseUI.createText(container, "", 1, 200);
+		outputFolderBrowseButton = WyclipseUI.createButton(container, "Browse...", 120);
 		
 		WyclipseUI.createSeparator(container, 3);
+
+		// =====================================================================
+		// Configure Verification Group
+		// =====================================================================
 		
-		WyclipseUI.createCheckBox(container, "Enable Verification",3);
-		WyclipseUI.createCheckBox(container, "Generate Verification Conditions (i.e. WyAL files)", 3);
-		
+		enableVerification = WyclipseUI.createCheckBox(container,
+				"Enable Verification", 3);
+		generateVerificationConditions = WyclipseUI.createCheckBox(container,
+				"Generate Verification Conditions (i.e. WyAL files)", 3);
+
 		WyclipseUI.createSeparator(container, 3);
 		
-		WyclipseUI.createCheckBox(container, "Enable Advanced Configuration",3);
-		WyclipseUI.createCheckBox(container, "Generate Intermediate Files (i.e. WyIL files)", 3);
-				
+		// =====================================================================
+		// Configure Advanced Configuration Group
+		// =====================================================================
+		
+		enableAdvancedConfiguration = WyclipseUI.createCheckBox(container,
+				"Enable Advanced Configuration", 3);
+		generateWyilFiles = WyclipseUI.createCheckBox(container,
+				"Generate Intermediate Files (i.e. WyIL files)", 3);
+
+		// =====================================================================
+		// Initialise Data
+	    // =====================================================================
+		initialiseSourceTargetGroup();
+		initialiseOutputFolderGroup();
+		initialiseVerificationGroup();
+		initialiseAdvancedConfigurationGroup();
+		
+		// =====================================================================
+		// Done
+	    // =====================================================================
+						
 		return container;
+	}
+	
+	@Override
+	public void okPressed() {
+		// FIXME.
+	}
+	
+	private void initialiseSourceTargetGroup() {		
+		sourceFolderText.setText(buildRule.getSourceFolder().toString());
+		sourceIncludesText.setText(buildRule.getSourceIncludes().toString());
+		//targetText.setText(buildRule.getTarget().toString());
+	}
+	
+	private void initialiseOutputFolderGroup() {
+		if(buildRule.getOutputFolder() != null) {
+			useDefaultOutputFolder.setSelection(false);
+			outputFolderText.setText(buildRule.getOutputFolder().toString());
+			outputFolderText.setEnabled(true);
+			outputFolderBrowseButton.setEnabled(true);
+		} else {
+			useDefaultOutputFolder.setSelection(true);
+			outputFolderText.setEnabled(false);
+			outputFolderBrowseButton.setEnabled(false);
+		}
+	}
+	
+	private void initialiseVerificationGroup() {
+		// Fow now, not supported!
+		enableVerification.setSelection(false);
+		generateVerificationConditions.setEnabled(false);
+	}
+	
+	private void initialiseAdvancedConfigurationGroup() {
+		// Fow now, not supported!
+		enableAdvancedConfiguration.setSelection(false);
+		generateWyilFiles.setEnabled(false);
 	}
 }
