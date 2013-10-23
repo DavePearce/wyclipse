@@ -112,18 +112,5 @@
         </adapt>         
       </enabledWhen>
     </page>
-    <page
-        class="wyclipse.ui.pages.WhileyCompilerPropertyPage"
-        id="wyclipse.ui.whileycompilerpropertypage"
-        name="Whiley Compiler">
-      <enabledWhen>
-        <adapt type="org.eclipse.core.resources.IProject">
-          <test
-              property="org.eclipse.core.resources.projectNature"
-              value="wyclipse.core.whileynature"/>
-        </adapt>         
-      </enabledWhen>
-
-    </page>
   </extension>
 </plugin>

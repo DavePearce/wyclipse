@@ -77,17 +77,6 @@ import wyil.lang.WyilFile;
  */
 public class WhileyNature implements IProjectNature {
 
-	/**
-	 * The following describe the persistent properties maintained for the
-	 * Whiley Compiler. These are user configurable parameters which control the
-	 * compilation process. For example, verification can be enabled or disabled
-	 * through the "Whiley Compiler" property page.
-	 */
-	public static final QualifiedName VERIFICATION_PROPERTY = new QualifiedName(
-			"", "VERIFICATION");
-	
-	public static final boolean VERIFICATION_DEFAULT = true;
-
 	private IProject project;
 
 	private WhileyProjectBuilder whileyProjectBuilder;
@@ -197,38 +186,7 @@ public class WhileyNature implements IProjectNature {
 	public void setWhileyProjectBuilder(WhileyProjectBuilder builder) {
 		this.whileyProjectBuilder = builder;
 	}
-	
-	/**
-	 * Check whether verification is enabled or not. Enabling verification means
-	 * the automated theorem prover will be used to check the
-	 * pre-/post-conditions and other invariants of a Whiley module.
-	 * 
-	 * @return
-	 */
-	public boolean getVerificationEnable() throws CoreException {		
-		String property = project.getPersistentProperty(VERIFICATION_PROPERTY);
-		if(property == null) {
-			return VERIFICATION_DEFAULT;
-		} else {
-			return property.equals("true");
-		}
-	}
-	
-	/**
-	 * Set the verification enabled property. Enabling verification means the
-	 * automated theorem prover will be used to check the pre-/post-conditions
-	 * and other invariants of a Whiley module.
-	 * 
-	 * @return
-	 */
-	public void setVerificationEnable(boolean property) throws CoreException {
-		project.setPersistentProperty(VERIFICATION_PROPERTY,
-				Boolean.toString(property));
-		if(whileyProjectBuilder != null) {
-			whileyProjectBuilder.setVerificationEnable(property);
-		}
-	}
-	
+			
 	/**
 	 * Construct a default whileypath to be used in the case when no whileypath
 	 * exists already, and we can't find anything which helps us to guess a
