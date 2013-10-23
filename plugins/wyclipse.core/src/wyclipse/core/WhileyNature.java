@@ -42,6 +42,7 @@ import wybs.lang.Content;
 import wybs.util.Trie;
 import wyc.lang.WhileyFile;
 import wyclipse.core.builder.WhileyPath;
+import wyclipse.core.builder.WhileyProjectBuilder;
 import wycs.core.WycsFile;
 import wycs.syntax.WyalFile;
 import wyil.lang.WyilFile;
@@ -69,7 +70,9 @@ public class WhileyNature implements IProjectNature {
 	public static final boolean VERIFICATION_DEFAULT = true;
 
 	private IProject project;
-				
+
+	private WhileyProjectBuilder whileyProjectBuilder;
+	
 	@Override
 	public void configure() throws CoreException {
 		IProjectDescription desc = project.getDescription();
@@ -136,6 +139,10 @@ public class WhileyNature implements IProjectNature {
 		this.project = project;		
 	}	
 	
+	public void setWhileyProjectBuilder(WhileyProjectBuilder builder) {
+		this.whileyProjectBuilder = builder;
+	}
+	
 	/**
 	 * Check whether verification is enabled or not. Enabling verification means
 	 * the automated theorem prover will be used to check the
@@ -162,5 +169,8 @@ public class WhileyNature implements IProjectNature {
 	public void setVerificationEnable(boolean property) throws CoreException {
 		project.setPersistentProperty(VERIFICATION_PROPERTY,
 				Boolean.toString(property));
+		if(whileyProjectBuilder != null) {
+			whileyProjectBuilder.setVerificationEnable(property);
+		}
 	}
 }
