@@ -3,6 +3,7 @@ package wyclipse.ui.util;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
@@ -31,6 +32,17 @@ public class WyclipseUI {
 		button.setText(text);
 		button.setLayoutData(gd);
 		return button;
+	}
+	
+	public static Combo createCombo(Composite parent, int horizontalSpan, String... items) {
+		GridData gd = new GridData(GridData.FILL_HORIZONTAL);
+		gd.horizontalSpan = horizontalSpan;
+		Combo combo = new Combo(parent, SWT.CHECK);
+		for(String item : items) {
+			combo.add(item);
+		}
+		combo.setLayoutData(gd);
+		return combo;
 	}
 	
 	public static Label createSeparator(Composite parent, int horizontalSpan) {

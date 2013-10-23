@@ -3,6 +3,8 @@ package wyclipse.ui.dialogs;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.*;
 
@@ -34,7 +36,7 @@ public class NewWhileyPathBuildRuleDialog extends Dialog {
 	// Source / Target Group
 	private Text sourceFolderText;	
 	private Text sourceIncludesText;
-	private Text targetText;
+	private Combo targetCombo;
 	
 	// Output Folder Group
 	private Button useDefaultOutputFolder;
@@ -82,7 +84,8 @@ public class NewWhileyPathBuildRuleDialog extends Dialog {
 		sourceIncludesText = WyclipseUI.createText(container, "", 2);
 		
 		WyclipseUI.createLabel(container, "Target Platform:", 1);
-		targetText = WyclipseUI.createText(container, "", 2); // to be removed
+		targetCombo = WyclipseUI.createCombo(container, 2,
+				"Whiley Virtual Machine (Default)", "Java Virtual Machine (Default)"); 
 
 		// =====================================================================
 		// Configure Output Folder Group
@@ -93,6 +96,12 @@ public class NewWhileyPathBuildRuleDialog extends Dialog {
 		outputFolderLabel = WyclipseUI.createLabel(container, "Output Folder:", 1);		
 		outputFolderText = WyclipseUI.createText(container, "", 1, 200);
 		outputFolderBrowseButton = WyclipseUI.createButton(container, "Browse...", 120);
+		
+		useDefaultOutputFolder.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				handleUseDefaultOutputFolder();
+			}
+		});	
 		
 		WyclipseUI.createSeparator(container, 3);
 
@@ -105,6 +114,12 @@ public class NewWhileyPathBuildRuleDialog extends Dialog {
 		generateVerificationConditions = WyclipseUI.createCheckBox(container,
 				"Generate Verification Conditions (i.e. WyAL files)", 3);
 
+		enableVerification.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				handleEnableVerification();
+			}
+		});
+		
 		WyclipseUI.createSeparator(container, 3);
 		
 		// =====================================================================
@@ -116,6 +131,12 @@ public class NewWhileyPathBuildRuleDialog extends Dialog {
 		generateWyilFiles = WyclipseUI.createCheckBox(container,
 				"Generate Intermediate Files (i.e. WyIL files)", 3);
 
+		enableAdvancedConfiguration.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				handleEnableAdvancedConfiguration();
+			}
+		});
+		
 		// =====================================================================
 		// Initialise Data
 	    // =====================================================================
@@ -130,12 +151,48 @@ public class NewWhileyPathBuildRuleDialog extends Dialog {
 						
 		return container;
 	}
+
+	// =========================================================================
+	// Event Handlers
+	// =========================================================================
 	
 	@Override
 	public void okPressed() {
 		// FIXME: need more!!
 		readSourceTargetGroup();
 		super.okPressed();
+	}
+	
+	private void handleUseDefaultOutputFolder() {
+		// useDefaultOutputFolder control toggled.
+		if (useDefaultOutputFolder.getSelection()) {
+			outputFolderLabel.setEnabled(false);
+			outputFolderLabel.setForeground(outputFolderLabel.getDisplay()
+					.getSystemColor(SWT.COLOR_DARK_GRAY)); // force gray
+			outputFolderText.setEnabled(false);
+			outputFolderBrowseButton.setEnabled(false);
+		} else {
+			outputFolderLabel.setEnabled(true);
+			outputFolderLabel.setForeground(null); // set default
+			outputFolderText.setEnabled(true);
+			outputFolderBrowseButton.setEnabled(true);
+		}
+	}
+	
+	private void handleEnableVerification() {
+		if (enableVerification.getSelection()) {
+			generateVerificationConditions.setEnabled(true);
+		} else {
+			generateVerificationConditions.setEnabled(false);
+		}
+	}
+	
+	private void handleEnableAdvancedConfiguration() {
+		if (enableAdvancedConfiguration.getSelection()) {
+			generateWyilFiles.setEnabled(true);
+		} else {
+			generateWyilFiles.setEnabled(false);
+		}
 	}
 	
 	// =========================================================================
@@ -145,7 +202,7 @@ public class NewWhileyPathBuildRuleDialog extends Dialog {
 	private void writeSourceTargetGroup() {		
 		sourceFolderText.setText(buildRule.getSourceFolder().toString());
 		sourceIncludesText.setText(buildRule.getSourceIncludes().toString());
-		//targetText.setText(buildRule.getTarget().toString());
+		targetCombo.setText("Whiley Virtual Machine");
 	}
 	
 	private void writeOutputFolderGroup() {
