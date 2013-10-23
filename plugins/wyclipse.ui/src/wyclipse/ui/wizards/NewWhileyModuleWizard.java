@@ -25,13 +25,14 @@
 
 package wyclipse.ui.wizards;
 
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.*;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.ui.INewWizard;
 import org.eclipse.ui.IWorkbench;
 
-public class NewWhileyModuleWizard extends Wizard implements INewWizard{
+public class NewWhileyModuleWizard extends Wizard implements INewWizard {
 	private IWorkbench workbench;
 	private IStructuredSelection selection;
 	
@@ -66,7 +67,8 @@ public class NewWhileyModuleWizard extends Wizard implements INewWizard{
 	 * the wizard. 
 	 */
 	public boolean performFinish() {
-		return true;
+		IFile file = page.createNewFile();
+		return file != null;
 	}
 	
 	protected void finishPage(IProgressMonitor monitor) throws InterruptedException, CoreException {

@@ -93,6 +93,12 @@ public class WhileyPathConfigurationControl {
 			}
 		});
 		
+		editButton.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				handleEditRule();
+			}
+		});
+		
 		removeButton.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
 				handleRemoveRule();
@@ -144,6 +150,32 @@ public class WhileyPathConfigurationControl {
 		if (dialog.open() == Window.OK) {
 			whileypath.getEntries().add(buildRule);
 			whileyPathViewer.refresh();
+		}
+	}
+	
+	/**
+	 * This function is called when the edit button is pressed.
+	 */
+	protected void handleEditRule() {
+		WhileyPath.BuildRule buildRule = null;
+		
+		// First, extract the select item (if any)
+		TreeItem[] items = whileyPathViewer.getTree().getSelection();
+		for (TreeItem item : items) {
+			Object data = item.getData();
+			if (data instanceof WhileyPath.BuildRule) {			
+				buildRule = (WhileyPath.BuildRule) data;
+				break;
+			}
+		}
+		
+		// Second, open the build rule dialog
+		if (buildRule != null) {
+			NewWhileyPathBuildRuleDialog dialog = new NewWhileyPathBuildRuleDialog(
+					shell, buildRule);
+			if (dialog.open() == Window.OK) {
+				whileyPathViewer.refresh();
+			}
 		}
 	}
 	

@@ -122,13 +122,17 @@ public class WhileyProjectBuilder extends IncrementalProjectBuilder {
 		
 		List<Path.Root> whileyProjectRoots = whileyProject.roots();
 		ContainerRoot defaultOutputRoot = null;
-		if (whileypath.getDefaultOutputFolder() != null) {
+		
+		if (whileypath.getDefaultOutputFolder() != null) {			
 			IFolder defaultOutputFolder = project.getFolder(whileypath
 					.getDefaultOutputFolder());
 			Content.Filter defaultOutputIncludes = Content.filter(
 					Trie.fromString("**"), WyilFile.ContentType);
 			defaultOutputRoot = new ContainerRoot(defaultOutputFolder, registry);
 			whileyProjectRoots.add(defaultOutputRoot);
+			
+			System.err.println("*** INITIALISING DEFAULT OUTPUT ROOT: "
+					+ defaultOutputFolder.getLocation());
 		}
 		
 		// Second, iterate all entries looking for: actions which define source
@@ -168,6 +172,8 @@ public class WhileyProjectBuilder extends IncrementalProjectBuilder {
 				StandardBuildRule br = new StandardBuildRule(whileyBuilder);
 				br.add(sourceRoot, sourceIncludes, outputRoot,
 						WhileyFile.ContentType, WyilFile.ContentType);
+				
+				System.err.println("*** INITIALISING WYC BUILD RULE: " + sourceRoot + " => " + outputRoot);
 				
 				// FIXME: clearly, need more build rules
 				whileyProject.add(br);

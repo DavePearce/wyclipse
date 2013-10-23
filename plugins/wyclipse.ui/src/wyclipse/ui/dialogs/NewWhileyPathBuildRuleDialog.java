@@ -1,7 +1,6 @@
 package wyclipse.ui.dialogs;
 
 import org.eclipse.core.runtime.Path;
-import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridLayout;
@@ -50,9 +49,9 @@ public class NewWhileyPathBuildRuleDialog extends Dialog {
 	private Button enableAdvancedConfiguration;
 	private Button generateWyilFiles;
 
-	public NewWhileyPathBuildRuleDialog(Shell parentShell,
+	public NewWhileyPathBuildRuleDialog(Shell shell,
 			WhileyPath.BuildRule buildRule) {
-		super(parentShell);
+		super(shell);
 		this.buildRule = buildRule;
 	}
 
