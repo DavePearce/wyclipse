@@ -1,11 +1,13 @@
 package wyclipse.ui.dialogs;
 
+import org.eclipse.core.runtime.Path;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.*;
 
+import wybs.util.Trie;
 import wyclipse.core.builder.WhileyPath;
 import wyclipse.ui.util.WyclipseUI;
 
@@ -117,9 +119,9 @@ public class NewWhileyPathBuildRuleDialog extends Dialog {
 		// =====================================================================
 		// Initialise Data
 	    // =====================================================================
-		initialiseSourceTargetGroup();
-		initialiseOutputFolderGroup();
-		initialiseVerificationGroup();
+		writeSourceTargetGroup();
+		writeOutputFolderGroup();
+		writeVerificationGroup();
 		initialiseAdvancedConfigurationGroup();
 		
 		// =====================================================================
@@ -131,16 +133,22 @@ public class NewWhileyPathBuildRuleDialog extends Dialog {
 	
 	@Override
 	public void okPressed() {
-		// FIXME.
+		// FIXME: need more!!
+		readSourceTargetGroup();
+		super.okPressed();
 	}
 	
-	private void initialiseSourceTargetGroup() {		
+	// =========================================================================
+	// Write data to fields from WhileyPath
+	// =========================================================================
+	
+	private void writeSourceTargetGroup() {		
 		sourceFolderText.setText(buildRule.getSourceFolder().toString());
 		sourceIncludesText.setText(buildRule.getSourceIncludes().toString());
 		//targetText.setText(buildRule.getTarget().toString());
 	}
 	
-	private void initialiseOutputFolderGroup() {
+	private void writeOutputFolderGroup() {
 		if(buildRule.getOutputFolder() != null) {
 			useDefaultOutputFolder.setSelection(false);
 			outputFolderText.setText(buildRule.getOutputFolder().toString());
@@ -153,7 +161,7 @@ public class NewWhileyPathBuildRuleDialog extends Dialog {
 		}
 	}
 	
-	private void initialiseVerificationGroup() {
+	private void writeVerificationGroup() {
 		// Fow now, not supported!
 		enableVerification.setSelection(false);
 		generateVerificationConditions.setEnabled(false);
@@ -163,5 +171,19 @@ public class NewWhileyPathBuildRuleDialog extends Dialog {
 		// Fow now, not supported!
 		enableAdvancedConfiguration.setSelection(false);
 		generateWyilFiles.setEnabled(false);
+	}
+	
+	// =========================================================================
+	// Read data from fields into WhileyPath
+	// =========================================================================
+
+	private void readSourceTargetGroup() {		
+		buildRule.setSourceFolder(new Path(sourceFolderText.getText()));
+		buildRule.setSourceIncludes(Trie.fromString(sourceIncludesText.getText()));
+		if(useDefaultOutputFolder.getSelection()) {
+			buildRule.setOutputFolder(null);
+		} else {
+			buildRule.setOutputFolder(new Path(outputFolderText.getText()));
+		}
 	}
 }

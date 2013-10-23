@@ -3,6 +3,8 @@ package wyclipse.ui.pages;
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.jface.dialogs.IDialogPage;
+import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -138,7 +140,11 @@ public class WhileyPathConfigurationControl {
 				Trie.fromString("**/*.whiley"), null);
 		NewWhileyPathBuildRuleDialog dialog = new NewWhileyPathBuildRuleDialog(
 				shell, buildRule);
-		dialog.open();		
+		
+		if (dialog.open() == Window.OK) {
+			whileypath.getEntries().add(buildRule);
+			whileyPathViewer.refresh();
+		}
 	}
 	
 	/**

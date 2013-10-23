@@ -256,12 +256,24 @@ public final class WhileyPath {
 			return sourceFolder;
 		}
 		
+		public void setSourceFolder(IPath sourceFolder) {
+			this.sourceFolder = sourceFolder;
+		}
+		
 		public Path.Filter getSourceIncludes() {
 			return sourceIncludes;
 		}
 		
+		public void setSourceIncludes(Path.Filter sourceIncludes) {
+			this.sourceIncludes = sourceIncludes;
+		}
+		
 		public IPath getOutputFolder() {
 			return outputFolder;
+		}
+		
+		public void setOutputFolder(IPath outputFolder) {
+			this.outputFolder = outputFolder;
 		}
 	}
 }
