@@ -38,6 +38,7 @@ public class NewWhileyPathBuildRuleDialog extends Dialog {
 	
 	// Output Folder Group
 	private Button useDefaultOutputFolder;
+	private Label outputFolderLabel;	
 	private Text outputFolderText;	
 	private Button outputFolderBrowseButton;
 
@@ -80,7 +81,7 @@ public class NewWhileyPathBuildRuleDialog extends Dialog {
 		WyclipseUI.createLabel(container, "Includes:", 1);		
 		sourceIncludesText = WyclipseUI.createText(container, "", 2);
 		
-		WyclipseUI.createLabel(container, "Target:", 1);
+		WyclipseUI.createLabel(container, "Target Platform:", 1);
 		targetText = WyclipseUI.createText(container, "", 2); // to be removed
 
 		// =====================================================================
@@ -89,7 +90,7 @@ public class NewWhileyPathBuildRuleDialog extends Dialog {
 
 		// create check box
 		useDefaultOutputFolder = WyclipseUI.createCheckBox(container, "Use Default Output Folder",3);
-		WyclipseUI.createLabel(container, "Output Folder:", 1);		
+		outputFolderLabel = WyclipseUI.createLabel(container, "Output Folder:", 1);		
 		outputFolderText = WyclipseUI.createText(container, "", 1, 200);
 		outputFolderBrowseButton = WyclipseUI.createButton(container, "Browse...", 120);
 		
@@ -121,7 +122,7 @@ public class NewWhileyPathBuildRuleDialog extends Dialog {
 		writeSourceTargetGroup();
 		writeOutputFolderGroup();
 		writeVerificationGroup();
-		initialiseAdvancedConfigurationGroup();
+		writeAdvancedConfigurationGroup();
 		
 		// =====================================================================
 		// Done
@@ -150,11 +151,16 @@ public class NewWhileyPathBuildRuleDialog extends Dialog {
 	private void writeOutputFolderGroup() {
 		if(buildRule.getOutputFolder() != null) {
 			useDefaultOutputFolder.setSelection(false);
+			outputFolderLabel.setEnabled(true);
+			outputFolderLabel.setForeground(null); // set default
 			outputFolderText.setText(buildRule.getOutputFolder().toString());
 			outputFolderText.setEnabled(true);
 			outputFolderBrowseButton.setEnabled(true);
 		} else {
 			useDefaultOutputFolder.setSelection(true);
+			outputFolderLabel.setEnabled(false);
+			outputFolderLabel.setForeground(outputFolderLabel.getDisplay()
+					.getSystemColor(SWT.COLOR_DARK_GRAY)); // force gray
 			outputFolderText.setEnabled(false);
 			outputFolderBrowseButton.setEnabled(false);
 		}
@@ -166,7 +172,7 @@ public class NewWhileyPathBuildRuleDialog extends Dialog {
 		generateVerificationConditions.setEnabled(false);
 	}
 	
-	private void initialiseAdvancedConfigurationGroup() {
+	private void writeAdvancedConfigurationGroup() {
 		// Fow now, not supported!
 		enableAdvancedConfiguration.setSelection(false);
 		generateWyilFiles.setEnabled(false);
