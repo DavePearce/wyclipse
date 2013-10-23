@@ -34,7 +34,6 @@ import org.eclipse.core.runtime.*;
 import wyclipse.core.Activator;
 import wyclipse.core.WhileyNature;
 import wyclipse.core.builder.ContainerRoot.IFileEntry;
-
 import wybs.lang.*;
 import wybs.lang.Path;
 import wybs.util.StandardBuildRule;
@@ -43,7 +42,6 @@ import wybs.util.Trie;
 import wyc.builder.WhileyBuilder;
 import wyc.lang.WhileyFile;
 import wyc.util.WycBuildTask;
-
 import wycs.builders.Wyal2WycsBuilder;
 import wycs.core.WycsFile;
 import wycs.syntax.WyalFile;
@@ -97,7 +95,9 @@ public class WhileyProjectBuilder extends IncrementalProjectBuilder {
 		IProject iproject = (IProject) getProject();
 		WhileyNature nature = (WhileyNature) iproject
 				.getNature(Activator.WYCLIPSE_NATURE_ID);
-		WhileyPath whileypath = nature.getWhileyPath();
+		nature.setWhileyProjectBuilder(this);
+		
+		WhileyPath whileypath = nature.getWhileyPath();		
 		
 		this.whileyProject = new StandardProject();
 		
@@ -119,71 +119,73 @@ public class WhileyProjectBuilder extends IncrementalProjectBuilder {
 	 */
 	protected void initialiseWhileyProject(WhileyPath whileypath,
 			Map<String, Builder> builders, IProject project) {
+		// First, create an appropriate root for the default output folder (if
+		// applicable)
 		
-		HashMap<String, ContainerRoot> rootMap = new HashMap<String, ContainerRoot>();
-		HashMap<String, WhileyPath.Container> containerMap = new HashMap<String, WhileyPath.Container>();
+		List<Path.Root> whileyProjectRoots = whileyProject.roots();
+		ContainerRoot defaultOutputRoot = null;
 		
-		// First, find and add roots to the project based on whileypath
-		// container entries.
-		for (WhileyPath.Entry entry : whileypath.getEntries()) {
-			if (entry instanceof WhileyPath.Container) {
-				WhileyPath.Container container = (WhileyPath.Container) entry;
-				Content.Filter includes = Content.filter(container.getIncludes(),container.getContentType());
-				ContainerRoot root;
-				if (entry instanceof WhileyPath.SourceFolder) {
-					IFolder folder = project.getFolder(container.getLocation());
-					System.err.println("*** INITIALISING SOURCE ROOT: " + container.getLocation());
-					root = new SourceRoot(folder,includes,registry);					
-				} else if (entry instanceof WhileyPath.BinaryFolder) {
-					IFolder folder = project.getFolder(container.getLocation());
-					System.err.println("*** INITIALISING BINARY ROOT: " + container.getLocation());
-					root = new ContainerRoot(folder,includes,registry);
-				} else {
-					WhileyPath.External ext = (WhileyPath.External) entry;					
-					// TODO: implement me!
-					System.err.println("IGNORING EXTERNAL CONTAINER: " + container.getID());
-					root = null; // problem!
-				}
-				rootMap.put(container.getID(),root);
-				containerMap.put(container.getID(), container);
-				whileyProject.roots().add(root);
-			}
+		if (whileypath.getDefaultOutputFolder() != null) {			
+			IFolder defaultOutputFolder = project.getFolder(whileypath
+					.getDefaultOutputFolder());
+			Content.Filter defaultOutputIncludes = Content.filter(
+					Trie.fromString("**"), WyilFile.ContentType);
+			defaultOutputRoot = new ContainerRoot(defaultOutputFolder, registry);
+			whileyProjectRoots.add(defaultOutputRoot);
+			
+			System.err.println("*** INITIALISING DEFAULT OUTPUT ROOT: "
+					+ defaultOutputFolder.getLocation());
 		}
 		
-		// Second, find and add rules. We do this after adding the roots to
-		// ensure that the ordering in which roots and rules are listed in the
-		// whileypath doesn't matter.
+		// Second, iterate all entries looking for: actions which define source
+		// and output folders, as well as build rules; and, also external
+		// libraries. 
 		for (WhileyPath.Entry entry : whileypath.getEntries()) {
-			if(entry instanceof WhileyPath.Rule) { 
-				WhileyPath.Rule rule = (WhileyPath.Rule) entry;
-				Builder builder = builders.get(rule.getBuilderID());
-				ContainerRoot sourceRoot = rootMap.get(rule.getSourceFolderID());
-				ContainerRoot binaryRoot = rootMap.get(rule.getBinaryFolderID());
-				WhileyPath.Container sourceContainer = containerMap.get(rule.getSourceFolderID());
-				WhileyPath.Container binaryContainer = containerMap.get(rule.getBinaryFolderID());
+			
+			if (entry instanceof WhileyPath.BuildRule) {
+				WhileyPath.BuildRule action = (WhileyPath.BuildRule) entry;
 				
-				if(builder != null && sourceRoot != null && binaryRoot != null) {
-					StandardBuildRule br = new StandardBuildRule(builder);
-					Content.Filter srcIncludes = sourceRoot.getIncludes();
-					Content.Filter binIncludes = binaryRoot.getIncludes();
-					
-					// TODO: we could attempt to validate that the given builder
-					// is actually capable of compiling files from the source
-					// folder to the binary folder.
-					
-					br.add(sourceRoot, srcIncludes, binaryRoot,
-							sourceContainer.getContentType(),
-							binaryContainer.getContentType());
-					whileyProject.add(br);
-					
-				} else {
-					System.err.println("IGNORING BUILD RULE: "
-							+ rule.getBuilderID() + ":"
-							+ rule.getSourceFolderID() + "=>"
-							+ rule.getBinaryFolderID());
+				// ============================================================
+				// First, create the corresponding source root
+				// ============================================================
+				Content.Filter<WhileyFile> sourceIncludes = Content.filter(
+						action.getSourceIncludes(), WhileyFile.ContentType);
+				IFolder sourceFolder = project.getFolder(action
+						.getSourceFolder());
+				SourceRoot<WhileyFile> sourceRoot = new SourceRoot<WhileyFile>(
+						sourceFolder, sourceIncludes, registry);
+				whileyProjectRoots.add(sourceRoot);
+				
+				System.err.println("*** INITIALISING WHILEY SOURCE ROOT: " + action.getSourceFolder());
+				// ============================================================
+				// Second, create the corresponding output root (if applicable)
+				// ============================================================
+				Path.Root outputRoot = defaultOutputRoot; 
+				if(action.getOutputFolder() != null) {
+					IFolder outputFolder = project.getFolder(action.getOutputFolder());
+					outputRoot = new ContainerRoot(outputFolder,registry);					
+					whileyProjectRoots.add(outputRoot);
 				}
+				
+				// ============================================================
+				// Third, create the corresponding build rule(s)
+				// ============================================================
+				Builder whileyBuilder = builders.get("wyc");
+				StandardBuildRule br = new StandardBuildRule(whileyBuilder);
+				br.add(sourceRoot, sourceIncludes, outputRoot,
+						WhileyFile.ContentType, WyilFile.ContentType);
+				
+				System.err.println("*** INITIALISING WYC BUILD RULE: " + sourceRoot + " => " + outputRoot);
+				
+				// FIXME: clearly, need more build rules
+				whileyProject.add(br);
+				
+			} else if(entry instanceof WhileyPath.ExternalLibrary){
+				WhileyPath.ExternalLibrary ext = (WhileyPath.ExternalLibrary) entry;					
+				// TODO: implement me!
+				System.err.println("IGNORING EXTERNAL CONTAINER: " + ext.getLocation());
 			}
-		}		
+		}			
 	}
 	
 	/**
@@ -525,10 +527,18 @@ public class WhileyProjectBuilder extends IncrementalProjectBuilder {
 	}
 
 	public class SourceRoot<T> extends ContainerRoot {
+		private final Content.Filter<T> includes;
+		
 		public SourceRoot(IContainer dir, Content.Filter<T> includes,
 				Content.Registry contentTypes) {
-			super(dir, includes, contentTypes);
+			super(dir, contentTypes);
+			this.includes = includes;
 		}
+		
+
+		public List<wybs.lang.Path.Entry<T>> get() throws IOException {
+			return super.get(includes);
+		}		
 	}
 	
 	private static boolean isWhileyPath(IResource resource) {

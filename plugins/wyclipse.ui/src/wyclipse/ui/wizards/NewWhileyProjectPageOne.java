@@ -25,6 +25,7 @@
 
 package wyclipse.ui.wizards;
 
+import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.swt.widgets.*;
 import org.eclipse.ui.dialogs.WizardNewProjectCreationPage;
 
@@ -95,9 +96,5 @@ public class NewWhileyProjectPageOne extends WizardNewProjectCreationPage {
 //		new Label(parent, SWT.SEPARATOR | SWT.HORIZONTAL);
 //		
 //		setControl(container);
-	}
-	
-	public void dispose() {
-		super.dispose();
 	}
 }

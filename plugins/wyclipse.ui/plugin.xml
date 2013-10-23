@@ -1,116 +1,116 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?eclipse version="3.4"?>
 <plugin>
-	<extension
-		point="org.eclipse.ui.perspectives">
-		<perspective
-			name ="Whiley"
-			class="wyclipse.ui.perspective.Perspective"
-			id="wyclipse.ui.whileyPerspective"
-			icon="icons/whiley_perspective.gif">
-		</perspective>
-	</extension>
-	
-  	<extension
-    	point="org.eclipse.ui.editors">
-      	<editor
-       	 	class="wyclipse.ui.editor.Editor"
-            contributorClass="org.eclipse.ui.texteditor.BasicTextEditorActionContributor"
-            extensions="whiley"
-            icon="icons/whiley_file.gif"
-            id="whileyEditor"
-            name="Whiley Source File Editor">
-        	<contentTypeBinding
-            	contentTypeId="wyclipse.core.whileySource">
-          	</contentTypeBinding>
-     	 </editor>
-  	 </extension>
-   
-	<extension
-		point="org.eclipse.core.filebuffers.documentSetup">
-		<participant
-			extensions="whiley"
-			class="wyclipse.ui.editor.DocumentSetup">
-		</participant>
-	</extension>
-   
-   
+  <extension
+      point="org.eclipse.ui.perspectives">
+    <perspective
+	name ="Whiley"
+	class="wyclipse.ui.perspective.Perspective"
+	id="wyclipse.ui.whileyPerspective"
+	icon="icons/whiley_perspective.gif">
+    </perspective>
+  </extension>
+  
+  <extension
+      point="org.eclipse.ui.editors">
+    <editor
+       	class="wyclipse.ui.editor.Editor"
+        contributorClass="org.eclipse.ui.texteditor.BasicTextEditorActionContributor"
+        extensions="whiley"
+        icon="icons/whiley_file.gif"
+        id="whileyEditor"
+        name="Whiley Source File Editor">
+      <contentTypeBinding
+          contentTypeId="wyclipse.core.whileySource">
+      </contentTypeBinding>
+    </editor>
+  </extension>
+  
+  <extension
+      point="org.eclipse.core.filebuffers.documentSetup">
+    <participant
+	extensions="whiley"
+	class="wyclipse.ui.editor.DocumentSetup">
+    </participant>
+  </extension>
+  
+  
 
-<extension point="org.eclipse.ui.newWizards">
-	<category
-            id="wyclipse.ui.WhileyCategory"
-            name="Whiley">
+  <extension point="org.eclipse.ui.newWizards">
+    <category
+        id="wyclipse.ui.WhileyCategory"
+        name="Whiley">
     </category>
-   	<wizard
-            category="wyclipse.ui.WhileyCategory"
-            class="wyclipse.ui.wizards.NewWhileyModuleWizard"
-            icon="icons/newmodule_wiz.gif"
-           	hasPages="true"
-           	
-            id="wyclipse.ui.newWhileyModuleWizard"
-            finalPerspective="wyclipse.ui.whileyPerspective"
-            preferredPerspectives="wyclipse.ui.whileyPerspective"
-            name="Whiley Module"
-            project="false">
-            
-            
-      </wizard>	
-       <wizard
-            category="wyclipse.ui.WhileyCategory"
-            class="wyclipse.ui.wizards.NewWhileyProjectWizard"
-            icon="icons/newwprj_wiz.gif"
-            finalPerspective="wyclipse.ui.whileyPerspective"
-            hasPages="true"
-            id="wyclipse.ui.newWhileyProjectWizard"
-            name="Whiley Project"
-            preferredPerspectives="wyclipse.ui.whileyPerspective"
-            project="true"
-           >
-       </wizard>	
- </extension>
+    <wizard
+        category="wyclipse.ui.WhileyCategory"
+        class="wyclipse.ui.wizards.NewWhileyModuleWizard"
+        icon="icons/newmodule_wiz.gif"
+        hasPages="true"
+        
+        id="wyclipse.ui.newWhileyModuleWizard"
+        finalPerspective="wyclipse.ui.whileyPerspective"
+        preferredPerspectives="wyclipse.ui.whileyPerspective"
+        name="Whiley Module"
+        project="false">
+      
+      
+    </wizard>	
+    <wizard
+        category="wyclipse.ui.WhileyCategory"
+        class="wyclipse.ui.wizards.NewWhileyProjectWizard"
+        icon="icons/newwprj_wiz.gif"
+        finalPerspective="wyclipse.ui.whileyPerspective"
+        hasPages="true"
+        id="wyclipse.ui.newWhileyProjectWizard"
+        name="Whiley Project"
+        preferredPerspectives="wyclipse.ui.whileyPerspective"
+        project="true"
+        >
+    </wizard>	
+  </extension>
 
- <extension
-     point="org.eclipse.ui.navigator.navigatorContent">
-   <commonWizard
-       type = "new"      	
-       wizardId="wyclipse.ui.newWhileyModuleWizard">
-     <enablement>
-       <or>
-	 <adapt type="org.eclipse.core.resources.IResource"/>
-	 <adapt type="org.eclipse.core.resources.IFolder"/>
-	 <adapt type="org.eclipse.core.resources.IProject"/>
-       </or>
-     </enablement>      	
-   </commonWizard>
-   <commonWizard type = "new" wizardId="wyclipse.ui.newWhileyProjectWizard" menuGroupId="org.eclipse.cdt.ui.newProject">
-     <enablement>
-     </enablement>
-   </commonWizard>   
- </extension>
-    
+  <extension
+      point="org.eclipse.ui.navigator.navigatorContent">
+    <commonWizard
+	type = "new"      	
+	wizardId="wyclipse.ui.newWhileyModuleWizard">
+      <enablement>
+	<or>
+	  <adapt type="org.eclipse.core.resources.IResource"/>
+	  <adapt type="org.eclipse.core.resources.IFolder"/>
+	  <adapt type="org.eclipse.core.resources.IProject"/>
+	</or>
+      </enablement>      	
+    </commonWizard>
+    <commonWizard type = "new" wizardId="wyclipse.ui.newWhileyProjectWizard" menuGroupId="org.eclipse.cdt.ui.newProject">
+      <enablement>
+      </enablement>
+    </commonWizard>   
+  </extension>
+  
 
-   <extension
-         name="Whiley Perspective Extension"
-         point="org.eclipse.ui.perspectiveExtensions">
-      <perspectiveExtension targetID="wyclipse.ui.whileyPerspective">
-         <actionSet 
-         	id="org.eclipse.debug.ui.launchActionSet">
-		 </actionSet>
-      </perspectiveExtension>
-   </extension>
-   <extension
-         point="org.eclipse.ui.propertyPages">
-      <page
-            class="wyclipse.ui.WhileyCompilerPropertyPage"
-            id="wyclipse.ui.propertypage"
-            name="Whiley Compiler">
-            <enabledWhen>
-         <adapt type="org.eclipse.core.resources.IProject">
-              <test
-                 property="org.eclipse.core.resources.projectNature"
-                 value="wyclipse.whileynature"/>
-         </adapt>         
-</enabledWhen>
-      </page>
-   </extension>
+  <extension
+      name="Whiley Perspective Extension"
+      point="org.eclipse.ui.perspectiveExtensions">
+    <perspectiveExtension targetID="wyclipse.ui.whileyPerspective">
+      <actionSet 
+          id="org.eclipse.debug.ui.launchActionSet">
+      </actionSet>
+    </perspectiveExtension>
+  </extension>
+  <extension
+      point="org.eclipse.ui.propertyPages">
+    <page
+        class="wyclipse.ui.pages.WhileyPathPropertyPage"
+        id="wyclipse.ui.whileybuildpathpropertypage"
+        name="Whiley Build Path">
+      <enabledWhen>
+        <adapt type="org.eclipse.core.resources.IProject">
+          <test
+              property="org.eclipse.core.resources.projectNature"
+              value="wyclipse.core.whileynature"/>
+        </adapt>         
+      </enabledWhen>
+    </page>
+  </extension>
 </plugin>
