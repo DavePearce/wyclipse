@@ -148,8 +148,8 @@ public class WhileyProjectBuilder extends IncrementalProjectBuilder {
 				// ============================================================
 				// First, create the corresponding source root
 				// ============================================================
-				Content.Filter<WhileyFile> sourceIncludes = Content.filter(
-						action.getSourceIncludes(), WhileyFile.ContentType);
+				Content.Filter<WhileyFile> sourceIncludes = convertIncludeString(
+						action.getSourceIncludes(), WhileyFile.ContentType); 						
 				IFolder sourceFolder = project.getFolder(action
 						.getSourceFolder());
 				SourceRoot<WhileyFile> sourceRoot = new SourceRoot<WhileyFile>(
@@ -544,6 +544,23 @@ public class WhileyProjectBuilder extends IncrementalProjectBuilder {
 	private static boolean isWhileyPath(IResource resource) {
 		return resource instanceof IFile && resource.getName().equals(".whileypath");
 	}	
+	
+	/**
+	 * Convert an include string of the form e.g. "whiley/lang/*.whiley" into an appropriate
+	 * content filter.
+	 * 
+	 * @param includes
+	 * @return
+	 */
+	private <T> Content.Filter<T> convertIncludeString(String includes,
+			Content.Type<T> contentType) {
+		// FIXME: this is really a bit broken, but it works for now. The thing
+		// is that we presumably would want it to correctly identify the
+		// appropriate content type based on the suffix. Well, this is difficult
+		// to do, given that it doens't have to have a suffix!
+		includes = includes.replace("." + registry.suffix(contentType), "");
+		return Content.filter(includes, contentType);
+	}
 	
 	// =====================================================================
 	// Registry
