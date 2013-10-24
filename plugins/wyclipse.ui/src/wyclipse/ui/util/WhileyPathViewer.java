@@ -99,9 +99,9 @@ public class WhileyPathViewer extends TreeViewer {
 	}
 	
 	private static class SourceIncludesElement {
-		public Path.Filter includes;
+		public String includes;
 		
-		public SourceIncludesElement(Path.Filter includes) {
+		public SourceIncludesElement(String includes) {
 			this.includes = includes;
 		}
 	}

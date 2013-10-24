@@ -143,7 +143,7 @@ public class WhileyPathConfigurationControl {
 	 */
 	protected void handleAddRule() {
 		WhileyPath.BuildRule buildRule = new WhileyPath.BuildRule(new Path(""),
-				Trie.fromString("**/*.whiley"), null);
+				"**/*.whiley", null);
 		NewWhileyPathBuildRuleDialog dialog = new NewWhileyPathBuildRuleDialog(
 				shell, buildRule);
 		

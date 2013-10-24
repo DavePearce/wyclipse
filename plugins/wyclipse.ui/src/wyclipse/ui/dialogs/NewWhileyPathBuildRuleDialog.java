@@ -241,7 +241,7 @@ public class NewWhileyPathBuildRuleDialog extends Dialog {
 
 	private void readSourceTargetGroup() {		
 		buildRule.setSourceFolder(new Path(sourceFolderText.getText()));
-		buildRule.setSourceIncludes(Trie.fromString(sourceIncludesText.getText()));
+		buildRule.setSourceIncludes(sourceIncludesText.getText());
 		if(useDefaultOutputFolder.getSelection()) {
 			buildRule.setOutputFolder(null);
 		} else {

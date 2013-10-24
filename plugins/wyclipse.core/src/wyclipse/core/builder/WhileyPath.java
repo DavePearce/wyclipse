@@ -141,8 +141,8 @@ public final class WhileyPath {
 				NamedNodeMap attributes = child.getAttributes();
 				IPath sourceFolder = new org.eclipse.core.runtime.Path(
 						attributes.getNamedItem("srcdir").getNodeValue());
-				Path.Filter sourceIncludes = Trie.fromString(attributes
-						.getNamedItem("includes").getNodeValue());
+				String sourceIncludes = attributes.getNamedItem("includes")
+						.getNodeValue();
 				Node bindir = attributes.getNamedItem("bindir");
 				IPath outputFolder = bindir == null ? null
 						: new org.eclipse.core.runtime.Path(
@@ -153,8 +153,8 @@ public final class WhileyPath {
 				NamedNodeMap attributes = child.getAttributes();
 				IPath location = new org.eclipse.core.runtime.Path(attributes
 						.getNamedItem("srcdir").getNodeValue());
-				Path.Filter includes = Trie.fromString(attributes.getNamedItem(
-						"includes").getNodeValue());
+				String includes = attributes.getNamedItem("includes")
+						.getNodeValue();
 				whileyPathEntries.add(new WhileyPath.ExternalLibrary(location,
 						includes));
 			}
@@ -198,9 +198,9 @@ public final class WhileyPath {
 		/**
 		 * Describes the set of files which are included in this library.
 		 */
-		private Path.Filter includes;
+		private String includes;
 		
-		public ExternalLibrary(IPath location, Path.Filter includes) {	
+		public ExternalLibrary(IPath location, String includes) {	
 			this.location = location;
 			this.includes = includes;
 		}
@@ -209,7 +209,7 @@ public final class WhileyPath {
 			return location;
 		}
 		
-		public Path.Filter getIncludes() {
+		public String getIncludes() {
 			return includes;
 		}
 	}
@@ -235,7 +235,7 @@ public final class WhileyPath {
 		/**
 		 * Describes the set of source files which are included in this action.
 		 */
-		private Path.Filter sourceIncludes;
+		private String sourceIncludes;
 		
 		/**
 		 * The location of the folder where binary (i.e. compiled) files are
@@ -245,7 +245,7 @@ public final class WhileyPath {
 		 */
 		private IPath outputFolder;
 	
-		public BuildRule(IPath sourceFolder, Path.Filter sourceIncludes, IPath outputFolder) {
+		public BuildRule(IPath sourceFolder, String sourceIncludes, IPath outputFolder) {
 			this.sourceFolder = sourceFolder;
 			this.sourceIncludes = sourceIncludes;
 			this.outputFolder = outputFolder;
@@ -260,11 +260,11 @@ public final class WhileyPath {
 			this.sourceFolder = sourceFolder;
 		}
 		
-		public Path.Filter getSourceIncludes() {
+		public String getSourceIncludes() {
 			return sourceIncludes;
 		}
 		
-		public void setSourceIncludes(Path.Filter sourceIncludes) {
+		public void setSourceIncludes(String sourceIncludes) {
 			this.sourceIncludes = sourceIncludes;
 		}
 		

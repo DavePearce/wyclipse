@@ -198,8 +198,8 @@ public class WhileyNature implements IProjectNature {
 		Path sourceFolder = new Path("src");
 		Path defaultOutputFolder = new Path("bin");
 
-		WhileyPath.BuildRule defaultAction = new WhileyPath.BuildRule(sourceFolder,
-				Trie.fromString("**/*.whiley"), null);
+		WhileyPath.BuildRule defaultAction = new WhileyPath.BuildRule(
+				sourceFolder, "**/*.whiley", null);
 
 		return new WhileyPath(defaultOutputFolder, defaultAction);
 	}	
