@@ -367,7 +367,7 @@ public final class WhileyPath {
 		}
 		
 		public void setGenerateWyIL(boolean generateWyIL) {
-			this.generateWyAL = generateWyIL;
+			this.generateWyIL = generateWyIL;
 		}
 	}
 }
