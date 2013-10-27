@@ -39,6 +39,7 @@ import wybs.lang.Path;
 import wybs.util.StandardBuildRule;
 import wybs.util.StandardProject;
 import wybs.util.Trie;
+import wybs.util.VirtualRoot;
 import wyc.builder.WhileyBuilder;
 import wyc.lang.WhileyFile;
 import wyc.util.WycBuildTask;
@@ -168,13 +169,16 @@ public class WhileyProjectBuilder extends IncrementalProjectBuilder {
 					outputRoot = new ContainerRoot(outputFolder,registry);					
 					whileyProjectRoots.add(outputRoot);
 				}
+				Path.Root virtualOutputRoot = new VirtualRoot(registry); 
+				Path.Root wyilOutputRoot = action.getGenerateWyIL() ? outputRoot : virtualOutputRoot;
+				Path.Root wyalOutputRoot = action.getGenerateWyAL() ? outputRoot : virtualOutputRoot;
 				
 				// ============================================================
 				// Third, create the corresponding build rule(s)
 				// ============================================================
 				Builder wycBuilder = builders.get("wyc");
 				StandardBuildRule whiley2wyil = new StandardBuildRule(wycBuilder);
-				whiley2wyil.add(sourceRoot, sourceIncludes, outputRoot,
+				whiley2wyil.add(sourceRoot, sourceIncludes, wyilOutputRoot,
 						WhileyFile.ContentType, WyilFile.ContentType);
 				whileyProject.add(whiley2wyil);
 				
@@ -186,18 +190,18 @@ public class WhileyProjectBuilder extends IncrementalProjectBuilder {
 					Builder wyalBuilder = builders.get("wyal");
 					StandardBuildRule wyil2wyal = new StandardBuildRule(
 							wyalBuilder);
-					wyil2wyal.add(outputRoot,
+					wyil2wyal.add(wyilOutputRoot,
 							Content.filter("**", WyilFile.ContentType),
-							outputRoot, WyilFile.ContentType,
+							wyalOutputRoot, WyilFile.ContentType,
 							WyalFile.ContentType);
 					whileyProject.add(wyil2wyal);
 					
 					Builder wycsBuilder = builders.get("wycs");
 					StandardBuildRule wyal2wycs = new StandardBuildRule(
 							wycsBuilder);
-					wyal2wycs.add(outputRoot,
+					wyal2wycs.add(wyalOutputRoot,
 							Content.filter("**", WyalFile.ContentType),
-							outputRoot, WyalFile.ContentType,
+							virtualOutputRoot, WyalFile.ContentType,
 							WycsFile.ContentType);
 					whileyProject.add(wyal2wycs);
 				}
@@ -208,7 +212,7 @@ public class WhileyProjectBuilder extends IncrementalProjectBuilder {
 				Builder wyjcBuilder = builders.get("wyjc");
 				StandardBuildRule wyil2class = new StandardBuildRule(
 						wyjcBuilder);
-				wyil2class.add(outputRoot,
+				wyil2class.add(wyilOutputRoot,
 						Content.filter("**", WyilFile.ContentType), outputRoot,
 						WyilFile.ContentType, WyjcBuildTask.ContentType);
 				whileyProject.add(wyil2class);
@@ -345,8 +349,10 @@ public class WhileyProjectBuilder extends IncrementalProjectBuilder {
 
 			// third, delete all target files
 			for (Path.Entry<?> _e : allTargets) {
-				IFileEntry<?> e = (IFileEntry<?>) _e;
-				e.getFile().delete(true, null);
+				if(_e instanceof IFileEntry) {
+					IFileEntry<?> e = (IFileEntry<?>) _e;
+					e.getFile().delete(true, null);
+				}
 			}
 		} catch (CoreException e) {
 			throw e;

@@ -47,7 +47,6 @@ public class NewWhileyPathBuildRuleDialog extends Dialog {
 	private Button enableRuntimeAssertions;
 	
 	// Advanced Config Group
-	private Button enableAdvancedConfiguration;
 	private Button generateWyIL;
 	private Button generateWyAL;
 
@@ -116,20 +115,13 @@ public class NewWhileyPathBuildRuleDialog extends Dialog {
 		// =====================================================================
 		// Configure Advanced Configuration Group
 		// =====================================================================
-		
-		enableAdvancedConfiguration = WyclipseUI.createCheckBox(container,
-				"Enable Advanced Configuration", 3);
+				
+		WyclipseUI.createLabel(container,"Advance Configuration Options",3);
 		generateWyIL = WyclipseUI.createCheckBox(container,
 				"Generate Intermediate Files (i.e. WyIL files)", 3);
 		generateWyAL = WyclipseUI.createCheckBox(container,
 				"Generate Verification Conditions (i.e. WyAL files)", 3);
 
-		enableAdvancedConfiguration.addSelectionListener(new SelectionAdapter() {
-			public void widgetSelected(SelectionEvent e) {
-				handleEnableAdvancedConfiguration();
-			}
-		});
-		
 		// =====================================================================
 		// Initialise Data
 	    // =====================================================================
@@ -173,16 +165,6 @@ public class NewWhileyPathBuildRuleDialog extends Dialog {
 		}
 	}
 	
-	private void handleEnableAdvancedConfiguration() {
-		if (enableAdvancedConfiguration.getSelection()) {
-			generateWyIL.setEnabled(true);
-			generateWyAL.setEnabled(true);
-		} else {
-			generateWyIL.setEnabled(false);
-			generateWyAL.setEnabled(false);
-		}
-	}
-	
 	// =========================================================================
 	// Write data to fields from WhileyPath
 	// =========================================================================
@@ -218,9 +200,8 @@ public class NewWhileyPathBuildRuleDialog extends Dialog {
 	
 	private void writeAdvancedConfigurationGroup() {
 		// Fow now, not supported!
-		enableAdvancedConfiguration.setSelection(false);
-		generateWyIL.setEnabled(buildRule.getGenerateWyIL());
-		generateWyAL.setEnabled(buildRule.getGenerateWyAL());
+		generateWyIL.setSelection(buildRule.getGenerateWyIL());
+		generateWyAL.setSelection(buildRule.getGenerateWyAL());
 	}
 	
 	// =========================================================================
