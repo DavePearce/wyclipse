@@ -43,14 +43,13 @@ public class NewWhileyPathBuildRuleDialog extends Dialog {
 	private Label outputFolderLabel;	
 	private Text outputFolderText;	
 	private Button outputFolderBrowseButton;
-
-	// Verification Group
 	private Button enableVerification;
-	private Button generateVerificationConditions;
-
+	private Button enableRuntimeAssertions;
+	
 	// Advanced Config Group
 	private Button enableAdvancedConfiguration;
-	private Button generateWyilFiles;
+	private Button generateWyIL;
+	private Button generateWyAL;
 
 	public NewWhileyPathBuildRuleDialog(Shell shell,
 			WhileyPath.BuildRule buildRule) {
@@ -85,7 +84,7 @@ public class NewWhileyPathBuildRuleDialog extends Dialog {
 		
 		WyclipseUI.createLabel(container, "Target Platform:", 1);
 		targetCombo = WyclipseUI.createCombo(container, 2,
-				"Whiley Virtual Machine (Default)", "Java Virtual Machine (Default)"); 
+				"Java Virtual Machine (Default)"); 
 
 		// =====================================================================
 		// Configure Output Folder Group
@@ -103,22 +102,14 @@ public class NewWhileyPathBuildRuleDialog extends Dialog {
 			}
 		});	
 		
-		WyclipseUI.createSeparator(container, 3);
-
 		// =====================================================================
 		// Configure Verification Group
 		// =====================================================================
 		
 		enableVerification = WyclipseUI.createCheckBox(container,
 				"Enable Verification", 3);
-		generateVerificationConditions = WyclipseUI.createCheckBox(container,
-				"Generate Verification Conditions (i.e. WyAL files)", 3);
-
-		enableVerification.addSelectionListener(new SelectionAdapter() {
-			public void widgetSelected(SelectionEvent e) {
-				handleEnableVerification();
-			}
-		});
+		enableRuntimeAssertions = WyclipseUI.createCheckBox(container,
+				"Enable RuntimeAssertions", 3);
 		
 		WyclipseUI.createSeparator(container, 3);
 		
@@ -128,8 +119,10 @@ public class NewWhileyPathBuildRuleDialog extends Dialog {
 		
 		enableAdvancedConfiguration = WyclipseUI.createCheckBox(container,
 				"Enable Advanced Configuration", 3);
-		generateWyilFiles = WyclipseUI.createCheckBox(container,
+		generateWyIL = WyclipseUI.createCheckBox(container,
 				"Generate Intermediate Files (i.e. WyIL files)", 3);
+		generateWyAL = WyclipseUI.createCheckBox(container,
+				"Generate Verification Conditions (i.e. WyAL files)", 3);
 
 		enableAdvancedConfiguration.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
@@ -158,8 +151,9 @@ public class NewWhileyPathBuildRuleDialog extends Dialog {
 	
 	@Override
 	public void okPressed() {
-		// FIXME: need more!!
 		readSourceTargetGroup();
+		readVerificationGroup();
+		readAdvancedGroup();
 		super.okPressed();
 	}
 	
@@ -179,19 +173,13 @@ public class NewWhileyPathBuildRuleDialog extends Dialog {
 		}
 	}
 	
-	private void handleEnableVerification() {
-		if (enableVerification.getSelection()) {
-			generateVerificationConditions.setEnabled(true);
-		} else {
-			generateVerificationConditions.setEnabled(false);
-		}
-	}
-	
 	private void handleEnableAdvancedConfiguration() {
 		if (enableAdvancedConfiguration.getSelection()) {
-			generateWyilFiles.setEnabled(true);
+			generateWyIL.setEnabled(true);
+			generateWyAL.setEnabled(true);
 		} else {
-			generateWyilFiles.setEnabled(false);
+			generateWyIL.setEnabled(false);
+			generateWyAL.setEnabled(false);
 		}
 	}
 	
@@ -224,15 +212,15 @@ public class NewWhileyPathBuildRuleDialog extends Dialog {
 	}
 	
 	private void writeVerificationGroup() {
-		// Fow now, not supported!
-		enableVerification.setSelection(false);
-		generateVerificationConditions.setEnabled(false);
+		enableVerification.setSelection(buildRule.getEnableVerification());
+		enableRuntimeAssertions.setSelection(buildRule.getEnableRuntimeAssertions());
 	}
 	
 	private void writeAdvancedConfigurationGroup() {
 		// Fow now, not supported!
 		enableAdvancedConfiguration.setSelection(false);
-		generateWyilFiles.setEnabled(false);
+		generateWyIL.setEnabled(buildRule.getGenerateWyIL());
+		generateWyAL.setEnabled(buildRule.getGenerateWyAL());
 	}
 	
 	// =========================================================================
@@ -247,5 +235,15 @@ public class NewWhileyPathBuildRuleDialog extends Dialog {
 		} else {
 			buildRule.setOutputFolder(new Path(outputFolderText.getText()));
 		}
+	}
+	
+	private void readVerificationGroup() {
+		buildRule.setEnableVerification(enableVerification.getSelection());
+		buildRule.setEnableRuntimeAssertions(enableRuntimeAssertions.getSelection());
+	}
+	
+	private void readAdvancedGroup() {
+		buildRule.setGenerateWyIL(generateWyIL.getSelection());
+		buildRule.setGenerateWyAL(generateWyAL.getSelection());
 	}
 }

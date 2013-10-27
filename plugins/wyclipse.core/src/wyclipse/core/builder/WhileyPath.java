@@ -94,6 +94,18 @@ public final class WhileyPath {
 						child.setAttribute("bindir", action.getOutputFolder()
 								.toString());
 					}
+					if(action.getEnableVerification()) {
+						child.setAttribute("verify","true");
+					}
+					if(action.getEnableRuntimeAssertions()) {
+						child.setAttribute("runtimeassertions","true");
+					}
+					if(action.getGenerateWyAL()) {
+						child.setAttribute("wyal","true");
+					}
+					if(action.getGenerateWyIL()) {
+						child.setAttribute("wyil","true");
+					}
 					root.appendChild(child);
 				} else if(e instanceof ExternalLibrary) {
 					ExternalLibrary el = (ExternalLibrary) e;
@@ -138,6 +150,10 @@ public final class WhileyPath {
 			Node child = children.item(i);
 			String childName = child.getNodeName();
 			if (childName.equals("buildrule")) {
+				
+				// NOTE: the way this all works is rather primitive and a more
+				// robust solution is planned for the future.
+				
 				NamedNodeMap attributes = child.getAttributes();
 				IPath sourceFolder = new org.eclipse.core.runtime.Path(
 						attributes.getNamedItem("srcdir").getNodeValue());
@@ -147,8 +163,26 @@ public final class WhileyPath {
 				IPath outputFolder = bindir == null ? null
 						: new org.eclipse.core.runtime.Path(
 								bindir.getNodeValue());
-				whileyPathEntries.add(new WhileyPath.BuildRule(sourceFolder,
-						sourceIncludes, outputFolder));
+				Node ev = attributes.getNamedItem("verify");
+				boolean enableVerification = ev == null ? false : Boolean
+						.parseBoolean(ev.getNodeValue());
+				Node rv = attributes.getNamedItem("runtimeassertions");
+				boolean enableRuntimeAssertions = rv == null ? false : Boolean
+						.parseBoolean(rv.getNodeValue());
+				Node gwyal = attributes.getNamedItem("wyal");
+				boolean generateWyAL = gwyal == null ? false : Boolean
+						.parseBoolean(gwyal.getNodeValue());
+				Node gwyil = attributes.getNamedItem("wyal");
+				boolean generateWyIL = gwyil == null ? false : Boolean
+						.parseBoolean(gwyil.getNodeValue());
+				
+				WhileyPath.BuildRule rule = new WhileyPath.BuildRule(sourceFolder,
+						sourceIncludes, outputFolder);
+				rule.setEnableVerification(enableVerification);
+				rule.setEnableRuntimeAssertions(enableRuntimeAssertions);
+				rule.setGenerateWyAL(generateWyAL);
+				rule.setGenerateWyIL(generateWyIL);
+				whileyPathEntries.add(rule);
 			} else if (childName.equals("library")) {
 				NamedNodeMap attributes = child.getAttributes();
 				IPath location = new org.eclipse.core.runtime.Path(attributes
@@ -244,7 +278,35 @@ public final class WhileyPath {
 		 * (in which case the defaultOutputFolder is used).
 		 */
 		private IPath outputFolder;
+		
+		/**
+		 * Determine whether or not verification is enabled. If not, then
+		 * pre-/post-conditions and other invariants will not be statically
+		 * checked.
+		 */
+		private boolean enableVerification;
 	
+		/**
+		 * Determine whether or not runtime assertions should be generated. If
+		 * true, then assertion bytecodes are inserted into the generated WyIL
+		 * files.
+		 */
+		private boolean enableRuntimeAssertions;
+		
+		/**
+		 * Determine whether or not WyAL files should be physically generated.
+		 * Generally speaking this is used for debugging purposes in order to
+		 * diagnose why a given invariant is failing.
+		 */
+		private boolean generateWyAL;
+		
+		/**
+		 * Determine whether or not WyIL files should be physically generated.
+		 * Generally speaking this is used for debugging purposes in order to
+		 * look at the raw WyIL bytecodes.
+		 */
+		private boolean generateWyIL;
+		
 		public BuildRule(IPath sourceFolder, String sourceIncludes, IPath outputFolder) {
 			this.sourceFolder = sourceFolder;
 			this.sourceIncludes = sourceIncludes;
@@ -274,6 +336,38 @@ public final class WhileyPath {
 		
 		public void setOutputFolder(IPath outputFolder) {
 			this.outputFolder = outputFolder;
+		}
+		
+		public boolean getEnableVerification() {
+			return enableVerification;
+		}
+		
+		public void setEnableVerification(boolean enableVerification) {
+			this.enableVerification = enableVerification;
+		}
+		
+		public boolean getEnableRuntimeAssertions() {
+			return enableRuntimeAssertions;
+		}
+		
+		public void setEnableRuntimeAssertions(boolean enableRuntimeAssertions) {
+			this.enableRuntimeAssertions = enableRuntimeAssertions;
+		}
+		
+		public boolean getGenerateWyAL() {
+			return generateWyAL;
+		}
+		
+		public void setGenerateWyAL(boolean generateWyAL) {
+			this.generateWyAL = generateWyAL;
+		}
+		
+		public boolean getGenerateWyIL() {
+			return generateWyIL;
+		}
+		
+		public void setGenerateWyIL(boolean generateWyIL) {
+			this.generateWyAL = generateWyIL;
 		}
 	}
 }
