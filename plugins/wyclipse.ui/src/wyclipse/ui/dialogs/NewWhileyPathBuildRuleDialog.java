@@ -44,7 +44,7 @@ public class NewWhileyPathBuildRuleDialog extends Dialog {
 	private Text outputFolderText;	
 	private Button outputFolderBrowseButton;
 	private Button enableVerification;
-	private Button enableRuntimeAssertions;
+	//private Button enableRuntimeAssertions;
 	
 	// Advanced Config Group
 	private Button generateWyIL;
@@ -107,9 +107,9 @@ public class NewWhileyPathBuildRuleDialog extends Dialog {
 		
 		enableVerification = WyclipseUI.createCheckBox(container,
 				"Enable Verification", 3);
-		enableRuntimeAssertions = WyclipseUI.createCheckBox(container,
-				"Enable RuntimeAssertions", 3);
-		
+//		enableRuntimeAssertions = WyclipseUI.createCheckBox(container,
+//				"Enable RuntimeAssertions", 3);
+//		
 		WyclipseUI.createSeparator(container, 3);
 		
 		// =====================================================================
@@ -195,7 +195,7 @@ public class NewWhileyPathBuildRuleDialog extends Dialog {
 	
 	private void writeVerificationGroup() {
 		enableVerification.setSelection(buildRule.getEnableVerification());
-		enableRuntimeAssertions.setSelection(buildRule.getEnableRuntimeAssertions());
+		//enableRuntimeAssertions.setSelection(buildRule.getEnableRuntimeAssertions());
 	}
 	
 	private void writeAdvancedConfigurationGroup() {
@@ -220,7 +220,7 @@ public class NewWhileyPathBuildRuleDialog extends Dialog {
 	
 	private void readVerificationGroup() {
 		buildRule.setEnableVerification(enableVerification.getSelection());
-		buildRule.setEnableRuntimeAssertions(enableRuntimeAssertions.getSelection());
+		//buildRule.setEnableRuntimeAssertions(enableRuntimeAssertions.getSelection());
 	}
 	
 	private void readAdvancedGroup() {
