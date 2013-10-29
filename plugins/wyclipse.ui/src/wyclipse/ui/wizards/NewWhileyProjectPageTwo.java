@@ -78,7 +78,7 @@ public class NewWhileyProjectPageTwo extends WizardPage {
 			// Therefore, redetect the WhileyPath based on the new location.
 			// Observe that this will destroy any previous information the user
 			// has configured for the WhileyPath.			
-			wpControl.setWhileyPath(detectWhileyPath(location));
+			wpControl.setWhileyPath(detectWhileyPath(location, (NewWhileyProjectPageOne) page));
 			this.location = location;
 		}
 	}
@@ -94,7 +94,7 @@ public class NewWhileyProjectPageTwo extends WizardPage {
 	 * 
 	 * @return
 	 */
-	protected WhileyPath detectWhileyPath(URI location) {
+	protected WhileyPath detectWhileyPath(URI location, NewWhileyProjectPageOne previousPage) {
 		WhileyPath whileypath;
 		
 		// First, determine whether or not a ".whileypath" file already exists.
@@ -123,7 +123,11 @@ public class NewWhileyProjectPageTwo extends WizardPage {
 		// FIXME: attempt to auto-configure whiley path
 		
 		// Third, return the default whiley path.
-		return WhileyNature.getDefaultWhileyPath();
+		WhileyPath wp = WhileyNature.getDefaultWhileyPath();
+		IPath wyrtLocation = new Path(previousPage.getWyrtLocation());
+		wp.getEntries().add(new WhileyPath.ExternalLibrary(wyrtLocation, "**"));
+		
+		return wp;
 	}
 	
 	protected WhileyPath loadWhileyPathFromExistingFile(File file) {

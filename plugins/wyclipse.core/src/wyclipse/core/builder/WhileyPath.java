@@ -186,7 +186,7 @@ public final class WhileyPath {
 			} else if (childName.equals("library")) {
 				NamedNodeMap attributes = child.getAttributes();
 				IPath location = new org.eclipse.core.runtime.Path(attributes
-						.getNamedItem("srcdir").getNodeValue());
+						.getNamedItem("path").getNodeValue());
 				String includes = attributes.getNamedItem("includes")
 						.getNodeValue();
 				whileyPathEntries.add(new WhileyPath.ExternalLibrary(location,

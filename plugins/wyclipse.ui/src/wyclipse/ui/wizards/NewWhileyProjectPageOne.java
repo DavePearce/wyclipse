@@ -27,6 +27,8 @@ package wyclipse.ui.wizards;
 
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.*;
@@ -47,6 +49,7 @@ import wyclipse.ui.util.WyclipseUI;
  * 
  */
 public class NewWhileyProjectPageOne extends WizardNewProjectCreationPage {
+	private Text locationText;
 	
 	/**
 	 * Constructor for SampleNewWizardPage.
@@ -78,32 +81,24 @@ public class NewWhileyProjectPageOne extends WizardNewProjectCreationPage {
 		// page. For now, I don't do anything. 
 		
 		Group group = WyclipseUI.createGroup(container, "Whiley Runtime Environment", SWT.SHADOW_ETCHED_IN, 3);
-		Label label = WyclipseUI.createLabel(group, "Location:", 1);
-		Text location = WyclipseUI.createText(group, wyclipse.core.Activator.WHILEY_RUNTIME_JAR, 1);
-		Button browse = WyclipseUI.createButton(group, "Browse...", 200);
-		//		projectName = new Text(container, SWT.BORDER | SWT.SINGLE);
-//		GridData gd = new GridData(GridData.FILL_HORIZONTAL);
-//		gd.horizontalSpan = 2;
-//		projectName.setLayoutData(gd);
-//		
-//		defaultLocation = new Button(container, SWT.CHECK);				
-//		defaultLocation.setText("Use default location");
-//
-//		location = new Text(container, SWT.BORDER | SWT.SINGLE);
-//		gd = new GridData(GridData.FILL_HORIZONTAL);
-//		location.setLayoutData(gd);
-//		initialiseLocation();
-//		
-//		Button button = new Button(container, SWT.PUSH);
-//		button.setText("Browse...");
-//		button.addSelectionListener(new SelectionAdapter() {
-//			public void widgetSelected(SelectionEvent e) {
-//				handleBrowseLocation();
-//			}
-//		});
-//		
-//		new Label(parent, SWT.SEPARATOR | SWT.HORIZONTAL);
-//		
-//		setControl(container);
+		WyclipseUI.createLabel(group, "Location:", 1);
+		locationText = WyclipseUI.createText(group, wyclipse.core.Activator.WHILEY_RUNTIME_JAR, 1);
+		WyclipseUI.createButton(group, "Browse...", 120).addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				handleBrowseLocationButton();
+			}
+		});	
+	}
+	
+	protected void handleBrowseLocationButton() {
+		FileDialog dialog = new FileDialog(this.getShell());
+		String result = dialog.open();
+		if(result != null) {
+			locationText.setText(result);
+		}
+	}
+
+	public String getWyrtLocation() {
+		return locationText.getText();
 	}
 }

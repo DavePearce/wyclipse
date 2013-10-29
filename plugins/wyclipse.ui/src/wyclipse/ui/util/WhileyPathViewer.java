@@ -1,5 +1,9 @@
 package wyclipse.ui.util;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.ILabelProvider;
@@ -9,6 +13,8 @@ import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.ui.ISharedImages;
+import org.eclipse.ui.PlatformUI;
 
 import wybs.lang.Path;
 import wybs.util.Trie;
@@ -70,16 +76,10 @@ public class WhileyPathViewer extends TreeViewer {
 		@Override
 		public Object[] getChildren(Object parentElement) {
 			if (parentElement instanceof WhileyPath) {
-				WhileyPath whileyPath = (WhileyPath) parentElement;
-				java.util.List<WhileyPath.Entry> entries = whileyPath
-						.getEntries();
-				return entries.toArray(new Object[entries.size()]);
-			} else if (parentElement instanceof WhileyPath.BuildRule) {
-				WhileyPath.BuildRule rule = (WhileyPath.BuildRule) parentElement;
-				Object[] entries = new Object[2];
-				entries[0] = new SourceIncludesElement(rule.getSourceIncludes());
-				entries[1] = new OutputFolderElement(rule.getOutputFolder());
-				return entries;
+				return whileyPath2Nodes((WhileyPath) parentElement);
+			} else if (parentElement instanceof PathNode) {
+				PathNode node = (PathNode) parentElement;
+				return node.children;				
 			} else {
 				return new Object[] {};
 			}
@@ -93,25 +93,71 @@ public class WhileyPathViewer extends TreeViewer {
 
 		@Override
 		public boolean hasChildren(Object element) {
-			return element instanceof WhileyPath
-					|| element instanceof WhileyPath.BuildRule;
+			if(element instanceof WhileyPath) {
+				return true;
+			} else if(element instanceof PathNode) {
+				PathNode pn = (PathNode) element;
+				return pn.children.length > 0;
+			}
+			return false;
 		}		
 	}
 	
-	private static class SourceIncludesElement {
-		public String includes;
+	private static enum PathKind {
+		BUILD_RULE,
+		FOLDER,
+		INCLUDES,
+		LIBRARY
+	}
+	
+	private static class PathNode {
+		public PathKind kind;
+		public String text;
+		public PathNode[] children;
 		
-		public SourceIncludesElement(String includes) {
-			this.includes = includes;
+		public PathNode(PathKind kind, String text, PathNode... children) {
+			this.kind = kind;
+			this.text = text;
+			this.children = children;
+		}
+		
+		public PathNode(PathKind kind, String text, Collection<PathNode> children) {
+			this.kind = kind;
+			this.text = text;
+			this.children = new PathNode[children.size()];
+			int i = 0;
+			for(PathNode n : children) {
+				this.children[i++] = n;
+			}
 		}
 	}
 	
-	private static class OutputFolderElement {
-		public IPath folder;
-		
-		public OutputFolderElement(IPath folder) {
-			this.folder = folder;
+	private static Object[] whileyPath2Nodes(WhileyPath whileypath) {
+		List<WhileyPath.Entry> wpEntries = whileypath.getEntries();
+		Object[] entries = new Object[wpEntries.size()];
+		for (int i = 0; i != entries.length; ++i) {
+			WhileyPath.Entry e = wpEntries.get(i);
+			PathNode pn;
+			if (e instanceof WhileyPath.BuildRule) {
+				WhileyPath.BuildRule br = (WhileyPath.BuildRule) e;
+				ArrayList<PathNode> nodes = new ArrayList<PathNode>();
+				nodes.add(new PathNode(PathKind.INCLUDES,"Includes: " + br.getSourceIncludes()));
+				nodes.add(new PathNode(PathKind.INCLUDES,"Output Folder: " + br.getOutputFolder()));
+				nodes.add(new PathNode(PathKind.INCLUDES,"Verification: " + br.getEnableVerification()));
+				nodes.add(new PathNode(PathKind.INCLUDES,"Runtime Assertions: " + br.getEnableRuntimeAssertions()));
+				nodes.add(new PathNode(PathKind.INCLUDES,"Generate WyIL: " + br.getGenerateWyIL()));
+				nodes.add(new PathNode(PathKind.INCLUDES,"Generate WyAL: " + br.getGenerateWyAL()));
+				pn = new PathNode(PathKind.FOLDER, br.getSourceFolder()
+						.toString(),nodes);				
+			} else {
+				WhileyPath.ExternalLibrary wl = (WhileyPath.ExternalLibrary) e;				
+				ArrayList<PathNode> nodes = new ArrayList<PathNode>();
+				nodes.add(new PathNode(PathKind.INCLUDES,"includes: " + wl.getIncludes()));
+				pn = new PathNode(PathKind.LIBRARY, wl.getLocation().toString(),nodes);
+			}
+			entries[i] = pn;
 		}
+		return entries;
 	}
 		
 	/**
@@ -150,8 +196,18 @@ public class WhileyPathViewer extends TreeViewer {
 		public Image getImage(Object element) {
 			ImageDescriptor descriptor = null;
 			
-			if(element instanceof WhileyPath.BuildRule) { 
-				descriptor = Activator.getImageDescriptor("whiley_modulefolder.gif");
+			if(element instanceof PathNode) {
+				PathNode pn = (PathNode) element;
+				switch(pn.kind) {
+				case FOLDER:
+					descriptor = Activator.getImageDescriptor("whiley_modulefolder.gif");
+					break;
+				case LIBRARY:
+					descriptor = Activator.getImageDescriptor("jar_obj.gif");
+					break;
+				default:
+					return null;
+				}				
 			} else {
 				return null;
 			}
@@ -162,15 +218,9 @@ public class WhileyPathViewer extends TreeViewer {
 
 		@Override
 		public String getText(Object element) {
-			if (element instanceof WhileyPath.BuildRule) {
-				WhileyPath.BuildRule container = (WhileyPath.BuildRule) element;
-				return container.getSourceFolder().toString();
-			} else if (element instanceof SourceIncludesElement) {
-				SourceIncludesElement sie = (SourceIncludesElement) element;
-				return "Includes: " + sie.includes;
-			} else if (element instanceof OutputFolderElement) {
-				OutputFolderElement ofe = (OutputFolderElement) element;
-				return "Output Folder: " + ofe.folder;
+			if (element instanceof PathNode) {
+				PathNode node = (PathNode) element;
+				return node.text;
 			} 
 			return null;
 		}
