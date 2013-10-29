@@ -2,9 +2,11 @@ package wyclipse.ui.util;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 
@@ -15,6 +17,16 @@ import org.eclipse.swt.widgets.Text;
  * 
  */
 public class WyclipseUI {
+	
+	public static Group createGroup(Composite parent, String text, int style, int numColumns) {
+		Group group = new Group(parent, style);
+		group.setText("Whiley Runtime Environment");
+		GridLayout layout = new GridLayout();		
+		group.setLayout(layout);
+		group.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		layout.numColumns = numColumns;
+		return group;
+	}
 	
 	public static Button createButton(Composite parent, String text, int width) {
 		GridData gd = new GridData();
@@ -55,7 +67,7 @@ public class WyclipseUI {
 	}
 	
 	public static Label createLabel(Composite parent, String text, int horizontalSpan) {
-		GridData gd = new GridData(GridData.FILL_HORIZONTAL);
+		GridData gd = new GridData();
 		gd.horizontalSpan = horizontalSpan;
 		Label label = new Label(parent, SWT.NULL);
 		label.setText(text);

@@ -26,8 +26,13 @@
 package wyclipse.ui.wizards;
 
 import org.eclipse.jface.wizard.IWizardPage;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.*;
 import org.eclipse.ui.dialogs.WizardNewProjectCreationPage;
+
+import wyclipse.ui.util.WyclipseUI;
 
 /**
  * Implements the first page of the new Whiley project wizard. The main
@@ -59,20 +64,24 @@ public class NewWhileyProjectPageOne extends WizardNewProjectCreationPage {
 	 */
 	@Override
 	public void createControl(Composite parent) {
-		super.createControl(parent);		
-		Composite container = (Composite) getControl();
+		// First, setup outer container
+		Composite container = new Composite(parent, SWT.NONE);
+		GridLayout layout = new GridLayout();
+		layout.numColumns = 1;
+		container.setLayout(layout);
+		
+		// Second add default controls which are managed by super class, and fit
+		// them into our three column format.
+		super.createControl(container);
+		
 		// at this point, we can use container to add more widgets onto the main
 		// page. For now, I don't do anything. 
 		
-//		GridLayout layout = new GridLayout();		
-//		container.setLayout(layout);
-//		layout.numColumns = 3;
-//		layout.verticalSpacing = 9;	
-//		layout.marginWidth = 20;
-//		Label label = new Label(container, SWT.NULL);
-//		label.setText("&Project Name:");
-//
-//		projectName = new Text(container, SWT.BORDER | SWT.SINGLE);
+		Group group = WyclipseUI.createGroup(container, "Whiley Runtime Environment", SWT.SHADOW_ETCHED_IN, 3);
+		Label label = WyclipseUI.createLabel(group, "Location:", 1);
+		Text location = WyclipseUI.createText(group, wyclipse.core.Activator.WHILEY_RUNTIME_JAR, 1);
+		Button browse = WyclipseUI.createButton(group, "Browse...", 200);
+		//		projectName = new Text(container, SWT.BORDER | SWT.SINGLE);
 //		GridData gd = new GridData(GridData.FILL_HORIZONTAL);
 //		gd.horizontalSpan = 2;
 //		projectName.setLayoutData(gd);
