@@ -122,11 +122,12 @@ public class NewWhileyProjectPageTwo extends WizardPage {
 		
 		// FIXME: attempt to auto-configure whiley path
 		
-		// Third, return the default whiley path.
+		// Third, return the default whiley path, augmented with the chosen
+		// Runtime Environment.
 		WhileyPath wp = WhileyNature.getDefaultWhileyPath();
-		IPath wyrtLocation = new Path(previousPage.getWyrtLocation());
-		wp.getEntries().add(new WhileyPath.ExternalLibrary(wyrtLocation, "**"));
-		
+		wp.getEntries().add(
+				new WhileyPath.StandardLibrary(previousPage.getWhileyRuntime()));
+
 		return wp;
 	}
 	

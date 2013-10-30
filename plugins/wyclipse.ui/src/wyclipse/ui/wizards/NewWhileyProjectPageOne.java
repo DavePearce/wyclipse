@@ -25,11 +25,7 @@
 
 package wyclipse.ui.wizards;
 
-import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.SelectionAdapter;
-import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.*;
 import org.eclipse.ui.dialogs.WizardNewProjectCreationPage;
@@ -49,7 +45,7 @@ import wyclipse.ui.util.WyclipseUI;
  * 
  */
 public class NewWhileyProjectPageOne extends WizardNewProjectCreationPage {
-	private Text locationText;
+	private Combo wreCombo;
 	
 	/**
 	 * Constructor for SampleNewWizardPage.
@@ -80,25 +76,11 @@ public class NewWhileyProjectPageOne extends WizardNewProjectCreationPage {
 		// at this point, we can use container to add more widgets onto the main
 		// page. For now, I don't do anything. 
 		
-		Group group = WyclipseUI.createGroup(container, "Whiley Runtime Environment", SWT.SHADOW_ETCHED_IN, 3);
-		WyclipseUI.createLabel(group, "Location:", 1);
-		locationText = WyclipseUI.createText(group, wyclipse.core.Activator.WHILEY_RUNTIME_JAR, 1);
-		WyclipseUI.createButton(group, "Browse...", 120).addSelectionListener(new SelectionAdapter() {
-			public void widgetSelected(SelectionEvent e) {
-				handleBrowseLocationButton();
-			}
-		});	
+		WyclipseUI.createLabel(container, "Whiley Runtime Environment:", 1);
+		wreCombo = WyclipseUI.createCombo(container, 1, "Default WyRT");		
 	}
 	
-	protected void handleBrowseLocationButton() {
-		FileDialog dialog = new FileDialog(this.getShell());
-		String result = dialog.open();
-		if(result != null) {
-			locationText.setText(result);
-		}
-	}
-
-	public String getWyrtLocation() {
-		return locationText.getText();
+	public String getWhileyRuntime() {
+		return wreCombo.getText();
 	}
 }

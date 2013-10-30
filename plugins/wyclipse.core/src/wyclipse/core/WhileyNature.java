@@ -29,7 +29,9 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -185,6 +187,20 @@ public class WhileyNature implements IProjectNature {
 	
 	public void setWhileyProjectBuilder(WhileyProjectBuilder builder) {
 		this.whileyProjectBuilder = builder;
+	}
+	
+	/**
+	 * Return the mapping from standard library names to their absolute path
+	 * location. Standard libraries are effectively built in libraries (e.g.
+	 * wyrt) which have standard names. This means they can be specified on the
+	 * whileypath without giving an absolute location.
+	 * 
+	 * @return
+	 */
+	public Map<String,IPath> getStandardLibraries() {
+		HashMap<String,IPath> stdlibs = new HashMap<String,IPath>();
+		stdlibs.put("Default WyRT", new Path(Activator.WHILEY_RUNTIME_JAR));
+		return stdlibs;
 	}
 			
 	/**

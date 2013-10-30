@@ -83,7 +83,7 @@ public final class WhileyPath {
 			for (Entry e : entries) {
 				if (e instanceof BuildRule) {
 					BuildRule action = (BuildRule) e;
-					Element child = doc.createElement("buildrule");
+					Element child = doc.createElement("build");
 					// FIXME: need to do more here!
 					child.setAttribute("target", "wyil");
 					child.setAttribute("srcdir", action.getSourceFolder()
@@ -109,9 +109,14 @@ public final class WhileyPath {
 					root.appendChild(child);
 				} else if(e instanceof ExternalLibrary) {
 					ExternalLibrary el = (ExternalLibrary) e;
-					Element child = doc.createElement("library");
+					Element child = doc.createElement("extlib");
 					child.setAttribute("path", el.getLocation().toString());
 					child.setAttribute("includes", el.getIncludes().toString());
+					root.appendChild(child);
+				} else if(e instanceof StandardLibrary) {
+					StandardLibrary el = (StandardLibrary) e;
+					Element child = doc.createElement("stdlib");
+					child.setAttribute("name", el.getName());
 					root.appendChild(child);
 				}
 			}
@@ -149,7 +154,7 @@ public final class WhileyPath {
 		for (int i = 0; i != children.getLength(); ++i) {
 			Node child = children.item(i);
 			String childName = child.getNodeName();
-			if (childName.equals("buildrule")) {
+			if (childName.equals("build")) {
 				
 				// NOTE: the way this all works is rather primitive and a more
 				// robust solution is planned for the future.
@@ -183,7 +188,7 @@ public final class WhileyPath {
 				rule.setGenerateWyAL(generateWyAL);
 				rule.setGenerateWyIL(generateWyIL);
 				whileyPathEntries.add(rule);
-			} else if (childName.equals("library")) {
+			} else if (childName.equals("extlib")) {
 				NamedNodeMap attributes = child.getAttributes();
 				IPath location = new org.eclipse.core.runtime.Path(attributes
 						.getNamedItem("path").getNodeValue());
@@ -191,6 +196,11 @@ public final class WhileyPath {
 						.getNodeValue();
 				whileyPathEntries.add(new WhileyPath.ExternalLibrary(location,
 						includes));
+			} else if (childName.equals("stdlib")) {
+				NamedNodeMap attributes = child.getAttributes();
+				String name = attributes.getNamedItem("name")
+						.getNodeValue();
+				whileyPathEntries.add(new WhileyPath.StandardLibrary(name));
 			}
 		}
 		
@@ -368,6 +378,31 @@ public final class WhileyPath {
 		
 		public void setGenerateWyIL(boolean generateWyIL) {
 			this.generateWyIL = generateWyIL;
+		}
+	}
+	
+	/**
+	 * Represents the default standard library provided with Whiley. This is
+	 * given special status to avoid encoding absolute paths into the
+	 * whileypath. In principle, we'd probably want to provide a mechanism
+	 * whereby we can register different standard libraries and versions.
+	 * 
+	 * @author David J. Pearce
+	 * 
+	 */
+	public static final class StandardLibrary extends Entry {
+		private String name;
+		
+		public StandardLibrary(String name) {
+			this.name = name;
+		}
+		
+		public String getName() {
+			return name;
+		}
+		
+		public void setName(String name) {
+			this.name = name;
 		}
 	}
 }

@@ -85,6 +85,12 @@ public class WhileyProjectBuilder extends IncrementalProjectBuilder {
 	private StandardProject whileyProject;
 	
 	/**
+	 * The nature associated with this builder. This is useful for getting
+	 * global project properties (e.g. the set of available standard libraries).
+	 */
+	private WhileyNature whileyNature;
+	
+	/**
 	 * The delta is a list of entries which require recompilation. As entries
 	 * are changed, they may be added to this list (e.g. Whiley). Entries which
 	 * depend upon them may also be added. Or, if they represent e.g. binary
@@ -96,11 +102,11 @@ public class WhileyProjectBuilder extends IncrementalProjectBuilder {
 		System.err.println("WHILEY PROJECT BUILDER INITIALISED");
 		// First, get the whileypath from the nature
 		IProject iproject = (IProject) getProject();
-		WhileyNature nature = (WhileyNature) iproject
+		this.whileyNature = (WhileyNature) iproject
 				.getNature(Activator.WYCLIPSE_NATURE_ID);
-		nature.setWhileyProjectBuilder(this);
+		whileyNature.setWhileyProjectBuilder(this);
 		
-		WhileyPath whileypath = nature.getWhileyPath();		
+		WhileyPath whileypath = whileyNature.getWhileyPath();		
 		
 		this.whileyProject = new StandardProject();
 		
@@ -221,12 +227,27 @@ public class WhileyProjectBuilder extends IncrementalProjectBuilder {
 				System.err.println("*** INITIALISING WYC BUILD RULE: " + sourceRoot + " => " + outputRoot);				
 				
 			} else if(entry instanceof WhileyPath.ExternalLibrary){
-				WhileyPath.ExternalLibrary ext = (WhileyPath.ExternalLibrary) entry;
+				WhileyPath.ExternalLibrary extlib = (WhileyPath.ExternalLibrary) entry;
 				try {
-					whileyProjectRoots.add(new JarFileRoot(ext.getLocation().toOSString(), registry));
-					System.err.println("*** INITIALISING EXTERNAL LIBRARY: " + ext.getLocation());
+					whileyProjectRoots.add(new JarFileRoot(extlib.getLocation().toOSString(), registry));
+					System.err.println("*** INITIALISING EXTERNAL LIBRARY: " + extlib.getLocation());
 				} catch(IOException e) {
-					System.err.println("*** FAILED ADDING EXTERNAL LIBRARY: " + ext.getLocation());
+					System.err.println("*** FAILED ADDING EXTERNAL LIBRARY: " + extlib.getLocation());
+				}
+				
+			} else if(entry instanceof WhileyPath.StandardLibrary){
+				WhileyPath.StandardLibrary stdlib = (WhileyPath.StandardLibrary) entry;
+				IPath path = whileyNature.getStandardLibraries().get(stdlib.getName());
+				try {
+					if(path != null) {
+						whileyProjectRoots.add(new JarFileRoot(path.toOSString(), registry));
+						System.err.println("*** INITIALISING STANDARD LIBRARY: " + path);
+					} else {
+						System.err.println("*** FAILED ADDING STANDARD LIBRARY: " + path);
+					}
+				} catch (IOException e) {
+					System.err.println("*** FAILED ADDING STANDARD LIBRARY: "
+							+ path);
 				}
 			}
 		}			
