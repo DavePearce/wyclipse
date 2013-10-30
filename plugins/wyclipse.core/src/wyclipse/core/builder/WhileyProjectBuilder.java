@@ -176,9 +176,10 @@ public class WhileyProjectBuilder extends IncrementalProjectBuilder {
 					outputRoot = new ContainerRoot(outputFolder,registry);					
 					whileyProjectRoots.add(outputRoot);
 				}
-				Path.Root virtualOutputRoot = new VirtualRoot(registry); 
+				Path.Root virtualOutputRoot = new VirtualRoot(registry); 				
 				Path.Root wyilOutputRoot = action.getGenerateWyIL() ? outputRoot : virtualOutputRoot;
 				Path.Root wyalOutputRoot = action.getGenerateWyAL() ? outputRoot : virtualOutputRoot;
+				whileyProjectRoots.add(virtualOutputRoot);
 				
 				// ============================================================
 				// Third, create the corresponding build rule(s)
