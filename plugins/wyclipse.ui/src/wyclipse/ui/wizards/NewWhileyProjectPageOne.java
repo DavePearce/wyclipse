@@ -26,6 +26,7 @@
 package wyclipse.ui.wizards;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.*;
 import org.eclipse.ui.dialogs.WizardNewProjectCreationPage;
@@ -46,6 +47,7 @@ import wyclipse.ui.util.WyclipseUI;
  */
 public class NewWhileyProjectPageOne extends WizardNewProjectCreationPage {
 	private Combo wreCombo;
+	private Combo wycsCombo;
 	
 	/**
 	 * Constructor for SampleNewWizardPage.
@@ -71,16 +73,27 @@ public class NewWhileyProjectPageOne extends WizardNewProjectCreationPage {
 		
 		// Second add default controls which are managed by super class, and fit
 		// them into our three column format.
-		super.createControl(container);
+		super.createControl(container);		
 		
 		// at this point, we can use container to add more widgets onto the main
 		// page. For now, I don't do anything. 
-		
-		WyclipseUI.createLabel(container, "Whiley Runtime Environment:", 1);
-		wreCombo = WyclipseUI.createCombo(container, 1, "Default WyRT");		
+		Group group = WyclipseUI.createGroup(container, "Whiley Environment", SWT.SHADOW_ETCHED_IN, 2);
+		WyclipseUI.createLabel(group, "Standard Library:", 1);
+		wreCombo = WyclipseUI.createCombo(group, 1, "Default WyRT");
+		wreCombo.setText("Default WyRT");
+		WyclipseUI.createLabel(group, "Verifier:", 1);
+		wycsCombo = WyclipseUI.createCombo(group, 1, "Default WyCS");
+		wycsCombo.setText("Default WyCS");
 	}
 	
 	public String getWhileyRuntime() {
-		return wreCombo.getText();
+		//return wreCombo.getText();
+		return "dumb";
+	}
+	
+	@Override
+	public void dispose() {
+		wreCombo.dispose();
+		wycsCombo.dispose();
 	}
 }

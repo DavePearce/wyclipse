@@ -153,11 +153,14 @@ public class WhileyPathViewer extends TreeViewer {
 				nodes.add(new PathNode(PathKind.INCLUDES,"Generate WyAL: " + br.getGenerateWyAL(),null));
 				pn = new PathNode(PathKind.FOLDER, br.getSourceFolder()
 						.toString(),br,nodes);				
-			} else {
+			} else if(e instanceof WhileyPath.ExternalLibrary) {
 				WhileyPath.ExternalLibrary wl = (WhileyPath.ExternalLibrary) e;				
 				ArrayList<PathNode> nodes = new ArrayList<PathNode>();
 				nodes.add(new PathNode(PathKind.INCLUDES,"includes: " + wl.getIncludes(),null));
 				pn = new PathNode(PathKind.LIBRARY, wl.getLocation().toString(), wl, nodes);
+			} else {
+				WhileyPath.StandardLibrary wl = (WhileyPath.StandardLibrary) e;				
+				pn = new PathNode(PathKind.LIBRARY, wl.getName(), wl);
 			}
 			entries[i] = pn;
 		}
