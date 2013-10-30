@@ -55,10 +55,9 @@ public class NewWhileyProjectPageTwo extends WizardPage {
 	}
 	
 	@Override
-	public void createControl(Composite parent) {
+	public void createControl(Composite parent) {;
 		wpControl = new WhileyPathConfigurationControl(getShell());
 		Composite composite = wpControl.create(parent);
-
 		setControl(composite);
 	}
 	

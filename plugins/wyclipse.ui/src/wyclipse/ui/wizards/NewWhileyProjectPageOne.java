@@ -85,6 +85,8 @@ public class NewWhileyProjectPageOne extends WizardNewProjectCreationPage {
 		WyclipseUI.createLabel(group, "Verifier:", 1);
 		wycsCombo = WyclipseUI.createCombo(group, 1, "Default WyCS");
 		wycsCombo.setText("Default WyCS");
+		
+		setControl(container);
 	}	
 	
 	public String getWhileyRuntime() {

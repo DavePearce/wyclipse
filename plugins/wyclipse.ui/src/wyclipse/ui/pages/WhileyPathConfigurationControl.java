@@ -58,6 +58,18 @@ public class WhileyPathConfigurationControl {
 	public void setWhileyPath(WhileyPath whileypath) {
 		this.whileypath = whileypath;
 		this.whileyPathViewer.setInput(whileypath);
+		IPath defaultOutputFolder = whileypath.getDefaultOutputFolder();
+		if(defaultOutputFolder != null) {
+			defaultOutputFolderText.setText(defaultOutputFolder.toString());
+			defaultOutputFolderLabel.setEnabled(true);
+			defaultOutputFolderText.setEnabled(true);
+			defaultOutputFolderBrowseButton.setEnabled(true);
+		} else {
+			defaultOutputFolderLabel.setEnabled(false);
+			defaultOutputFolderText.setEnabled(false);
+			defaultOutputFolderBrowseButton.setEnabled(false);
+			defaultOutputFolderText.setText("");
+		}
 	}
 	
 	public void setContainer(IContainer container) {
@@ -177,18 +189,15 @@ public class WhileyPathConfigurationControl {
 	 * This function is called when the edit button is pressed.
 	 */
 	protected void handleEditRule() {
-		System.out.println("*** HANDLE EDIT RULE");
 		WhileyPath.BuildRule buildRule = null;
 		
 		// First, extract the select item (if any)
 		TreeItem[] items = whileyPathViewer.getTree().getSelection();
 		for (TreeItem item : items) {
 			Object data = item.getData();
-			System.out.println("*** GOT: " + data);
 			if (data instanceof WhileyPathViewer.PathNode) {			
 				WhileyPathViewer.PathNode pn = (WhileyPathViewer.PathNode) data;
 				if(pn.data instanceof WhileyPath.BuildRule) {
-					System.out.println("*** MATCHED BUILD RULE");
 					buildRule = (WhileyPath.BuildRule) pn.data;
 					break;					
 				}
@@ -198,7 +207,6 @@ public class WhileyPathConfigurationControl {
 		
 		// Second, open the build rule dialog
 		if (buildRule != null) {
-			System.out.println("*** NO BUILD RULE");
 			NewWhileyPathBuildRuleDialog dialog = new NewWhileyPathBuildRuleDialog(
 					shell, buildRule);
 			if (dialog.open() == Window.OK) {
