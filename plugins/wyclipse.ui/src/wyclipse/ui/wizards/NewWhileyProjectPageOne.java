@@ -46,6 +46,7 @@ import wyclipse.ui.util.WyclipseUI;
  * 
  */
 public class NewWhileyProjectPageOne extends WizardNewProjectCreationPage {
+	private Composite container;
 	private Combo wreCombo;
 	private Combo wycsCombo;
 	
@@ -66,7 +67,7 @@ public class NewWhileyProjectPageOne extends WizardNewProjectCreationPage {
 	@Override
 	public void createControl(Composite parent) {
 		// First, setup outer container
-		Composite container = new Composite(parent, SWT.NONE);
+		this.container = new Composite(parent, SWT.NONE);
 		GridLayout layout = new GridLayout();
 		layout.numColumns = 1;
 		container.setLayout(layout);
@@ -84,7 +85,7 @@ public class NewWhileyProjectPageOne extends WizardNewProjectCreationPage {
 		WyclipseUI.createLabel(group, "Verifier:", 1);
 		wycsCombo = WyclipseUI.createCombo(group, 1, "Default WyCS");
 		wycsCombo.setText("Default WyCS");
-	}
+	}	
 	
 	public String getWhileyRuntime() {
 		return wreCombo.getText();
@@ -92,6 +93,8 @@ public class NewWhileyProjectPageOne extends WizardNewProjectCreationPage {
 	
 	@Override
 	public void dispose() {
+		super.dispose();
+		container.dispose();
 		wreCombo.dispose();
 		wycsCombo.dispose();
 	}

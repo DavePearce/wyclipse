@@ -84,7 +84,7 @@ public class WhileyPathConfigurationControl {
 		// Create viewer which is 2 columns wide and 3 rows deep.
 		whileyPathViewer = createWhileyPathViewer(container, whileypath, 2, 4);						
 		Button addBuildButton = WyclipseUI.createButton(container, "Add Rule...", 120);
-		Button addLibraryButton = WyclipseUI.createButton(container, "Add Library...", 120);
+		Button addExternalLibraryButton = WyclipseUI.createButton(container, "Add Library...", 120);
 		Button editButton = WyclipseUI.createButton(container, "Edit", 120);
 		Button removeButton = WyclipseUI.createButton(container, "Remove", 120);		
 		
@@ -94,9 +94,9 @@ public class WhileyPathConfigurationControl {
 			}
 		});
 		
-		addLibraryButton.addSelectionListener(new SelectionAdapter() {
+		addExternalLibraryButton.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
-				handleAddLibrary();
+				handleAddExternalLibrary();
 			}
 		});
 		
@@ -163,7 +163,7 @@ public class WhileyPathConfigurationControl {
 	/**
 	 * This function is called when the add library button is pressed.
 	 */
-	protected void handleAddLibrary() {
+	protected void handleAddExternalLibrary() {
 		FileDialog dialog = new FileDialog(shell);
 		String result = dialog.open();
 		if(result != null) {
@@ -177,20 +177,28 @@ public class WhileyPathConfigurationControl {
 	 * This function is called when the edit button is pressed.
 	 */
 	protected void handleEditRule() {
+		System.out.println("*** HANDLE EDIT RULE");
 		WhileyPath.BuildRule buildRule = null;
 		
 		// First, extract the select item (if any)
 		TreeItem[] items = whileyPathViewer.getTree().getSelection();
 		for (TreeItem item : items) {
 			Object data = item.getData();
-			if (data instanceof WhileyPath.BuildRule) {			
-				buildRule = (WhileyPath.BuildRule) data;
-				break;
+			System.out.println("*** GOT: " + data);
+			if (data instanceof WhileyPathViewer.PathNode) {			
+				WhileyPathViewer.PathNode pn = (WhileyPathViewer.PathNode) data;
+				if(pn.data instanceof WhileyPath.BuildRule) {
+					System.out.println("*** MATCHED BUILD RULE");
+					buildRule = (WhileyPath.BuildRule) pn.data;
+					break;					
+				}
+
 			}
 		}
 		
 		// Second, open the build rule dialog
 		if (buildRule != null) {
+			System.out.println("*** NO BUILD RULE");
 			NewWhileyPathBuildRuleDialog dialog = new NewWhileyPathBuildRuleDialog(
 					shell, buildRule);
 			if (dialog.open() == Window.OK) {

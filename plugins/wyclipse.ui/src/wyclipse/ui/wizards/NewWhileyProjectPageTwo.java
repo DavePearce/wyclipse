@@ -80,6 +80,7 @@ public class NewWhileyProjectPageTwo extends WizardPage {
 			// has configured for the WhileyPath.			
 			wpControl.setWhileyPath(detectWhileyPath(location, (NewWhileyProjectPageOne) page));
 			this.location = location;
+			System.out.println("GOT HERE");
 		}
 	}
 	

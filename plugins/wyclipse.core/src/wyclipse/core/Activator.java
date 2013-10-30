@@ -73,7 +73,6 @@ public class Activator extends AbstractUIPlugin {
 	public void start(BundleContext context) throws Exception {
 		super.start(context);		
 		try {
-			System.out.println("LOOKING FOR SOMETHING");
 			URL url = FileLocator.resolve(context.getBundle().getEntry(
 					WHILEY_RUNTIME_JAR));
 			WHILEY_RUNTIME_JAR_IPATH = URIUtil.toPath(url.toURI());
