@@ -82,14 +82,21 @@ public class WhileyPathConfigurationControl {
 		// =====================================================================		
 				
 		// Create viewer which is 2 columns wide and 3 rows deep.
-		whileyPathViewer = createWhileyPathViewer(container, whileypath, 2, 3);						
-		Button addButton = WyclipseUI.createButton(container, "Add Rule...", 120);
+		whileyPathViewer = createWhileyPathViewer(container, whileypath, 2, 4);						
+		Button addBuildButton = WyclipseUI.createButton(container, "Add Rule...", 120);
+		Button addLibraryButton = WyclipseUI.createButton(container, "Add Library...", 120);
 		Button editButton = WyclipseUI.createButton(container, "Edit", 120);
 		Button removeButton = WyclipseUI.createButton(container, "Remove", 120);		
 		
-		addButton.addSelectionListener(new SelectionAdapter() {
+		addBuildButton.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
 				handleAddRule();
+			}
+		});
+		
+		addLibraryButton.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				handleAddLibrary();
 			}
 		});
 		
@@ -139,7 +146,7 @@ public class WhileyPathConfigurationControl {
 	// ======================================================================
 
 	/**
-	 * This function is called when the add button is pressed.
+	 * This function is called when the add rule button is pressed.
 	 */
 	protected void handleAddRule() {
 		WhileyPath.BuildRule buildRule = new WhileyPath.BuildRule(new Path(""),
@@ -149,6 +156,19 @@ public class WhileyPathConfigurationControl {
 		
 		if (dialog.open() == Window.OK) {
 			whileypath.getEntries().add(buildRule);
+			whileyPathViewer.refresh();
+		}
+	}
+	
+	/**
+	 * This function is called when the add library button is pressed.
+	 */
+	protected void handleAddLibrary() {
+		FileDialog dialog = new FileDialog(shell);
+		String result = dialog.open();
+		if(result != null) {
+			IPath location = new Path(result);
+			whileypath.getEntries().add(new WhileyPath.ExternalLibrary(location, "**/*.wyil"));
 			whileyPathViewer.refresh();
 		}
 	}
@@ -182,12 +202,15 @@ public class WhileyPathConfigurationControl {
 	/**
 	 * This function is called when the remove button is pressed.
 	 */
-	protected void handleRemoveRule() {		
+	protected void handleRemoveRule() {
 		TreeItem[] items = whileyPathViewer.getTree().getSelection();
 		for (TreeItem item : items) {
 			Object data = item.getData();
-			if (data instanceof WhileyPath.BuildRule) {
-				whileypath.getEntries().remove(data);
+			if (data instanceof WhileyPathViewer.PathNode) {
+				WhileyPathViewer.PathNode pn = (WhileyPathViewer.PathNode) data;
+				// Here, data refers to the WhileyPath.Entry object associated
+				// with this path node.
+				whileypath.getEntries().remove(pn.data);
 			}
 		}
 		whileyPathViewer.refresh();

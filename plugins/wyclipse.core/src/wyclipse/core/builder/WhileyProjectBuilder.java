@@ -36,6 +36,7 @@ import wyclipse.core.WhileyNature;
 import wyclipse.core.builder.ContainerRoot.IFileEntry;
 import wybs.lang.*;
 import wybs.lang.Path;
+import wybs.util.JarFileRoot;
 import wybs.util.StandardBuildRule;
 import wybs.util.StandardProject;
 import wybs.util.Trie;
@@ -220,9 +221,13 @@ public class WhileyProjectBuilder extends IncrementalProjectBuilder {
 				System.err.println("*** INITIALISING WYC BUILD RULE: " + sourceRoot + " => " + outputRoot);				
 				
 			} else if(entry instanceof WhileyPath.ExternalLibrary){
-				WhileyPath.ExternalLibrary ext = (WhileyPath.ExternalLibrary) entry;					
-				// TODO: implement me!
-				System.err.println("IGNORING EXTERNAL CONTAINER: " + ext.getLocation());
+				WhileyPath.ExternalLibrary ext = (WhileyPath.ExternalLibrary) entry;
+				try {
+					whileyProjectRoots.add(new JarFileRoot(ext.getLocation().toOSString(), registry));
+					System.err.println("*** INITIALISING EXTERNAL LIBRARY: " + ext.getLocation());
+				} catch(IOException e) {
+					System.err.println("*** FAILED ADDING EXTERNAL LIBRARY: " + ext.getLocation());
+				}
 			}
 		}			
 	}

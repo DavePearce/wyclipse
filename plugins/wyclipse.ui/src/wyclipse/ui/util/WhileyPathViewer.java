@@ -110,20 +110,24 @@ public class WhileyPathViewer extends TreeViewer {
 		LIBRARY
 	}
 	
-	private static class PathNode {
-		public PathKind kind;
-		public String text;
-		public PathNode[] children;
+	public static class PathNode {
+		public final PathKind kind;
+		public final String text;
+		public final Object data;
+		public final PathNode[] children;		
 		
-		public PathNode(PathKind kind, String text, PathNode... children) {
+		public PathNode(PathKind kind, String text, Object data, PathNode... children) {
 			this.kind = kind;
 			this.text = text;
+			this.data = data;
 			this.children = children;
 		}
 		
-		public PathNode(PathKind kind, String text, Collection<PathNode> children) {
+		public PathNode(PathKind kind, String text, Object data,
+				Collection<PathNode> children) {
 			this.kind = kind;
 			this.text = text;
+			this.data = data;
 			this.children = new PathNode[children.size()];
 			int i = 0;
 			for(PathNode n : children) {
@@ -141,19 +145,19 @@ public class WhileyPathViewer extends TreeViewer {
 			if (e instanceof WhileyPath.BuildRule) {
 				WhileyPath.BuildRule br = (WhileyPath.BuildRule) e;
 				ArrayList<PathNode> nodes = new ArrayList<PathNode>();
-				nodes.add(new PathNode(PathKind.INCLUDES,"Includes: " + br.getSourceIncludes()));
-				nodes.add(new PathNode(PathKind.INCLUDES,"Output Folder: " + br.getOutputFolder()));
-				nodes.add(new PathNode(PathKind.INCLUDES,"Verification: " + br.getEnableVerification()));
-				nodes.add(new PathNode(PathKind.INCLUDES,"Runtime Assertions: " + br.getEnableRuntimeAssertions()));
-				nodes.add(new PathNode(PathKind.INCLUDES,"Generate WyIL: " + br.getGenerateWyIL()));
-				nodes.add(new PathNode(PathKind.INCLUDES,"Generate WyAL: " + br.getGenerateWyAL()));
+				nodes.add(new PathNode(PathKind.INCLUDES,"Includes: " + br.getSourceIncludes(),null));
+				nodes.add(new PathNode(PathKind.INCLUDES,"Output Folder: " + br.getOutputFolder(),null));
+				nodes.add(new PathNode(PathKind.INCLUDES,"Verification: " + br.getEnableVerification(),null));
+				nodes.add(new PathNode(PathKind.INCLUDES,"Runtime Assertions: " + br.getEnableRuntimeAssertions(),null));
+				nodes.add(new PathNode(PathKind.INCLUDES,"Generate WyIL: " + br.getGenerateWyIL(),null));
+				nodes.add(new PathNode(PathKind.INCLUDES,"Generate WyAL: " + br.getGenerateWyAL(),null));
 				pn = new PathNode(PathKind.FOLDER, br.getSourceFolder()
-						.toString(),nodes);				
+						.toString(),br,nodes);				
 			} else {
 				WhileyPath.ExternalLibrary wl = (WhileyPath.ExternalLibrary) e;				
 				ArrayList<PathNode> nodes = new ArrayList<PathNode>();
-				nodes.add(new PathNode(PathKind.INCLUDES,"includes: " + wl.getIncludes()));
-				pn = new PathNode(PathKind.LIBRARY, wl.getLocation().toString(),nodes);
+				nodes.add(new PathNode(PathKind.INCLUDES,"includes: " + wl.getIncludes(),null));
+				pn = new PathNode(PathKind.LIBRARY, wl.getLocation().toString(), wl, nodes);
 			}
 			entries[i] = pn;
 		}
