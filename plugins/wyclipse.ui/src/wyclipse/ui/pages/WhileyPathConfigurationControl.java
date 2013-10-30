@@ -6,6 +6,8 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.jface.dialogs.IDialogPage;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.ModifyEvent;
+import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.*;
@@ -148,6 +150,12 @@ public class WhileyPathConfigurationControl {
 			defaultOutputFolderText.setText(defaultOutputFolder.toString());
 		}
 		
+		defaultOutputFolderText.addModifyListener(new ModifyListener() {
+			public void modifyText(ModifyEvent e) {
+				handleModifyDefaultOutputFolder();
+			}
+		});	
+		
 		container.pack();
 		
 		return container;
@@ -254,9 +262,20 @@ public class WhileyPathConfigurationControl {
 		if (dialog.open() == ContainerSelectionDialog.OK) {
 			Object[] items = dialog.getResult();
 			if (items.length == 1) {
-				defaultOutputFolderText.setText(items[0].toString());
+				String defaultOutputFolder = items[0].toString();
+				defaultOutputFolderText.setText(defaultOutputFolder);
+				whileypath.setDefaultOutputFolder(new Path(defaultOutputFolder));				
 			}
 		}
+	}
+	
+	/**
+	 * This function is called when the text for the default output
+	 * folder is modified.
+	 */
+	protected void handleModifyDefaultOutputFolder() {
+		whileypath.setDefaultOutputFolder(new Path(defaultOutputFolderText
+				.getText()));
 	}
 	
 	// ======================================================================
