@@ -16,7 +16,7 @@ public class WhileyPathPropertyPage extends PropertyPage {
 	
 	public WhileyPathPropertyPage() throws CoreException {
 		super();
-		setDescription("Properties for the Whiley Compiler");
+		setDescription("Configure the Whiley Build Path");
 	}
 
 	@Override
