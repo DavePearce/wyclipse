@@ -87,8 +87,7 @@ public class NewWhileyProjectPageOne extends WizardNewProjectCreationPage {
 	}
 	
 	public String getWhileyRuntime() {
-		//return wreCombo.getText();
-		return "dumb";
+		return wreCombo.getText();
 	}
 	
 	@Override

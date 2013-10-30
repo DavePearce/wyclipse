@@ -199,7 +199,7 @@ public class WhileyNature implements IProjectNature {
 	 */
 	public Map<String,IPath> getStandardLibraries() {
 		HashMap<String,IPath> stdlibs = new HashMap<String,IPath>();
-		stdlibs.put("Default WyRT", new Path(Activator.WHILEY_RUNTIME_JAR));
+		stdlibs.put("Default WyRT", Activator.WHILEY_RUNTIME_JAR_IPATH);
 		return stdlibs;
 	}
 			
