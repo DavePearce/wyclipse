@@ -46,19 +46,19 @@ public class Scanner extends RuleBasedScanner {
 	public Scanner() {
 		IToken keyword = new Token(new TextAttribute(
 				ColorManager.KEYWORD_COLOR_C, null, SWT.BOLD));
-		IToken darkKeyword = new Token(new TextAttribute(
-				ColorManager.DARK_KEYWORD_COLOR_C, null, SWT.BOLD));
+		IToken specKeyword = new Token(new TextAttribute(
+				ColorManager.SPEC_KEYWORD_COLOR_C, null, SWT.BOLD));
 		IToken comment = new Token(new TextAttribute(
 				ColorManager.COMMENT_COLOR_C));
 		IToken string = new Token(
 				new TextAttribute(ColorManager.STRING_COLOR_C));
 		
 		WordRule keywordRule = new WordRule(new KeywordDetector());
-		WordRule darkKeywordRule = new WordRule(new KeywordDetector());
+		WordRule specKeywordRule = new WordRule(new KeywordDetector());
 				
 		for (String s : WhileyLexer.keywords) {
 			if(s.equals("requires") || s.equals("ensures") || s.equals("where")) {
-				darkKeywordRule.addWord(s, darkKeyword);
+				specKeywordRule.addWord(s, specKeyword);
 			} else {
 				keywordRule.addWord(s, keyword);
 			}
@@ -72,8 +72,8 @@ public class Scanner extends RuleBasedScanner {
 		// Add generic whitespace rule.
 		rules[2] = new WhitespaceRule(new WhitespaceDetector());
 
-		rules[3] = keywordRule;
-		rules[4] = darkKeywordRule;
+		rules[3] = specKeywordRule;
+		rules[4] = keywordRule;
 		rules[5] = new EndOfLineRule("//", comment);
 		rules[6] = new MultiLineRule("/*", "", comment, (char) 0, true);
 		setRules(rules);
