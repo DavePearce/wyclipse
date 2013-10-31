@@ -51,16 +51,18 @@ public class ColorManager {
 		}
 		return color;
 	}
-
+	
 	public static final RGB KEYWORD_COLOR = new RGB(127, 0, 85);
+	public static final RGB DARK_KEYWORD_COLOR = new RGB(63, 0, 42);
 	public static final RGB DEFAULT_COLOR = new RGB(0, 0, 0);
 	public static final RGB STRING_COLOR = new RGB(42, 0, 255);
 	public static final RGB COMMENT_COLOR = new RGB(63, 127, 95);
 	
-	public static final java.awt.Color KEYWORD_COLOR_C = new java.awt.Color(127, 0, 85);
-	public static final  java.awt.Color DEFAULT_COLOR_C = new java.awt.Color(0, 0, 0);
-	public static final  java.awt.Color STRING_COLOR_C = new java.awt.Color(42, 0, 255);
-	public static final  java.awt.Color COMMENT_COLOR_C = new java.awt.Color(63, 127, 95);
+	public static final Color KEYWORD_COLOR_C = new Color(null, 127, 0, 85);
+	public static final Color DARK_KEYWORD_COLOR_C = new Color(null, 63, 0, 42);
+	public static final Color DEFAULT_COLOR_C = new Color(null, 0, 0, 0);
+	public static final Color STRING_COLOR_C = new Color(null, 42, 0, 255);
+	public static final Color COMMENT_COLOR_C = new Color(null, 63, 127, 95);
 	
 	
 }
