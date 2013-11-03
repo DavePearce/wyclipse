@@ -78,7 +78,7 @@ public class NewWhileyProjectPageOne extends WizardNewProjectCreationPage {
 		
 		// at this point, we can use container to add more widgets onto the main
 		// page. For now, I don't do anything. 
-		Group group = WyclipseUI.createGroup(container, "Whiley Environment", SWT.SHADOW_ETCHED_IN, 2);
+		Group group = WyclipseUI.createGroup(container, "Whiley Environment", SWT.SHADOW_ETCHED_IN, 1, 2);
 		WyclipseUI.createLabel(group, "Standard Library:", 1);
 		wreCombo = WyclipseUI.createCombo(group, 1, "Default WyRT");
 		wreCombo.setText("Default WyRT");

@@ -40,6 +40,8 @@ public class WhileyPathConfigurationControl {
 	private Label defaultOutputFolderLabel;
 	private Text defaultOutputFolderText; 
 	private Button defaultOutputFolderBrowseButton;
+	private Button enableVerification;
+	private Button enableRuntimeAssertions;
 	
 	public WhileyPathConfigurationControl(Shell shell) {
 		this.shell = shell;
@@ -129,10 +131,17 @@ public class WhileyPathConfigurationControl {
 		// =====================================================================
 		// Bottom Section
 		// =====================================================================
+		WyclipseUI.createCheckBox(container, "Enable Folder Specific Settings", 3);
+		
+		//Group bottomGroup = WyclipseUI.createGroup(container, "Global Settings", SWT.SHADOW_ETCHED_IN, 3, 3);
 		defaultOutputFolderLabel = WyclipseUI.createLabel(container, "Default Output Folder:", 3);		
 		defaultOutputFolderText = WyclipseUI.createText(container, "", 2);
 		defaultOutputFolderBrowseButton = WyclipseUI.createButton(container, "Browse...", 120);
-
+		enableVerification = WyclipseUI.createCheckBox(container,
+				"Enable Verification", 3);
+		enableRuntimeAssertions = WyclipseUI.createCheckBox(container,
+				"Enable Runtime Assertions", 3);
+		
 		defaultOutputFolderBrowseButton
 				.addSelectionListener(new SelectionAdapter() {
 					public void widgetSelected(SelectionEvent e) {

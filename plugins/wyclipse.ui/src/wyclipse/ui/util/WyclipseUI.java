@@ -18,12 +18,14 @@ import org.eclipse.swt.widgets.Text;
  */
 public class WyclipseUI {
 	
-	public static Group createGroup(Composite parent, String text, int style, int numColumns) {
+	public static Group createGroup(Composite parent, String text, int style, int horizontalSpan, int numColumns) {
 		Group group = new Group(parent, style);
-		group.setText("Whiley Runtime Environment");
+		group.setText(text);
 		GridLayout layout = new GridLayout();		
 		group.setLayout(layout);
-		group.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		GridData gd = new GridData(GridData.FILL_HORIZONTAL);
+		gd.horizontalSpan = horizontalSpan;
+		group.setLayoutData(gd);
 		layout.numColumns = numColumns;
 		return group;
 	}
