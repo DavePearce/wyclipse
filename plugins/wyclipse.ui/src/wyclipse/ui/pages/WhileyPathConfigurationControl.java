@@ -98,11 +98,12 @@ public class WhileyPathConfigurationControl {
 		// =====================================================================		
 				
 		// Create viewer which is 2 columns wide and 3 rows deep.
-		whileyPathViewer = createWhileyPathViewer(container, whileypath, 2, 4);						
-		Button addBuildButton = WyclipseUI.createButton(container, "Add Rule...", 120);
-		Button addExternalLibraryButton = WyclipseUI.createButton(container, "Add Library...", 120);
-		Button editButton = WyclipseUI.createButton(container, "Edit", 120);
-		Button removeButton = WyclipseUI.createButton(container, "Remove", 120);		
+		whileyPathViewer = createWhileyPathViewer(container, whileypath, 2, 5);						
+		Button addBuildButton = WyclipseUI.createButton(container, "Add Rule...");
+		Button addLibraryButton = WyclipseUI.createButton(container, "Add Local Library...");
+		Button addExternalLibraryButton = WyclipseUI.createButton(container, "Add External Library...");
+		Button editButton = WyclipseUI.createButton(container, "Edit");
+		Button removeButton = WyclipseUI.createButton(container, "Remove");		
 		
 		addBuildButton.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
@@ -133,10 +134,9 @@ public class WhileyPathConfigurationControl {
 		// =====================================================================
 		WyclipseUI.createCheckBox(container, "Enable Folder Specific Settings", 3);
 		
-		//Group bottomGroup = WyclipseUI.createGroup(container, "Global Settings", SWT.SHADOW_ETCHED_IN, 3, 3);
 		defaultOutputFolderLabel = WyclipseUI.createLabel(container, "Default Output Folder:", 3);		
 		defaultOutputFolderText = WyclipseUI.createText(container, "", 2);
-		defaultOutputFolderBrowseButton = WyclipseUI.createButton(container, "Browse...", 120);
+		defaultOutputFolderBrowseButton = WyclipseUI.createButton(container, "Browse...");
 		enableVerification = WyclipseUI.createCheckBox(container,
 				"Enable Verification", 3);
 		enableRuntimeAssertions = WyclipseUI.createCheckBox(container,

@@ -30,6 +30,14 @@ public class WyclipseUI {
 		return group;
 	}
 	
+	public static Button createButton(Composite parent, String text) {
+		GridData gd = new GridData(GridData.FILL_HORIZONTAL);
+		Button button = new Button(parent, SWT.PUSH);
+		button.setText(text);
+		button.setLayoutData(gd);
+		return button;
+	}
+	
 	public static Button createButton(Composite parent, String text, int width) {
 		GridData gd = new GridData();
 		gd.widthHint = width;
