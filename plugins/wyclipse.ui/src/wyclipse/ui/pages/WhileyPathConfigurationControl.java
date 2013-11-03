@@ -99,11 +99,11 @@ public class WhileyPathConfigurationControl {
 				
 		// Create viewer which is 2 columns wide and 3 rows deep.
 		whileyPathViewer = createWhileyPathViewer(container, whileypath, 2, 5);						
-		Button addBuildButton = WyclipseUI.createButton(container, "Add Rule...");
-		Button addLibraryButton = WyclipseUI.createButton(container, "Add Local Library...");
-		Button addExternalLibraryButton = WyclipseUI.createButton(container, "Add External Library...");
-		Button editButton = WyclipseUI.createButton(container, "Edit");
-		Button removeButton = WyclipseUI.createButton(container, "Remove");		
+		Button addBuildButton = WyclipseUI.createButton(container, "Add Folder...",175);
+		Button addLibraryButton = WyclipseUI.createButton(container, "Add Local Library...",175);
+		Button addExternalLibraryButton = WyclipseUI.createButton(container, "Add External Library...",175);
+		Button editButton = WyclipseUI.createButton(container, "Edit",175);
+		Button removeButton = WyclipseUI.createButton(container, "Remove",175);		
 		
 		addBuildButton.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
@@ -132,15 +132,18 @@ public class WhileyPathConfigurationControl {
 		// =====================================================================
 		// Bottom Section
 		// =====================================================================
-		WyclipseUI.createCheckBox(container, "Enable Folder Specific Settings", 3);
+		//WyclipseUI.createCheckBox(container, "Enable Folder Specific Settings", 3);
 		
-		defaultOutputFolderLabel = WyclipseUI.createLabel(container, "Default Output Folder:", 3);		
-		defaultOutputFolderText = WyclipseUI.createText(container, "", 2);
-		defaultOutputFolderBrowseButton = WyclipseUI.createButton(container, "Browse...");
-		enableVerification = WyclipseUI.createCheckBox(container,
+		Group settings = WyclipseUI.createGroup(container,"Global Settings",SWT.SHADOW_ETCHED_IN, 3, 3);		
+		
+		enableVerification = WyclipseUI.createCheckBox(settings,
 				"Enable Verification", 3);
-		enableRuntimeAssertions = WyclipseUI.createCheckBox(container,
+		enableRuntimeAssertions = WyclipseUI.createCheckBox(settings,
 				"Enable Runtime Assertions", 3);
+		
+		defaultOutputFolderLabel = WyclipseUI.createLabel(settings, "Output Folder:", 1);		
+		defaultOutputFolderText = WyclipseUI.createText(settings, "", 1);
+		defaultOutputFolderBrowseButton = WyclipseUI.createButton(settings, "Browse...",175);
 		
 		defaultOutputFolderBrowseButton
 				.addSelectionListener(new SelectionAdapter() {

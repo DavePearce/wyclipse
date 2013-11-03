@@ -39,12 +39,12 @@ public class NewWhileyPathBuildRuleDialog extends Dialog {
 	private Combo targetCombo;
 	
 	// Output Folder Group
-	private Button useDefaultOutputFolder;
+	private Button useFolderSpecificSettings;
 	private Label outputFolderLabel;	
 	private Text outputFolderText;	
 	private Button outputFolderBrowseButton;
 	private Button enableVerification;
-	//private Button enableRuntimeAssertions;
+	private Button enableRuntimeAssertions;
 	
 	// Advanced Config Group
 	private Button generateWyIL;
@@ -90,36 +90,32 @@ public class NewWhileyPathBuildRuleDialog extends Dialog {
 		// =====================================================================
 
 		// create check box
-		useDefaultOutputFolder = WyclipseUI.createCheckBox(container, "Use Default Output Folder",3);
-		outputFolderLabel = WyclipseUI.createLabel(container, "Output Folder:", 1);		
-		outputFolderText = WyclipseUI.createText(container, "", 1, 200);
-		outputFolderBrowseButton = WyclipseUI.createButton(container, "Browse...", 120);
+		useFolderSpecificSettings = WyclipseUI.createCheckBox(container, "Enable Folder Specific Settings",3);
 		
-		useDefaultOutputFolder.addSelectionListener(new SelectionAdapter() {
+		// =====================================================================
+		// Configure Folder Specific Settings
+		// =====================================================================
+		
+		Group settings = WyclipseUI.createGroup(container,"Folder Specific Settings",SWT.SHADOW_ETCHED_IN, 3, 3);
+		
+		enableVerification = WyclipseUI.createCheckBox(settings,
+				"Enable Verification", 3);
+		enableRuntimeAssertions = WyclipseUI.createCheckBox(settings,
+				"Enable RuntimeAssertions", 3);
+				
+		outputFolderLabel = WyclipseUI.createLabel(settings, "Output Folder:", 1);		
+		outputFolderText = WyclipseUI.createText(settings, "", 1, 200);
+		outputFolderBrowseButton = WyclipseUI.createButton(settings, "Browse...", 120);
+		
+		useFolderSpecificSettings.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
-				handleUseDefaultOutputFolder();
+				handleEnableFolderSpecificSettings();
 			}
 		});	
-		
-		// =====================================================================
-		// Configure Verification Group
-		// =====================================================================
-		
-		enableVerification = WyclipseUI.createCheckBox(container,
-				"Enable Verification", 3);
-//		enableRuntimeAssertions = WyclipseUI.createCheckBox(container,
-//				"Enable RuntimeAssertions", 3);
-//		
-		WyclipseUI.createSeparator(container, 3);
-		
-		// =====================================================================
-		// Configure Advanced Configuration Group
-		// =====================================================================
-				
-		WyclipseUI.createLabel(container,"Advance Configuration Options",3);
-		generateWyIL = WyclipseUI.createCheckBox(container,
+						
+		generateWyIL = WyclipseUI.createCheckBox(settings,
 				"Generate Intermediate Files (i.e. WyIL files)", 3);
-		generateWyAL = WyclipseUI.createCheckBox(container,
+		generateWyAL = WyclipseUI.createCheckBox(settings,
 				"Generate Verification Conditions (i.e. WyAL files)", 3);
 
 		// =====================================================================
@@ -133,7 +129,9 @@ public class NewWhileyPathBuildRuleDialog extends Dialog {
 		// =====================================================================
 		// Done
 	    // =====================================================================
-						
+		
+		container.pack();
+		
 		return container;
 	}
 
@@ -149,19 +147,29 @@ public class NewWhileyPathBuildRuleDialog extends Dialog {
 		super.okPressed();
 	}
 	
-	private void handleUseDefaultOutputFolder() {
+	private void handleEnableFolderSpecificSettings() {
 		// useDefaultOutputFolder control toggled.
-		if (useDefaultOutputFolder.getSelection()) {
+		if (useFolderSpecificSettings.getSelection()) {
+			outputFolderLabel.setEnabled(true);
+			outputFolderLabel.setForeground(null); // set default
+			outputFolderText.setEnabled(true);
+			outputFolderBrowseButton.setEnabled(true);
+			
+			enableVerification.setEnabled(true);
+			enableRuntimeAssertions.setEnabled(true);
+			generateWyIL.setEnabled(true);
+			generateWyAL.setEnabled(true);
+		} else {
 			outputFolderLabel.setEnabled(false);
 			outputFolderLabel.setForeground(outputFolderLabel.getDisplay()
 					.getSystemColor(SWT.COLOR_DARK_GRAY)); // force gray
 			outputFolderText.setEnabled(false);
 			outputFolderBrowseButton.setEnabled(false);
-		} else {
-			outputFolderLabel.setEnabled(true);
-			outputFolderLabel.setForeground(null); // set default
-			outputFolderText.setEnabled(true);
-			outputFolderBrowseButton.setEnabled(true);
+			
+			enableVerification.setEnabled(false);
+			enableRuntimeAssertions.setEnabled(false);
+			generateWyIL.setEnabled(false);
+			generateWyAL.setEnabled(false);
 		}
 	}
 	
@@ -177,14 +185,14 @@ public class NewWhileyPathBuildRuleDialog extends Dialog {
 	
 	private void writeOutputFolderGroup() {
 		if(buildRule.getOutputFolder() != null) {
-			useDefaultOutputFolder.setSelection(false);
+			useFolderSpecificSettings.setSelection(false);
 			outputFolderLabel.setEnabled(true);
 			outputFolderLabel.setForeground(null); // set default
 			outputFolderText.setText(buildRule.getOutputFolder().toString());
 			outputFolderText.setEnabled(true);
 			outputFolderBrowseButton.setEnabled(true);
 		} else {
-			useDefaultOutputFolder.setSelection(true);
+			useFolderSpecificSettings.setSelection(true);
 			outputFolderLabel.setEnabled(false);
 			outputFolderLabel.setForeground(outputFolderLabel.getDisplay()
 					.getSystemColor(SWT.COLOR_DARK_GRAY)); // force gray
@@ -211,7 +219,7 @@ public class NewWhileyPathBuildRuleDialog extends Dialog {
 	private void readSourceTargetGroup() {		
 		buildRule.setSourceFolder(new Path(sourceFolderText.getText()));
 		buildRule.setSourceIncludes(sourceIncludesText.getText());
-		if(useDefaultOutputFolder.getSelection()) {
+		if(useFolderSpecificSettings.getSelection()) {
 			buildRule.setOutputFolder(null);
 		} else {
 			buildRule.setOutputFolder(new Path(outputFolderText.getText()));
