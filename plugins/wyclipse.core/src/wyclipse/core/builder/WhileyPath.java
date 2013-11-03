@@ -177,7 +177,7 @@ public final class WhileyPath {
 				Node gwyal = attributes.getNamedItem("wyal");
 				boolean generateWyAL = gwyal == null ? false : Boolean
 						.parseBoolean(gwyal.getNodeValue());
-				Node gwyil = attributes.getNamedItem("wyal");
+				Node gwyil = attributes.getNamedItem("wyil");
 				boolean generateWyIL = gwyil == null ? false : Boolean
 						.parseBoolean(gwyil.getNodeValue());
 				
