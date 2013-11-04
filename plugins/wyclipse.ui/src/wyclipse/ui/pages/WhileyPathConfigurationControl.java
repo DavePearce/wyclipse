@@ -20,6 +20,7 @@ import org.eclipse.ui.dialogs.ContainerSelectionDialog;
 
 import wybs.util.Trie;
 import wyclipse.core.builder.WhileyPath;
+import wyclipse.ui.dialogs.FolderSelectionDialog;
 import wyclipse.ui.dialogs.NewWhileyPathBuildRuleDialog;
 import wyclipse.ui.util.WhileyPathViewer;
 import wyclipse.ui.util.WyclipseUI;
@@ -319,15 +320,15 @@ public class WhileyPathConfigurationControl {
 		// ContainerSelectionDialog. This is roughly speaking the kind of dialog
 		// we'll want, although it will require the ability to add new folders.
 		
-		ContainerSelectionDialog dialog = new ContainerSelectionDialog(shell,
-				container, true, "Choose default output folder");
-		if (dialog.open() == ContainerSelectionDialog.OK) {
-			Object[] items = dialog.getResult();
-			if (items.length == 1) {
-				String defaultOutputFolder = items[0].toString();
-				defaultOutputFolderText.setText(defaultOutputFolder);
-				whileypath.setDefaultOutputFolder(new Path(defaultOutputFolder));				
-			}
+		FolderSelectionDialog dialog = new FolderSelectionDialog(shell,
+				container.getName(), container.getLocation().toFile());
+		if (dialog.open() == SWT.OK) {
+//			Object[] items = dialog.getResult();
+//			if (items.length == 1) {
+//				String defaultOutputFolder = items[0].toString();
+//				defaultOutputFolderText.setText(defaultOutputFolder);
+//				whileypath.setDefaultOutputFolder(new Path(defaultOutputFolder));				
+//			}
 		}
 	}
 	
