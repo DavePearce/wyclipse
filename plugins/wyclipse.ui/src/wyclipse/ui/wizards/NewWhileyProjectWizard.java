@@ -112,7 +112,7 @@ public class NewWhileyProjectWizard extends Wizard implements IExecutableExtensi
 					WhileyPath whileypath = page2.getWhileyPath();
 					createWhileyPathFile(whileypath,projectHandle,monitor);
 					monitor.worked(1000);
-					instantiateWhileyPath(whileypath,projectHandle,monitor);
+					page2.instantiateWhileyPath(projectHandle,monitor);
 				} finally {
 					monitor.done();
 				}
@@ -224,50 +224,5 @@ public class NewWhileyProjectWizard extends Wizard implements IExecutableExtensi
 		}
 	}
 	
-	/**
-	 * Make sure that all folders described in actions on the WhileyPath
-	 * actually exist. Also, if the defaultOutputFolder is being used, then
-	 * check that as well.
-	 * 
-	 * @param project
-	 * @param monitor
-	 * @throws CoreException
-	 */
-	void instantiateWhileyPath(WhileyPath whileypath, IProject project, IProgressMonitor monitor)
-			throws CoreException {
-		
-		// First, check whether the default output location exists (if applicable)
-		IPath defaultOutputLocation = whileypath.getDefaultOutputFolder();
-		if(defaultOutputLocation != null) {
-			IFolder defaultOutputFolder = project.getFolder(defaultOutputLocation);
-			if (!defaultOutputFolder.exists()) {
-				defaultOutputFolder.create(true, true, monitor);
-			}
-		}
-		
-		// Second, iterate through all the entries, looking for actions which
-		// may have folders that don't yet exist.
-		for (WhileyPath.Entry e : whileypath.getEntries()) {
-			if (e instanceof WhileyPath.BuildRule) {
-				WhileyPath.BuildRule container = (WhileyPath.BuildRule) e;
-				IPath sourceLocation = container.getSourceFolder();
-				IPath outputLocation = container.getOutputFolder();
-
-				// Create the source folder (if it doesn't already exist).
-				IFolder sourceFolder = project.getFolder(sourceLocation);
-				if (!sourceFolder.exists()) {
-					sourceFolder.create(true, true, monitor);
-				}
-
-				// Create the output folder (if applicable and it doesn't
-				// already exist).
-				if (outputLocation != null) {
-					IFolder outputFolder = project.getFolder(outputLocation);
-					if (!outputFolder.exists()) {
-						outputFolder.create(true, true, monitor);
-					}
-				}
-			}
-		}
-	}
+	
 }

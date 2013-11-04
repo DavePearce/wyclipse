@@ -10,12 +10,14 @@ import javax.xml.parsers.ParserConfigurationException;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.WizardPage;
@@ -86,7 +88,21 @@ public class NewWhileyProjectPageTwo extends WizardPage {
 	// ======================================================================
 	// WhileyPath Helpers
 	// ======================================================================
-
+	
+	/**
+	 * Make sure that all folders described in actions on the WhileyPath
+	 * actually exist. Also, if the defaultOutputFolder is being used, then
+	 * check that as well.
+	 * 
+	 * @param project
+	 * @param monitor
+	 * @throws CoreException
+	 */
+	void instantiateWhileyPath(IProject project, IProgressMonitor monitor)
+			throws CoreException {
+		wpControl.instantiateWhileyPath(project,monitor);
+	}
+	
 	/**
 	 * Determine an appropriate initial whileypath. This is done by first
 	 * checking whether there is already a whileypath; if not, we attempt to
