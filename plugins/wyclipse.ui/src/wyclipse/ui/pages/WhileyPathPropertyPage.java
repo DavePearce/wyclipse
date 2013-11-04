@@ -39,7 +39,6 @@ public class WhileyPathPropertyPage extends PropertyPage {
 	public boolean performOk() {
 		try {
 			getWhileyNature().setWhileyPath(whileypath, null);
-			System.out.println("*** INSTANTIATING WHILEY PATH");
 			wpControl.instantiateWhileyPath((IProject) getElement(), null);
 		} catch (CoreException e) {
 			MessageDialog.openError(getShell(),
