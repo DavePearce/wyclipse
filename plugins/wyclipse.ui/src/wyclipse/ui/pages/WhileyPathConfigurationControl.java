@@ -319,13 +319,15 @@ public class WhileyPathConfigurationControl {
 		// FIXME: as a very temporary solution, I'm using a
 		// ContainerSelectionDialog. This is roughly speaking the kind of dialog
 		// we'll want, although it will require the ability to add new folders.
-
+		
+		IPath containerRoot = container.getLocation();
 		FolderSelectionDialog dialog = new FolderSelectionDialog(shell,
-				container.getName(), container.getLocation().toFile());
-		if (dialog.open() == SWT.OK) {
-			String path = dialog.getSelection();
-			defaultOutputFolderText.setText(path);
-			whileypath.setDefaultOutputFolder(new Path(path));
+				container.getName(), containerRoot.toFile());
+		if (dialog.open() == Window.OK) {
+			IPath path = new Path(dialog.getResult().toString());
+			path = path.makeRelativeTo(containerRoot);
+			defaultOutputFolderText.setText(path.toString());
+			whileypath.setDefaultOutputFolder(path);
 		}
 	}
 	

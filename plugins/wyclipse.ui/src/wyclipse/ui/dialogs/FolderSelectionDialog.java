@@ -9,7 +9,9 @@ import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ILabelProviderListener;
 import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.ITreeContentProvider;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.SWT;
@@ -46,16 +48,15 @@ import org.eclipse.ui.PlatformUI;
 public class FolderSelectionDialog extends Dialog {	
 	private TreeNode root;
 	private TreeViewer view;
+	private File selection;
 	
 	public FolderSelectionDialog(Shell parentShell, String rootName, File rootLocation) {
 		super(parentShell);
 		this.root = new TreeNode(rootName, rootLocation);
 	}
 
-	public String getSelection() {
-		TreeItem[] selection = view.getTree().getSelection();
-		TreeNode node = (TreeNode) selection[0].getData();
-		return node.root.toString();
+	public File getResult() {
+		return selection;
 	}
 	
 	@Override
@@ -80,6 +81,8 @@ public class FolderSelectionDialog extends Dialog {
 		this.view.setLabelProvider(new LabelProvider());
 		this.view.setInput(root);
 		
+		//this.getButton(SWT.OK).setEnabled(false);
+		
 		GridData gd = new GridData(GridData.FILL_HORIZONTAL | GridData.FILL_VERTICAL);
 		gd.horizontalSpan = 1;
 		gd.verticalSpan = 10;
@@ -87,6 +90,17 @@ public class FolderSelectionDialog extends Dialog {
 		gd.widthHint = 300;
 		this.view.getTree().setLayout(new GridLayout());
 		this.view.getTree().setLayoutData(gd);
+		this.view.addSelectionChangedListener(new ISelectionChangedListener() {
+
+			@Override
+			public void selectionChanged(SelectionChangedEvent event) {
+				TreeItem[] selections = view.getTree().getSelection();
+				TreeNode node = (TreeNode) selections[0].getData();
+				selection = node.root;
+				//getButton(SWT.OK).setEnabled(true);
+			}
+			
+		});
 
 		// =====================================================================
 		// Configure TreeView
