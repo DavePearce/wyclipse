@@ -1,7 +1,12 @@
 package wyclipse.ui.dialogs;
 
+import java.io.File;
+import java.net.URI;
+
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.jface.dialogs.Dialog;
+import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -32,6 +37,8 @@ import wyclipse.ui.util.WyclipseUI;
 public class NewWhileyPathBuildRuleDialog extends Dialog {
 	// Data item being constructed
 	private WhileyPath.BuildRule buildRule;
+	private String rootName;
+	private IPath rootLocation;
 	
 	// Source / Target Group
 	private Text sourceFolderText;	
@@ -51,9 +58,11 @@ public class NewWhileyPathBuildRuleDialog extends Dialog {
 	private Button generateWyAL;
 
 	public NewWhileyPathBuildRuleDialog(Shell shell,
-			WhileyPath.BuildRule buildRule) {
+			WhileyPath.BuildRule buildRule, String rootName, IPath rootLocation) {
 		super(shell);
 		this.buildRule = buildRule;
+		this.rootName = rootName;
+		this.rootLocation = rootLocation;
 	}
 
 	@Override
@@ -76,7 +85,8 @@ public class NewWhileyPathBuildRuleDialog extends Dialog {
 		
 		WyclipseUI.createLabel(container, "Source Folder:", 1);		
 		sourceFolderText = WyclipseUI.createText(container, "", 1, 200);
-		WyclipseUI.createButton(container, "Browse...", 120);
+		Button sourceFolderBrowseButton = WyclipseUI.createButton(container, "Browse...",
+				120);
 		
 		WyclipseUI.createLabel(container, "Includes:", 1);		
 		sourceIncludesText = WyclipseUI.createText(container, "", 2);
@@ -84,6 +94,12 @@ public class NewWhileyPathBuildRuleDialog extends Dialog {
 		WyclipseUI.createLabel(container, "Target Platform:", 1);
 		targetCombo = WyclipseUI.createCombo(container, 2,
 				"Java Virtual Machine (Default)"); 
+
+		sourceFolderBrowseButton.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				handleBrowseSourceFolder();
+			}
+		});
 
 		// =====================================================================
 		// Configure Output Folder Group
@@ -106,6 +122,12 @@ public class NewWhileyPathBuildRuleDialog extends Dialog {
 		outputFolderLabel = WyclipseUI.createLabel(settings, "Output Folder:", 1);		
 		outputFolderText = WyclipseUI.createText(settings, "", 1, 200);
 		outputFolderBrowseButton = WyclipseUI.createButton(settings, "Browse...", 120);
+		
+		outputFolderBrowseButton.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				handleBrowseOutputFolder();
+			}
+		});
 		
 		useFolderSpecificSettings.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
@@ -170,6 +192,26 @@ public class NewWhileyPathBuildRuleDialog extends Dialog {
 			enableRuntimeAssertions.setEnabled(false);
 			generateWyIL.setEnabled(false);
 			generateWyAL.setEnabled(false);
+		}
+	}
+	
+	private void handleBrowseSourceFolder() {
+		FolderSelectionDialog dialog = new FolderSelectionDialog(getShell(),
+				rootName, rootLocation);
+		if (dialog.open() == Window.OK) {
+			IPath path = dialog.getResult();
+			path = path.makeRelativeTo(rootLocation);
+			sourceFolderText.setText(path.toString());
+		}
+	}
+	
+	private void handleBrowseOutputFolder() {
+		FolderSelectionDialog dialog = new FolderSelectionDialog(getShell(),
+				rootName, rootLocation);
+		if (dialog.open() == Window.OK) {
+			IPath path = dialog.getResult();
+			path = path.makeRelativeTo(rootLocation);
+			outputFolderText.setText(path.toString());
 		}
 	}
 	

@@ -1,10 +1,14 @@
 package wyclipse.ui.dialogs;
 
 import java.io.File;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.ui.ISharedImages;
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.Path;
+import org.eclipse.core.runtime.URIUtil;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ILabelProviderListener;
@@ -48,14 +52,14 @@ import org.eclipse.ui.PlatformUI;
 public class FolderSelectionDialog extends Dialog {	
 	private TreeNode root;
 	private TreeViewer view;
-	private File selection;
+	private IPath selection;
 	
-	public FolderSelectionDialog(Shell parentShell, String rootName, File rootLocation) {
+	public FolderSelectionDialog(Shell parentShell, String rootName, IPath rootLocation) {
 		super(parentShell);
 		this.root = new TreeNode(rootName, rootLocation);
 	}
 
-	public File getResult() {
+	public IPath getResult() {
 		return selection;
 	}
 	
@@ -112,22 +116,30 @@ public class FolderSelectionDialog extends Dialog {
 	
 	private static class TreeNode {
 		private String name;
-		private File root;
+		private IPath root;
 		private ArrayList<TreeNode> children;
 
-		public TreeNode(String name, File root) {
+		public TreeNode(String name, IPath root) {
 			this.root = root;
 			this.name = name;
 			// initially children is null; only when children is requested do we
 			// actually look what's there (i.e. lazily).
 		}
 
+		public TreeNode(String name, File root) {
+			this.root = new Path(root.toString());
+			this.name = name;
+			// initially children is null; only when children is requested do we
+			// actually look what's there (i.e. lazily).
+		}
+		
 		List<TreeNode> getChildren() {
 			if (children == null) {
 				children = new ArrayList<TreeNode>();
 				if (root != null) {
 					// non-virtual node
-					File[] contents = root.listFiles();
+					File dir = root.toFile();
+					File[] contents = dir.listFiles();
 					for (File f : contents) {
 						if (f.isDirectory()) {
 							children.add(new TreeNode(f.getName(), f));
@@ -154,15 +166,11 @@ public class FolderSelectionDialog extends Dialog {
 	private final static class ContentProvider implements ITreeContentProvider {
 
 		@Override
-		public void dispose() {
-			// TODO Auto-generated method stub
-			
+		public void dispose() {			
 		}
 
 		@Override
-		public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
-			// TODO Auto-generated method stub
-			
+		public void inputChanged(Viewer viewer, Object oldInput, Object newInput) { 			
 		}
 
 		@Override
@@ -188,7 +196,6 @@ public class FolderSelectionDialog extends Dialog {
 
 		@Override
 		public Object getParent(Object element) {
-			// TODO Auto-generated method stub
 			return null;
 		}
 
@@ -214,26 +221,19 @@ public class FolderSelectionDialog extends Dialog {
 
 		@Override
 		public void addListener(ILabelProviderListener listener) {
-			// TODO Auto-generated method stub
-			
 		}
 
 		@Override
 		public void dispose() {
-			// TODO Auto-generated method stub
-			
 		}
 
 		@Override
 		public boolean isLabelProperty(Object element, String property) {
-			// TODO Auto-generated method stub
 			return false;
 		}
 
 		@Override
 		public void removeListener(ILabelProviderListener listener) {
-			// TODO Auto-generated method stub
-			
 		}
 
 		@Override
@@ -246,8 +246,7 @@ public class FolderSelectionDialog extends Dialog {
 		@Override
 		public String getText(Object element) {
 			return element.toString();
-		}
-		
+		}		
 	}
 	
 }

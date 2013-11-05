@@ -1,5 +1,7 @@
 package wyclipse.ui.pages;
 
+import java.net.URI;
+
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
@@ -235,7 +237,7 @@ public class WhileyPathConfigurationControl {
 		WhileyPath.BuildRule buildRule = new WhileyPath.BuildRule(new Path(""),
 				"**/*.whiley", null);
 		NewWhileyPathBuildRuleDialog dialog = new NewWhileyPathBuildRuleDialog(
-				shell, buildRule);
+				shell, buildRule, container.getName(), container.getLocation());
 		
 		if (dialog.open() == Window.OK) {
 			whileypath.getEntries().add(buildRule);
@@ -279,7 +281,8 @@ public class WhileyPathConfigurationControl {
 		// Second, open the build rule dialog
 		if (buildRule != null) {
 			NewWhileyPathBuildRuleDialog dialog = new NewWhileyPathBuildRuleDialog(
-					shell, buildRule);
+					shell, buildRule, container.getName(),
+					container.getLocation());
 			if (dialog.open() == Window.OK) {
 				whileyPathViewer.refresh();
 			}
@@ -316,16 +319,11 @@ public class WhileyPathConfigurationControl {
 		// option to create something new (again observing that it's not
 		// actually created yet).
 
-		// FIXME: as a very temporary solution, I'm using a
-		// ContainerSelectionDialog. This is roughly speaking the kind of dialog
-		// we'll want, although it will require the ability to add new folders.
-		
-		IPath containerRoot = container.getLocation();
 		FolderSelectionDialog dialog = new FolderSelectionDialog(shell,
-				container.getName(), containerRoot.toFile());
+				container.getName(), container.getLocation());
 		if (dialog.open() == Window.OK) {
-			IPath path = new Path(dialog.getResult().toString());
-			path = path.makeRelativeTo(containerRoot);
+			IPath path = dialog.getResult();
+			path = path.makeRelativeTo(container.getLocation());
 			defaultOutputFolderText.setText(path.toString());
 			whileypath.setDefaultOutputFolder(path);
 		}
