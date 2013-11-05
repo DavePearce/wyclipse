@@ -64,8 +64,12 @@ public class FolderSelectionDialog extends Dialog {
 		this.view = new TreeViewer(container, SWT.VIRTUAL | SWT.BORDER);
 		this.view.setContentProvider(new ContentProvider());
 		this.view.setInput(root);
+		
 		GridData gd = new GridData(GridData.FILL_HORIZONTAL | GridData.FILL_VERTICAL);
-		gd.widthHint = 200;
+		gd.horizontalSpan = 1;
+		gd.verticalSpan = 10;
+		gd.heightHint = 400;
+		gd.widthHint = 300;
 		this.view.getTree().setLayout(new GridLayout());
 		this.view.getTree().setLayoutData(gd);
 
