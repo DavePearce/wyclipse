@@ -308,27 +308,24 @@ public class WhileyPathConfigurationControl {
 	 * folder is called.
 	 */
 	protected void handleBrowseDefaultOutputFolder() {
-		
+
 		// At this point, we need to create a special selection (tree?) dialog
 		// based on what we can see in the current project's location. One of
 		// the key problems here is that the current location may not actually
 		// exist! Therefore, we want to show onyl what does exist, and give the
 		// option to create something new (again observing that it's not
 		// actually created yet).
-		
+
 		// FIXME: as a very temporary solution, I'm using a
 		// ContainerSelectionDialog. This is roughly speaking the kind of dialog
 		// we'll want, although it will require the ability to add new folders.
-		
+
 		FolderSelectionDialog dialog = new FolderSelectionDialog(shell,
 				container.getName(), container.getLocation().toFile());
 		if (dialog.open() == SWT.OK) {
-//			Object[] items = dialog.getResult();
-//			if (items.length == 1) {
-//				String defaultOutputFolder = items[0].toString();
-//				defaultOutputFolderText.setText(defaultOutputFolder);
-//				whileypath.setDefaultOutputFolder(new Path(defaultOutputFolder));				
-//			}
+			String path = dialog.getSelection();
+			defaultOutputFolderText.setText(path);
+			whileypath.setDefaultOutputFolder(new Path(path));
 		}
 	}
 	

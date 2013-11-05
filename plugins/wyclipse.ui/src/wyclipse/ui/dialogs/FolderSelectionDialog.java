@@ -4,16 +4,24 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.ui.ISharedImages;
 import org.eclipse.jface.dialogs.Dialog;
+import org.eclipse.jface.viewers.ILabelProvider;
+import org.eclipse.jface.viewers.ILabelProviderListener;
+import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.TreeItem;
+import org.eclipse.ui.IWorkbench;
+import org.eclipse.ui.PlatformUI;
 
 /**
  * <p>
@@ -44,6 +52,12 @@ public class FolderSelectionDialog extends Dialog {
 		this.root = new TreeNode(rootName, rootLocation);
 	}
 
+	public String getSelection() {
+		TreeItem[] selection = view.getTree().getSelection();
+		TreeNode node = (TreeNode) selection[0].getData();
+		return node.root.toString();
+	}
+	
 	@Override
 	public Control createDialogArea(Composite parent) {
 		Composite container = new Composite(parent, SWT.NONE);
@@ -63,12 +77,13 @@ public class FolderSelectionDialog extends Dialog {
 		// =====================================================================
 		this.view = new TreeViewer(container, SWT.VIRTUAL | SWT.BORDER);
 		this.view.setContentProvider(new ContentProvider());
+		this.view.setLabelProvider(new LabelProvider());
 		this.view.setInput(root);
 		
 		GridData gd = new GridData(GridData.FILL_HORIZONTAL | GridData.FILL_VERTICAL);
 		gd.horizontalSpan = 1;
 		gd.verticalSpan = 10;
-		gd.heightHint = 400;
+		gd.heightHint = 300;
 		gd.widthHint = 300;
 		this.view.getTree().setLayout(new GridLayout());
 		this.view.getTree().setLayoutData(gd);
@@ -172,4 +187,53 @@ public class FolderSelectionDialog extends Dialog {
 			return false;
 		}		
 	}
+	
+	/**
+	 * The label provider is responsible for associating labels with the objects
+	 * being viewed in the viewer; in this case, that means it associates labels
+	 * with folders.
+	 * 
+	 * @author David J. Pearce
+	 * 
+	 */
+	protected static class LabelProvider implements ILabelProvider {
+
+		@Override
+		public void addListener(ILabelProviderListener listener) {
+			// TODO Auto-generated method stub
+			
+		}
+
+		@Override
+		public void dispose() {
+			// TODO Auto-generated method stub
+			
+		}
+
+		@Override
+		public boolean isLabelProperty(Object element, String property) {
+			// TODO Auto-generated method stub
+			return false;
+		}
+
+		@Override
+		public void removeListener(ILabelProviderListener listener) {
+			// TODO Auto-generated method stub
+			
+		}
+
+		@Override
+		public Image getImage(Object element) {
+			IWorkbench workbench = PlatformUI.getWorkbench();
+			ISharedImages images = workbench.getSharedImages();
+			return images.getImage(ISharedImages.IMG_OBJ_FOLDER);
+		}
+
+		@Override
+		public String getText(Object element) {
+			return element.toString();
+		}
+		
+	}
+	
 }
