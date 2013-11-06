@@ -18,16 +18,22 @@ import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.TreeItem;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.PlatformUI;
+
+import wyclipse.ui.util.WyclipseUI;
 
 /**
  * <p>
@@ -72,7 +78,7 @@ public class FolderSelectionDialog extends Dialog {
 		// =====================================================================
 
 		GridLayout layout = new GridLayout();		
-		layout.numColumns = 1;
+		layout.numColumns = 2;
 		layout.verticalSpacing = 9;	
 		layout.marginWidth = 20;
 		container.setLayout(layout);
@@ -88,7 +94,7 @@ public class FolderSelectionDialog extends Dialog {
 		//this.getButton(SWT.OK).setEnabled(false);
 		
 		GridData gd = new GridData(GridData.FILL_HORIZONTAL | GridData.FILL_VERTICAL);
-		gd.horizontalSpan = 1;
+		gd.horizontalSpan = 2;
 		gd.verticalSpan = 10;
 		gd.heightHint = 300;
 		gd.widthHint = 300;
@@ -107,11 +113,37 @@ public class FolderSelectionDialog extends Dialog {
 		});
 
 		// =====================================================================
-		// Configure TreeView
+		// Make New Folder Button
+		// =====================================================================
+		Button makeNewFolderButton = WyclipseUI.createButton(container, "Create New Folder", 150);
+		
+		makeNewFolderButton.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				handleMakeNewFolder();
+			}
+		});
+		
+		// =====================================================================
+		// Done
 		// =====================================================================
 
 		container.pack();
 		return container;
+	}
+	
+	private void handleMakeNewFolder() {
+		NewFolderDialog dialog = new NewFolderDialog(getShell());
+		if (dialog.open() == Window.OK) {
+			TreeItem[] items = view.getTree().getSelection();
+			TreeNode node = root;
+			if (items.length == 1) {
+				node = (TreeNode) items[0].getData();
+			}
+			node.getChildren().add(
+					new TreeNode(dialog.getResult(), (IPath) null));
+			
+			view.refresh();
+		}
 	}
 	
 	private static class TreeNode {
