@@ -105,9 +105,11 @@ public class FolderSelectionDialog extends Dialog {
 			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
 				TreeItem[] selections = view.getTree().getSelection();
-				TreeNode node = (TreeNode) selections[0].getData();
-				selection = node.root;
-				//getButton(SWT.OK).setEnabled(true);
+				if(selections.length > 0) {
+					TreeNode node = (TreeNode) selections[0].getData();
+					selection = node.root;
+					//getButton(SWT.OK).setEnabled(true);
+				}
 			}
 			
 		});
@@ -136,7 +138,8 @@ public class FolderSelectionDialog extends Dialog {
 		if (dialog.open() == Window.OK) {
 			TreeItem[] items = view.getTree().getSelection();
 			TreeNode node = root;
-			if (items.length == 1) {
+			if (items.length > 0) {
+				System.out.println("*** GOT SELECTION: " + dialog.getResult());
 				node = (TreeNode) items[0].getData();
 			}
 			node.getChildren().add(

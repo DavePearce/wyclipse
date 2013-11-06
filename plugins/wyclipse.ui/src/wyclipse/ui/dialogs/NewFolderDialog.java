@@ -38,7 +38,7 @@ public class NewFolderDialog extends Dialog {
 		// =====================================================================
 		// Label and Text
 		// =====================================================================
-		WyclipseUI.createLabel(container, "Folder Name", 1);
+		WyclipseUI.createLabel(container, "Folder Name:", 1);
 		this.folderText = WyclipseUI.createText(container, "", 1, 200);
 
 		// =====================================================================
