@@ -56,13 +56,30 @@ import wyclipse.ui.util.*;
  * 
  */
 public class FolderSelectionDialog extends Dialog {	
-	private VirtualFolder root;
+	
+	/**
+	 * Provides a "virtual" project within which we can see existing folders
+	 * within the project, and add new folders. However, new folders are not
+	 * actually created on the filesystem and remain "virtual".
+	 */
+	private VirtualFolder project;
+	
+	/**
+	 * The tree-based folder view which makes up the majority of this dialog.
+	 */
 	private TreeViewer view;
+	
+	/**
+	 * A shared variable which is used to store the result so it can be accessed
+	 * by the owner of this dialog. This is necessary because the TreeViewer
+	 * will be disposed after "OK" is pressed, and we'll no longer be able to
+	 * determine its selection.
+	 */
 	private IPath selection;
 	
-	public FolderSelectionDialog(Shell parentShell, IPath root) {
+	public FolderSelectionDialog(Shell parentShell, VirtualFolder project) {
 		super(parentShell);
-		this.root = new VirtualFolder(root);
+		this.project = project;
 	}
 
 	public IPath getResult() {
@@ -89,7 +106,7 @@ public class FolderSelectionDialog extends Dialog {
 		this.view = new TreeViewer(container, SWT.VIRTUAL | SWT.BORDER);
 		this.view.setContentProvider(new ContentProvider());
 		this.view.setLabelProvider(new LabelProvider());
-		this.view.setInput(root);
+		this.view.setInput(project);
 		
 		//this.getButton(SWT.OK).setEnabled(false);
 		
@@ -137,7 +154,7 @@ public class FolderSelectionDialog extends Dialog {
 		NewFolderDialog dialog = new NewFolderDialog(getShell());
 		if (dialog.open() == Window.OK) {
 			TreeItem[] items = view.getTree().getSelection();
-			VirtualFolder node = root;
+			VirtualFolder node = project;
 			if (items.length > 0) {
 				node = (VirtualFolder) items[0].getData();
 			}
