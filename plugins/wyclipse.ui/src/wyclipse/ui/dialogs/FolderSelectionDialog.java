@@ -200,6 +200,9 @@ public class FolderSelectionDialog extends Dialog {
 	 */
 	private final static class ContentProvider implements ITreeContentProvider {
 
+		private TreeNode cachedInputElement;
+		private TreeNode cachedResult;
+		
 		@Override
 		public void dispose() {			
 		}
@@ -210,10 +213,14 @@ public class FolderSelectionDialog extends Dialog {
 
 		@Override
 		public Object[] getElements(Object inputElement) {
-			if (inputElement instanceof TreeNode) {
+			if(inputElement == cachedInputElement) {
+				return new Object[] { cachedResult };
+			} else if (inputElement instanceof TreeNode) {
 				TreeNode node = (TreeNode) inputElement;
 				// NOTE: cannot just reuse node here.
-				return new Object[] { new TreeNode(node.name, node.root) };
+				cachedInputElement = node;
+				cachedResult = new TreeNode(node.name, node.root);
+				return new Object[] { cachedResult };
 			} else {
 				return new Object[]{};
 			}
@@ -221,6 +228,7 @@ public class FolderSelectionDialog extends Dialog {
 
 		@Override
 		public Object[] getChildren(Object parentElement) {
+			System.out.println("GET CHILDREN: " + parentElement);
 			if (parentElement instanceof TreeNode) {
 				TreeNode node = (TreeNode) parentElement;
 				return node.getChildren().toArray();				
