@@ -33,7 +33,7 @@ import org.eclipse.swt.widgets.TreeItem;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.PlatformUI;
 
-import wyclipse.ui.util.WyclipseUI;
+import wyclipse.ui.util.*;
 
 /**
  * <p>
@@ -56,13 +56,13 @@ import wyclipse.ui.util.WyclipseUI;
  * 
  */
 public class FolderSelectionDialog extends Dialog {	
-	private TreeNode root;
+	private VirtualFolder root;
 	private TreeViewer view;
 	private IPath selection;
 	
-	public FolderSelectionDialog(Shell parentShell, String rootName, IPath rootLocation) {
+	public FolderSelectionDialog(Shell parentShell, IPath root) {
 		super(parentShell);
-		this.root = new TreeNode(rootName, rootLocation);
+		this.root = new VirtualFolder(root);
 	}
 
 	public IPath getResult() {
@@ -106,8 +106,8 @@ public class FolderSelectionDialog extends Dialog {
 			public void selectionChanged(SelectionChangedEvent event) {
 				TreeItem[] selections = view.getTree().getSelection();
 				if(selections.length > 0) {
-					TreeNode node = (TreeNode) selections[0].getData();
-					selection = node.root;
+					VirtualFolder node = (VirtualFolder) selections[0].getData();
+					selection = node.getRoot();
 					//getButton(SWT.OK).setEnabled(true);
 				}
 			}
@@ -137,60 +137,18 @@ public class FolderSelectionDialog extends Dialog {
 		NewFolderDialog dialog = new NewFolderDialog(getShell());
 		if (dialog.open() == Window.OK) {
 			TreeItem[] items = view.getTree().getSelection();
-			TreeNode node = root;
+			VirtualFolder node = root;
 			if (items.length > 0) {
-				node = (TreeNode) items[0].getData();
+				node = (VirtualFolder) items[0].getData();
 			}
 			String name = dialog.getResult();
-			node.getChildren().add(new TreeNode(name, node.root.append(name)));
+			node.getChildren().add(
+					new VirtualFolder(node.getRoot().append(name)));
 			
 			view.refresh();
 		}
 	}
-	
-	private static class TreeNode {
-		private String name;
-		private IPath root;
-		private ArrayList<TreeNode> children;
-
-		public TreeNode(String name, IPath root) {
-			this.root = root;
-			this.name = name;
-			// initially children is null; only when children is requested do we
-			// actually look what's there (i.e. lazily).
-		}
-
-		public TreeNode(String name, File root) {
-			this.root = new Path(root.toString());
-			this.name = name;
-			// initially children is null; only when children is requested do we
-			// actually look what's there (i.e. lazily).
-		}
-		
-		List<TreeNode> getChildren() {
-			if (children == null) {
-				children = new ArrayList<TreeNode>();
-				if (root != null) {
-					// non-virtual node
-					File dir = root.toFile();
-					if(dir.exists()) {
-						File[] contents = dir.listFiles();
-						for (File f : contents) {
-							if (f.isDirectory()) {
-								children.add(new TreeNode(f.getName(), f));
-							}
-						}
-					}
-				}
-			}
-			return children;
-		}
-		
-		public String toString() {
-			return name;
-		}
-	}
-	
+			
 	/**
 	 * The content provider is responsible for deconstructing the object being
 	 * viewed in the viewer, so that the <code>TreeViewer</code> can navigate
@@ -201,8 +159,8 @@ public class FolderSelectionDialog extends Dialog {
 	 */
 	private final static class ContentProvider implements ITreeContentProvider {
 
-		private TreeNode cachedInputElement;
-		private TreeNode cachedResult;
+		private VirtualFolder cachedInputElement;
+		private VirtualFolder cachedResult;
 		
 		@Override
 		public void dispose() {			
@@ -216,11 +174,11 @@ public class FolderSelectionDialog extends Dialog {
 		public Object[] getElements(Object inputElement) {
 			if(inputElement == cachedInputElement) {
 				return new Object[] { cachedResult };
-			} else if (inputElement instanceof TreeNode) {
-				TreeNode node = (TreeNode) inputElement;
+			} else if (inputElement instanceof VirtualFolder) {
+				VirtualFolder node = (VirtualFolder) inputElement;
 				// NOTE: cannot just reuse node here.
 				cachedInputElement = node;
-				cachedResult = new TreeNode(node.name, node.root);
+				cachedResult = new VirtualFolder(node.getRoot());
 				return new Object[] { cachedResult };
 			} else {
 				return new Object[]{};
@@ -228,10 +186,9 @@ public class FolderSelectionDialog extends Dialog {
 		}
 
 		@Override
-		public Object[] getChildren(Object parentElement) {
-			System.out.println("GET CHILDREN: " + parentElement);
-			if (parentElement instanceof TreeNode) {
-				TreeNode node = (TreeNode) parentElement;
+		public Object[] getChildren(Object parentElement) {			
+			if (parentElement instanceof VirtualFolder) {
+				VirtualFolder node = (VirtualFolder) parentElement;
 				return node.getChildren().toArray();				
 			} else {
 				return new Object[] {};
@@ -245,8 +202,8 @@ public class FolderSelectionDialog extends Dialog {
 
 		@Override
 		public boolean hasChildren(Object element) {
-			if(element instanceof TreeNode) {
-				TreeNode node = (TreeNode) element;
+			if(element instanceof VirtualFolder) {
+				VirtualFolder node = (VirtualFolder) element;
 				return node.getChildren().size() > 0;
 			}
 			return false;

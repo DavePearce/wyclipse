@@ -1,13 +1,15 @@
 package wyclipse.ui.util;
 
-import org.eclipse.jface.viewers.TreeNode;
+import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 
-import wybs.lang.Path;
-import wybs.util.Trie;
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.Path;
 
 /**
  * <p>
- * Represents a "virtual" container. This is a container which doesn't really
+ * Represents a "virtual" container. This is a container which may not really
  * exist, but can be manipulated (e.g. by adding files, etc). This is useful for
  * implementing "transaction-semantics" in, for example, wizards.
  * </p>
@@ -33,48 +35,46 @@ import wybs.util.Trie;
  * @author David J. Pearce
  * 
  */
-public class VirtualContainer {
-	private java.io.File location;
-	private Resource root;
-	
-	public VirtualContainer(java.io.File location) {
-		this.location = location;
-		root = new Resource(Trie.ROOT);
-	}
-	
-	public Resource getRoot() {
-		return root;
-	}
-	
-	public class Resource extends TreeNode {
-		protected Path.ID id;
-		private Resource[] resources;
-		
-		private Resource(Path.ID id) {
-			super(null);
-			this.id = id;
-		}
-		
-		public Path.ID getID() {
-			return id;
-		}
-		
-		@Override
-		public Resource[] getChildren() {
-			if (resources == null) {
-				java.io.File myLocation = new java.io.File(location, id
-						.toString().replace('/', java.io.File.separatorChar));
+public class VirtualFolder {	
+	private IPath root;
+	private ArrayList<VirtualFolder> children;
 
-				if (myLocation.exists() && myLocation.isDirectory()) {
-					java.io.File[] files = myLocation.listFiles();
-					resources = new Resource[files.length];
-					for (int i = 0; i != files.length; ++i) {
-						Path.ID fid = id.append(files[i].getName());
-						resources[i] = new Resource(fid);
+	public VirtualFolder(IPath root) {
+		this.root = root;			
+		// initially children is null; only when children is requested do we
+		// actually look what's there (i.e. lazily).
+	}
+
+	private VirtualFolder(File root) {
+		this.root = new Path(root.toString());		
+		// initially children is null; only when children is requested do we
+		// actually look what's there (i.e. lazily).
+	}
+
+	public List<VirtualFolder> getChildren() {
+		if (children == null) {
+			children = new ArrayList<VirtualFolder>();
+			if (getRoot() != null) {
+				// non-virtual node
+				File dir = getRoot().toFile();
+				if (dir.exists()) {
+					File[] contents = dir.listFiles();
+					for (File f : contents) {
+						if (f.isDirectory()) {
+							children.add(new VirtualFolder(f));
+						}
 					}
 				}
 			}
-			return resources;
 		}
+		return children;
+	}
+
+	public String toString() {
+		return root.lastSegment();
+	}
+
+	public IPath getRoot() {
+		return root;
 	}
 }

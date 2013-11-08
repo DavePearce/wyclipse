@@ -37,8 +37,7 @@ import wyclipse.ui.util.WyclipseUI;
 public class NewWhileyPathBuildRuleDialog extends Dialog {
 	// Data item being constructed
 	private WhileyPath.BuildRule buildRule;
-	private String rootName;
-	private IPath rootLocation;
+	private IPath projectLocation;	
 	
 	// Source / Target Group
 	private Text sourceFolderText;	
@@ -58,11 +57,10 @@ public class NewWhileyPathBuildRuleDialog extends Dialog {
 	private Button generateWyAL;
 
 	public NewWhileyPathBuildRuleDialog(Shell shell,
-			WhileyPath.BuildRule buildRule, String rootName, IPath rootLocation) {
+			WhileyPath.BuildRule buildRule, IPath projectLocation) {
 		super(shell);
 		this.buildRule = buildRule;
-		this.rootName = rootName;
-		this.rootLocation = rootLocation;
+		this.projectLocation = projectLocation;
 	}
 
 	@Override
@@ -197,20 +195,20 @@ public class NewWhileyPathBuildRuleDialog extends Dialog {
 	
 	private void handleBrowseSourceFolder() {
 		FolderSelectionDialog dialog = new FolderSelectionDialog(getShell(),
-				rootName, rootLocation);
+				projectLocation);
 		if (dialog.open() == Window.OK) {
 			IPath path = dialog.getResult();
-			path = path.makeRelativeTo(rootLocation);
+			path = path.makeRelativeTo(projectLocation);
 			sourceFolderText.setText(path.toString());
 		}
 	}
 	
 	private void handleBrowseOutputFolder() {
 		FolderSelectionDialog dialog = new FolderSelectionDialog(getShell(),
-				rootName, rootLocation);
+				projectLocation);
 		if (dialog.open() == Window.OK) {
 			IPath path = dialog.getResult();
-			path = path.makeRelativeTo(rootLocation);
+			path = path.makeRelativeTo(projectLocation);
 			outputFolderText.setText(path.toString());
 		}
 	}

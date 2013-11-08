@@ -237,7 +237,7 @@ public class WhileyPathConfigurationControl {
 		WhileyPath.BuildRule buildRule = new WhileyPath.BuildRule(new Path(""),
 				"**/*.whiley", null);
 		NewWhileyPathBuildRuleDialog dialog = new NewWhileyPathBuildRuleDialog(
-				shell, buildRule, container.getName(), container.getLocation());
+				shell, buildRule, container.getLocation());
 		
 		if (dialog.open() == Window.OK) {
 			whileypath.getEntries().add(buildRule);
@@ -281,8 +281,7 @@ public class WhileyPathConfigurationControl {
 		// Second, open the build rule dialog
 		if (buildRule != null) {
 			NewWhileyPathBuildRuleDialog dialog = new NewWhileyPathBuildRuleDialog(
-					shell, buildRule, container.getName(),
-					container.getLocation());
+					shell, buildRule, container.getLocation());
 			if (dialog.open() == Window.OK) {
 				whileyPathViewer.refresh();
 			}
@@ -320,7 +319,7 @@ public class WhileyPathConfigurationControl {
 		// actually created yet).
 
 		FolderSelectionDialog dialog = new FolderSelectionDialog(shell,
-				container.getName(), container.getLocation());
+				container.getLocation());
 		if (dialog.open() == Window.OK) {
 			IPath path = dialog.getResult();
 			path = path.makeRelativeTo(container.getLocation());
