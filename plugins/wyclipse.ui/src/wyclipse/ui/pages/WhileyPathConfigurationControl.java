@@ -38,8 +38,7 @@ import wyclipse.ui.util.WyclipseUI;
  */
 public class WhileyPathConfigurationControl {
 	private Shell shell;
-	private IContainer container;
-	private VirtualContainer projectRoot;
+	private VirtualContainer project;
 	private WhileyPath whileypath;
 	
 	// WhileyPath view + controls
@@ -57,11 +56,11 @@ public class WhileyPathConfigurationControl {
 		this.whileypath = new WhileyPath();
 	}
 	
-	public WhileyPathConfigurationControl(Shell shell, IContainer container,
-			WhileyPath whileypath) {
+	public WhileyPathConfigurationControl(Shell shell,
+			VirtualContainer project, WhileyPath whileypath) {
 		this.shell = shell;
 		this.whileypath = whileypath;
-		this.container = container;
+		this.project = project;
 	}
 	
 	public WhileyPath getWhileyPath() {
@@ -83,10 +82,6 @@ public class WhileyPathConfigurationControl {
 			defaultOutputFolderBrowseButton.setEnabled(false);
 			defaultOutputFolderText.setText("");
 		}
-	}
-	
-	public void setContainer(IContainer container) {
-		this.container = container;
 	}
 	
 	public Composite create(Composite parent) {				
@@ -239,7 +234,7 @@ public class WhileyPathConfigurationControl {
 		WhileyPath.BuildRule buildRule = new WhileyPath.BuildRule(new Path(""),
 				"**/*.whiley", null);
 		NewWhileyPathBuildRuleDialog dialog = new NewWhileyPathBuildRuleDialog(
-				shell, buildRule, container.getLocation());
+				shell, buildRule, project);
 		
 		if (dialog.open() == Window.OK) {
 			whileypath.getEntries().add(buildRule);
@@ -283,7 +278,7 @@ public class WhileyPathConfigurationControl {
 		// Second, open the build rule dialog
 		if (buildRule != null) {
 			NewWhileyPathBuildRuleDialog dialog = new NewWhileyPathBuildRuleDialog(
-					shell, buildRule, container.getLocation());
+					shell, buildRule, project);
 			if (dialog.open() == Window.OK) {
 				whileyPathViewer.refresh();
 			}
@@ -320,11 +315,10 @@ public class WhileyPathConfigurationControl {
 		// option to create something new (again observing that it's not
 		// actually created yet).
 
-		VirtualContainerSelectionDialog dialog = new VirtualContainerSelectionDialog(shell,
-				container.getLocation());
+		VirtualContainerSelectionDialog dialog = new VirtualContainerSelectionDialog(
+				shell, project);
 		if (dialog.open() == Window.OK) {
 			IPath path = dialog.getResult();
-			path = path.makeRelativeTo(container.getLocation());
 			defaultOutputFolderText.setText(path.toString());
 			whileypath.setDefaultOutputFolder(path);
 		}
