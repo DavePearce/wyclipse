@@ -139,11 +139,10 @@ public class FolderSelectionDialog extends Dialog {
 			TreeItem[] items = view.getTree().getSelection();
 			TreeNode node = root;
 			if (items.length > 0) {
-				System.out.println("*** GOT SELECTION: " + dialog.getResult());
 				node = (TreeNode) items[0].getData();
 			}
-			node.getChildren().add(
-					new TreeNode(dialog.getResult(), (IPath) null));
+			String name = dialog.getResult();
+			node.getChildren().add(new TreeNode(name, node.root.append(name)));
 			
 			view.refresh();
 		}
@@ -174,10 +173,12 @@ public class FolderSelectionDialog extends Dialog {
 				if (root != null) {
 					// non-virtual node
 					File dir = root.toFile();
-					File[] contents = dir.listFiles();
-					for (File f : contents) {
-						if (f.isDirectory()) {
-							children.add(new TreeNode(f.getName(), f));
+					if(dir.exists()) {
+						File[] contents = dir.listFiles();
+						for (File f : contents) {
+							if (f.isDirectory()) {
+								children.add(new TreeNode(f.getName(), f));
+							}
 						}
 					}
 				}
