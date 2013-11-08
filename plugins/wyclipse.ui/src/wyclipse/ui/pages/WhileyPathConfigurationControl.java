@@ -22,9 +22,9 @@ import org.eclipse.ui.dialogs.ContainerSelectionDialog;
 
 import wybs.util.Trie;
 import wyclipse.core.builder.WhileyPath;
-import wyclipse.ui.dialogs.FolderSelectionDialog;
+import wyclipse.ui.dialogs.VirtualContainerSelectionDialog;
 import wyclipse.ui.dialogs.NewWhileyPathBuildRuleDialog;
-import wyclipse.ui.util.VirtualFolder;
+import wyclipse.ui.util.VirtualContainer;
 import wyclipse.ui.util.WhileyPathViewer;
 import wyclipse.ui.util.WyclipseUI;
 
@@ -39,7 +39,7 @@ import wyclipse.ui.util.WyclipseUI;
 public class WhileyPathConfigurationControl {
 	private Shell shell;
 	private IContainer container;
-	private VirtualFolder projectRoot;
+	private VirtualContainer projectRoot;
 	private WhileyPath whileypath;
 	
 	// WhileyPath view + controls
@@ -320,7 +320,7 @@ public class WhileyPathConfigurationControl {
 		// option to create something new (again observing that it's not
 		// actually created yet).
 
-		FolderSelectionDialog dialog = new FolderSelectionDialog(shell,
+		VirtualContainerSelectionDialog dialog = new VirtualContainerSelectionDialog(shell,
 				container.getLocation());
 		if (dialog.open() == Window.OK) {
 			IPath path = dialog.getResult();

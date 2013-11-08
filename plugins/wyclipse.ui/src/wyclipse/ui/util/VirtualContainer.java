@@ -35,25 +35,25 @@ import org.eclipse.core.runtime.Path;
  * @author David J. Pearce
  * 
  */
-public class VirtualFolder {	
+public class VirtualContainer {	
 	private IPath root;
-	private ArrayList<VirtualFolder> children;
+	private ArrayList<VirtualContainer> children;
 
-	public VirtualFolder(IPath root) {
+	public VirtualContainer(IPath root) {
 		this.root = root;			
 		// initially children is null; only when children is requested do we
 		// actually look what's there (i.e. lazily).
 	}
 
-	private VirtualFolder(File root) {
+	private VirtualContainer(File root) {
 		this.root = new Path(root.toString());		
 		// initially children is null; only when children is requested do we
 		// actually look what's there (i.e. lazily).
 	}
 
-	public List<VirtualFolder> getChildren() {
+	public List<VirtualContainer> getChildren() {
 		if (children == null) {
-			children = new ArrayList<VirtualFolder>();
+			children = new ArrayList<VirtualContainer>();
 			if (getRoot() != null) {
 				// non-virtual node
 				File dir = getRoot().toFile();
@@ -61,7 +61,7 @@ public class VirtualFolder {
 					File[] contents = dir.listFiles();
 					for (File f : contents) {
 						if (f.isDirectory()) {
-							children.add(new VirtualFolder(f));
+							children.add(new VirtualContainer(f));
 						}
 					}
 				}

@@ -15,6 +15,7 @@ import org.eclipse.swt.widgets.*;
 
 import wybs.util.Trie;
 import wyclipse.core.builder.WhileyPath;
+import wyclipse.ui.util.VirtualContainer;
 import wyclipse.ui.util.WyclipseUI;
 
 /**
@@ -35,9 +36,17 @@ import wyclipse.ui.util.WyclipseUI;
  * 
  */
 public class NewWhileyPathBuildRuleDialog extends Dialog {
-	// Data item being constructed
+	/**
+	 * The build rule is the data item that we're configuring in this dialog.
+	 */
 	private WhileyPath.BuildRule buildRule;
-	private IPath projectLocation;	
+	
+	/**
+	 * Provides a "virtual" project within which we can see existing folders
+	 * within the project, and add new folders. However, new folders are not
+	 * actually created on the filesystem and remain "virtual".
+	 */
+	private VirtualContainer projectLocation;
 	
 	// Source / Target Group
 	private Text sourceFolderText;	
@@ -57,10 +66,10 @@ public class NewWhileyPathBuildRuleDialog extends Dialog {
 	private Button generateWyAL;
 
 	public NewWhileyPathBuildRuleDialog(Shell shell,
-			WhileyPath.BuildRule buildRule, IPath projectLocation) {
+			WhileyPath.BuildRule buildRule, VirtualContainer project) {
 		super(shell);
 		this.buildRule = buildRule;
-		this.projectLocation = projectLocation;
+		this.projectLocation = project;
 	}
 
 	@Override
@@ -194,21 +203,19 @@ public class NewWhileyPathBuildRuleDialog extends Dialog {
 	}
 	
 	private void handleBrowseSourceFolder() {
-		FolderSelectionDialog dialog = new FolderSelectionDialog(getShell(),
+		VirtualContainerSelectionDialog dialog = new VirtualContainerSelectionDialog(getShell(),
 				projectLocation);
 		if (dialog.open() == Window.OK) {
 			IPath path = dialog.getResult();
-			path = path.makeRelativeTo(projectLocation);
 			sourceFolderText.setText(path.toString());
 		}
 	}
 	
 	private void handleBrowseOutputFolder() {
-		FolderSelectionDialog dialog = new FolderSelectionDialog(getShell(),
+		VirtualContainerSelectionDialog dialog = new VirtualContainerSelectionDialog(getShell(),
 				projectLocation);
 		if (dialog.open() == Window.OK) {
 			IPath path = dialog.getResult();
-			path = path.makeRelativeTo(projectLocation);
 			outputFolderText.setText(path.toString());
 		}
 	}

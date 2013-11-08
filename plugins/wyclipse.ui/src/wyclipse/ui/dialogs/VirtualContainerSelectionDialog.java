@@ -55,14 +55,14 @@ import wyclipse.ui.util.*;
  * @author David J. Pearce
  * 
  */
-public class FolderSelectionDialog extends Dialog {	
+public class VirtualContainerSelectionDialog extends Dialog {	
 	
 	/**
 	 * Provides a "virtual" project within which we can see existing folders
 	 * within the project, and add new folders. However, new folders are not
 	 * actually created on the filesystem and remain "virtual".
 	 */
-	private VirtualFolder project;
+	private VirtualContainer project;
 	
 	/**
 	 * The tree-based folder view which makes up the majority of this dialog.
@@ -77,7 +77,7 @@ public class FolderSelectionDialog extends Dialog {
 	 */
 	private IPath selection;
 	
-	public FolderSelectionDialog(Shell parentShell, VirtualFolder project) {
+	public VirtualContainerSelectionDialog(Shell parentShell, VirtualContainer project) {
 		super(parentShell);
 		this.project = project;
 	}
@@ -123,7 +123,7 @@ public class FolderSelectionDialog extends Dialog {
 			public void selectionChanged(SelectionChangedEvent event) {
 				TreeItem[] selections = view.getTree().getSelection();
 				if(selections.length > 0) {
-					VirtualFolder node = (VirtualFolder) selections[0].getData();
+					VirtualContainer node = (VirtualContainer) selections[0].getData();
 					selection = node.getRoot();
 					//getButton(SWT.OK).setEnabled(true);
 				}
@@ -154,13 +154,13 @@ public class FolderSelectionDialog extends Dialog {
 		NewFolderDialog dialog = new NewFolderDialog(getShell());
 		if (dialog.open() == Window.OK) {
 			TreeItem[] items = view.getTree().getSelection();
-			VirtualFolder node = project;
+			VirtualContainer node = project;
 			if (items.length > 0) {
-				node = (VirtualFolder) items[0].getData();
+				node = (VirtualContainer) items[0].getData();
 			}
 			String name = dialog.getResult();
 			node.getChildren().add(
-					new VirtualFolder(node.getRoot().append(name)));
+					new VirtualContainer(node.getRoot().append(name)));
 			
 			view.refresh();
 		}
@@ -176,8 +176,8 @@ public class FolderSelectionDialog extends Dialog {
 	 */
 	private final static class ContentProvider implements ITreeContentProvider {
 
-		private VirtualFolder cachedInputElement;
-		private VirtualFolder cachedResult;
+		private VirtualContainer cachedInputElement;
+		private VirtualContainer cachedResult;
 		
 		@Override
 		public void dispose() {			
@@ -191,11 +191,11 @@ public class FolderSelectionDialog extends Dialog {
 		public Object[] getElements(Object inputElement) {
 			if(inputElement == cachedInputElement) {
 				return new Object[] { cachedResult };
-			} else if (inputElement instanceof VirtualFolder) {
-				VirtualFolder node = (VirtualFolder) inputElement;
+			} else if (inputElement instanceof VirtualContainer) {
+				VirtualContainer node = (VirtualContainer) inputElement;
 				// NOTE: cannot just reuse node here.
 				cachedInputElement = node;
-				cachedResult = new VirtualFolder(node.getRoot());
+				cachedResult = new VirtualContainer(node.getRoot());
 				return new Object[] { cachedResult };
 			} else {
 				return new Object[]{};
@@ -204,8 +204,8 @@ public class FolderSelectionDialog extends Dialog {
 
 		@Override
 		public Object[] getChildren(Object parentElement) {			
-			if (parentElement instanceof VirtualFolder) {
-				VirtualFolder node = (VirtualFolder) parentElement;
+			if (parentElement instanceof VirtualContainer) {
+				VirtualContainer node = (VirtualContainer) parentElement;
 				return node.getChildren().toArray();				
 			} else {
 				return new Object[] {};
@@ -219,8 +219,8 @@ public class FolderSelectionDialog extends Dialog {
 
 		@Override
 		public boolean hasChildren(Object element) {
-			if(element instanceof VirtualFolder) {
-				VirtualFolder node = (VirtualFolder) element;
+			if(element instanceof VirtualContainer) {
+				VirtualContainer node = (VirtualContainer) element;
 				return node.getChildren().size() > 0;
 			}
 			return false;
