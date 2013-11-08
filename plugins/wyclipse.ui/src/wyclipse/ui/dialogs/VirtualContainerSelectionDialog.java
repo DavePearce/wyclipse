@@ -89,7 +89,10 @@ public class VirtualContainerSelectionDialog extends Dialog {
 		this.view.setContentProvider(new ContentProvider());
 		this.view.setLabelProvider(new LabelProvider());
 		this.view.setInput(project);
-		
+		// Force project root to be selected
+		view.setSelection(new StructuredSelection(project),true);		
+		// Force project root to be expanded
+		view.setExpandedState(project, true);
 		//this.getButton(SWT.OK).setEnabled(false);
 		
 		GridData gd = new GridData(GridData.FILL_HORIZONTAL | GridData.FILL_VERTICAL);
@@ -107,6 +110,7 @@ public class VirtualContainerSelectionDialog extends Dialog {
 				if(selections.length > 0) {
 					VirtualContainer node = (VirtualContainer) selections[0].getData();
 					selection = node.getRoot();
+					selection = selection.makeRelativeTo(project.getRoot());
 					//getButton(SWT.OK).setEnabled(true);
 				}
 			}
@@ -141,9 +145,10 @@ public class VirtualContainerSelectionDialog extends Dialog {
 				node = (VirtualContainer) items[0].getData();
 			}
 			String name = dialog.getResult();
-			node.getChildren().add(
-					new VirtualContainer(node.getRoot().append(name)));
-			
+			VirtualContainer newFolder = new VirtualContainer(node.getRoot().append(name)); 
+			node.getChildren().add(newFolder);
+			// Force the newly created folder to be automatically selected
+			view.setSelection(new StructuredSelection(newFolder),true);
 			view.refresh();
 		}
 	}
