@@ -25,6 +25,10 @@ import wyclipse.ui.util.VirtualContainer;
  */
 public class WhileyPathPropertyPage extends PropertyPage {
 	
+	/**
+	 * This gives us access to the <code>.whileypath</code> file which is
+	 * managed by the <code>WhileyNature</code>.
+	 */
 	private WhileyPath whileypath;
 	
 	private WhileyPathConfigurationControl wpControl;
