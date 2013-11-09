@@ -88,12 +88,11 @@ public class VirtualContainerSelectionDialog extends Dialog {
 		this.view = new TreeViewer(container, SWT.VIRTUAL | SWT.BORDER);
 		this.view.setContentProvider(new ContentProvider());
 		this.view.setLabelProvider(new LabelProvider());
-		this.view.setInput(project);
+		this.view.setInput(new Object[]{project});
 		// Force project root to be selected
 		view.setSelection(new StructuredSelection(project),true);		
 		// Force project root to be expanded
 		view.setExpandedState(project, true);
-		//this.getButton(SWT.OK).setEnabled(false);
 		
 		GridData gd = new GridData(GridData.FILL_HORIZONTAL | GridData.FILL_VERTICAL);
 		gd.horizontalSpan = 2;
@@ -111,7 +110,6 @@ public class VirtualContainerSelectionDialog extends Dialog {
 					VirtualContainer node = (VirtualContainer) selections[0].getData();
 					selection = node.getRoot();
 					selection = selection.makeRelativeTo(project.getRoot());
-					//getButton(SWT.OK).setEnabled(true);
 				}
 			}
 			
@@ -147,9 +145,10 @@ public class VirtualContainerSelectionDialog extends Dialog {
 			String name = dialog.getResult();
 			VirtualContainer newFolder = new VirtualContainer(node.getRoot().append(name)); 
 			node.getChildren().add(newFolder);
+			view.refresh();
 			// Force the newly created folder to be automatically selected
 			view.setSelection(new StructuredSelection(newFolder),true);
-			view.refresh();
+			
 		}
 	}
 			
@@ -163,9 +162,6 @@ public class VirtualContainerSelectionDialog extends Dialog {
 	 */
 	private final static class ContentProvider implements ITreeContentProvider {
 
-		private VirtualContainer cachedInputElement;
-		private VirtualContainer cachedResult;
-		
 		@Override
 		public void dispose() {			
 		}
@@ -176,17 +172,7 @@ public class VirtualContainerSelectionDialog extends Dialog {
 
 		@Override
 		public Object[] getElements(Object inputElement) {
-			if(inputElement == cachedInputElement) {
-				return new Object[] { cachedResult };
-			} else if (inputElement instanceof VirtualContainer) {
-				VirtualContainer node = (VirtualContainer) inputElement;
-				// NOTE: cannot just reuse node here.
-				cachedInputElement = node;
-				cachedResult = new VirtualContainer(node.getRoot());
-				return new Object[] { cachedResult };
-			} else {
-				return new Object[]{};
-			}
+			 return (Object[]) inputElement;
 		}
 
 		@Override
