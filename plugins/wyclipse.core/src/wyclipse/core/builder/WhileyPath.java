@@ -227,7 +227,8 @@ public final class WhileyPath {
 				
 				WhileyPath.BuildRule rule = new WhileyPath.BuildRule(
 						sourceFolder, sourceIncludes);
-				rule.setEnableLocalSettings(bindir != null);
+				rule.setEnableLocalSettings(bindir != null || ev != null
+						|| rv != null || gwyal != null || gwyil != null);
 				rule.setOutputFolder(outputFolder);
 				rule.setEnableVerification(enableVerification);
 				rule.setEnableRuntimeAssertions(enableRuntimeAssertions);
