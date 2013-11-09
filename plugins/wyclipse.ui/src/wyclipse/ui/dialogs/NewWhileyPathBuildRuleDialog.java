@@ -54,7 +54,7 @@ public class NewWhileyPathBuildRuleDialog extends Dialog {
 	private Combo targetCombo;
 	
 	// Output Folder Group
-	private Button useFolderSpecificSettings;
+	private Button useFolderSpecificSettingsButton;
 	private Button useDefaultOutputFolderButton;
 	private Label outputFolderLabel;	
 	private Text outputFolderText;	
@@ -114,7 +114,7 @@ public class NewWhileyPathBuildRuleDialog extends Dialog {
 		// =====================================================================
 
 		// create check box
-		useFolderSpecificSettings = WyclipseUI.createCheckBox(container, "Enable Folder Specific Settings",3);
+		useFolderSpecificSettingsButton = WyclipseUI.createCheckBox(container, "Enable Folder Specific Settings",3);
 		
 		// =====================================================================
 		// Configure Folder Specific Settings
@@ -144,7 +144,7 @@ public class NewWhileyPathBuildRuleDialog extends Dialog {
 			}
 		});
 		
-		useFolderSpecificSettings.addSelectionListener(new SelectionAdapter() {
+		useFolderSpecificSettingsButton.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
 				handleEnableFolderSpecificSettings();
 			}
@@ -181,7 +181,7 @@ public class NewWhileyPathBuildRuleDialog extends Dialog {
 	}
 	
 	private void handleEnableFolderSpecificSettings() {
-		if (useFolderSpecificSettings.getSelection()) {
+		if (useFolderSpecificSettingsButton.getSelection()) {
 			useDefaultOutputFolderButton.setEnabled(true);
 			enableVerificationButton.setEnabled(true);
 			enableRuntimeAssertionsButton.setEnabled(true);
@@ -198,7 +198,7 @@ public class NewWhileyPathBuildRuleDialog extends Dialog {
 	}
 	
 	private void handleUseDefaultOutputFolder() {
-		if (useFolderSpecificSettings.getSelection()
+		if (useFolderSpecificSettingsButton.getSelection()
 				&& !useDefaultOutputFolderButton.getSelection()) {
 			outputFolderLabel.setEnabled(true);
 			outputFolderLabel.setForeground(null); // set default
@@ -242,9 +242,9 @@ public class NewWhileyPathBuildRuleDialog extends Dialog {
 		targetCombo.setText("Whiley Virtual Machine");
 	
 		if (buildRule.getEnableLocalSettings()) {
-			useFolderSpecificSettings.setSelection(true);
+			useFolderSpecificSettingsButton.setSelection(true);
 		} else {
-			useFolderSpecificSettings.setSelection(false);
+			useFolderSpecificSettingsButton.setSelection(false);
 		}
 		if (buildRule.getOutputFolder() != null) {
 			useDefaultOutputFolderButton.setSelection(false);
@@ -266,7 +266,9 @@ public class NewWhileyPathBuildRuleDialog extends Dialog {
 	private void read() {		
 		buildRule.setSourceFolder(new Path(sourceFolderText.getText()));
 		buildRule.setSourceIncludes(sourceIncludesText.getText());
-		buildRule.setEnableLocalSettings(useFolderSpecificSettings
+		System.out.println("*** SETTING ENABLE LOCAL SETTINGS: "
+				+ useFolderSpecificSettingsButton.getSelection());
+		buildRule.setEnableLocalSettings(useFolderSpecificSettingsButton
 				.getSelection());
 		if(useDefaultOutputFolderButton.getSelection()) {
 			buildRule.setOutputFolder(null);

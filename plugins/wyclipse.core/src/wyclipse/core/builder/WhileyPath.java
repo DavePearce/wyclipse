@@ -115,22 +115,19 @@ public final class WhileyPath {
 					child.setAttribute("includes", action.getSourceIncludes()
 							.toString());
 					if (action.getEnableLocalSettings()) {
-						if(action.getOutputFolder() != null) {
-							child.setAttribute("bindir", action.getOutputFolder()
-									.toString());
+						if (action.getOutputFolder() != null) {
+							child.setAttribute("bindir", action
+									.getOutputFolder().toString());
 						}
-						if(action.getEnableVerification()) {
-							child.setAttribute("verification","true");
-						}
-						if(action.getEnableRuntimeAssertions()) {
-							child.setAttribute("runtimeassertions","true");
-						}
-						if(action.getGenerateWyAL()) {
-							child.setAttribute("wyal","true");
-						}
-						if(action.getGenerateWyIL()) {
-							child.setAttribute("wyil","true");
-						}
+
+						child.setAttribute("verification", Boolean
+								.toString(action.getEnableVerification()));
+						child.setAttribute("runtimeassertions", Boolean
+								.toString(action.getEnableRuntimeAssertions()));
+						child.setAttribute("wyal",
+								Boolean.toString(action.getGenerateWyAL()));
+						child.setAttribute("wyil",
+								Boolean.toString(action.getGenerateWyIL()));
 					}
 					
 					root.appendChild(child);
