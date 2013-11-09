@@ -150,10 +150,7 @@ public class NewWhileyPathBuildRuleDialog extends Dialog {
 		// =====================================================================
 		// Initialise Data
 	    // =====================================================================
-		writeSourceTargetGroup();
-		writeOutputFolderGroup();
-		writeVerificationGroup();
-		writeAdvancedConfigurationGroup();
+		write();
 		
 		// =====================================================================
 		// Done
@@ -170,9 +167,7 @@ public class NewWhileyPathBuildRuleDialog extends Dialog {
 	
 	@Override
 	public void okPressed() {
-		readSourceTargetGroup();
-		readVerificationGroup();
-		readAdvancedGroup();
+		read();
 		super.okPressed();
 	}
 	
@@ -224,37 +219,30 @@ public class NewWhileyPathBuildRuleDialog extends Dialog {
 	// Write data to fields from WhileyPath
 	// =========================================================================
 	
-	private void writeSourceTargetGroup() {		
+	private void write() {		
 		sourceFolderText.setText(buildRule.getSourceFolder().toString());
 		sourceIncludesText.setText(buildRule.getSourceIncludes().toString());
 		targetCombo.setText("Whiley Virtual Machine");
-	}
 	
-	private void writeOutputFolderGroup() {
-		if(buildRule.getOutputFolder() != null) {
-			useFolderSpecificSettings.setSelection(false);
+		if(buildRule.getEnableLocalSettings()) {
+			useFolderSpecificSettings.setSelection(true);
 			outputFolderLabel.setEnabled(true);
 			outputFolderLabel.setForeground(null); // set default
 			outputFolderText.setText(buildRule.getOutputFolder().toString());
 			outputFolderText.setEnabled(true);
 			outputFolderBrowseButton.setEnabled(true);
+			
 		} else {
-			useFolderSpecificSettings.setSelection(true);
+			useFolderSpecificSettings.setSelection(false);
 			outputFolderLabel.setEnabled(false);
 			outputFolderLabel.setForeground(outputFolderLabel.getDisplay()
 					.getSystemColor(SWT.COLOR_DARK_GRAY)); // force gray
 			outputFolderText.setEnabled(false);
 			outputFolderBrowseButton.setEnabled(false);
 		}
-	}
-	
-	private void writeVerificationGroup() {
+		
 		enableVerification.setSelection(buildRule.getEnableVerification());
-		//enableRuntimeAssertions.setSelection(buildRule.getEnableRuntimeAssertions());
-	}
-	
-	private void writeAdvancedConfigurationGroup() {
-		// Fow now, not supported!
+		enableRuntimeAssertions.setSelection(buildRule.getEnableRuntimeAssertions());
 		generateWyIL.setSelection(buildRule.getGenerateWyIL());
 		generateWyAL.setSelection(buildRule.getGenerateWyAL());
 	}
@@ -263,23 +251,19 @@ public class NewWhileyPathBuildRuleDialog extends Dialog {
 	// Read data from fields into WhileyPath
 	// =========================================================================
 
-	private void readSourceTargetGroup() {		
+	private void read() {		
 		buildRule.setSourceFolder(new Path(sourceFolderText.getText()));
 		buildRule.setSourceIncludes(sourceIncludesText.getText());
+		buildRule.setEnableLocalSettings(useFolderSpecificSettings
+				.getSelection());
 		if(useFolderSpecificSettings.getSelection()) {
-			buildRule.setOutputFolder(null);
+			buildRule.setOutputFolder(null);		
 		} else {
 			buildRule.setOutputFolder(new Path(outputFolderText.getText()));
+			buildRule.setEnableVerification(enableVerification.getSelection());
+			buildRule.setEnableRuntimeAssertions(enableRuntimeAssertions.getSelection());
+			buildRule.setGenerateWyIL(generateWyIL.getSelection());
+			buildRule.setGenerateWyAL(generateWyAL.getSelection());
 		}
-	}
-	
-	private void readVerificationGroup() {
-		buildRule.setEnableVerification(enableVerification.getSelection());
-		//buildRule.setEnableRuntimeAssertions(enableRuntimeAssertions.getSelection());
-	}
-	
-	private void readAdvancedGroup() {
-		buildRule.setGenerateWyIL(generateWyIL.getSelection());
-		buildRule.setGenerateWyAL(generateWyAL.getSelection());
-	}
+	}	
 }

@@ -90,22 +90,23 @@ public final class WhileyPath {
 							.toString());
 					child.setAttribute("includes", action.getSourceIncludes()
 							.toString());
-					if (action.getOutputFolder() != null) {
+					if (action.getEnableLocalSettings()) {
 						child.setAttribute("bindir", action.getOutputFolder()
 								.toString());
+						if(action.getEnableVerification()) {
+							child.setAttribute("verify","true");
+						}
+						if(action.getEnableRuntimeAssertions()) {
+							child.setAttribute("runtimeassertions","true");
+						}
+						if(action.getGenerateWyAL()) {
+							child.setAttribute("wyal","true");
+						}
+						if(action.getGenerateWyIL()) {
+							child.setAttribute("wyil","true");
+						}
 					}
-					if(action.getEnableVerification()) {
-						child.setAttribute("verify","true");
-					}
-					if(action.getEnableRuntimeAssertions()) {
-						child.setAttribute("runtimeassertions","true");
-					}
-					if(action.getGenerateWyAL()) {
-						child.setAttribute("wyal","true");
-					}
-					if(action.getGenerateWyIL()) {
-						child.setAttribute("wyil","true");
-					}
+					
 					root.appendChild(child);
 				} else if(e instanceof ExternalLibrary) {
 					ExternalLibrary el = (ExternalLibrary) e;
@@ -183,6 +184,7 @@ public final class WhileyPath {
 				
 				WhileyPath.BuildRule rule = new WhileyPath.BuildRule(sourceFolder,
 						sourceIncludes, outputFolder);
+				rule.setEnableLocalSettings(bindir != null);
 				rule.setEnableVerification(enableVerification);
 				rule.setEnableRuntimeAssertions(enableRuntimeAssertions);
 				rule.setGenerateWyAL(generateWyAL);
@@ -282,10 +284,17 @@ public final class WhileyPath {
 		private String sourceIncludes;
 		
 		/**
+		 * Indicates whether or not the local settings (i.e. the output folder,
+		 * the enableVerificaiton flag, etc) should be used or not.
+		 */
+		private boolean enableLocalSettings;
+		
+		/**
 		 * The location of the folder where binary (i.e. compiled) files are
 		 * placed. Observe that this may be relative to the project root, or an
 		 * absolute location. Note also that this is optional, and may be null
 		 * (in which case the defaultOutputFolder is used).
+		 * 
 		 */
 		private IPath outputFolder;
 		
@@ -322,8 +331,7 @@ public final class WhileyPath {
 			this.sourceIncludes = sourceIncludes;
 			this.outputFolder = outputFolder;
 		}	
-		
-		
+				
 		public IPath getSourceFolder() {
 			return sourceFolder;
 		}
@@ -338,6 +346,14 @@ public final class WhileyPath {
 		
 		public void setSourceIncludes(String sourceIncludes) {
 			this.sourceIncludes = sourceIncludes;
+		}
+		
+		public boolean getEnableLocalSettings() {
+			return enableLocalSettings;
+		}
+		
+		public void setEnableLocalSettings(boolean flag) {
+			this.enableLocalSettings = flag;
 		}
 		
 		public IPath getOutputFolder() {
