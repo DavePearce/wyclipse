@@ -51,11 +51,6 @@ public class WhileyPathConfigurationControl {
 	private Button enableVerification;
 	private Button enableRuntimeAssertions;
 	
-	public WhileyPathConfigurationControl(Shell shell) {
-		this.shell = shell;
-		this.whileypath = new WhileyPath();
-	}
-	
 	public WhileyPathConfigurationControl(Shell shell,
 			VirtualContainer project, WhileyPath whileypath) {
 		this.shell = shell;
@@ -67,6 +62,10 @@ public class WhileyPathConfigurationControl {
 		return whileypath;
 	}
 
+	public void setProject(VirtualContainer project) {
+		this.project = project;
+	}
+	
 	public void setWhileyPath(WhileyPath whileypath) {
 		this.whileypath = whileypath;
 		this.whileyPathViewer.setInput(whileypath);

@@ -51,6 +51,34 @@ public class VirtualContainer {
 		// actually look what's there (i.e. lazily).
 	}
 
+	/**
+	 * Create a folder with the given path, if it does not already exist.
+	 * 
+	 * @param path
+	 */
+	public void create(IPath path) {
+		List<VirtualContainer> children = getChildren();
+		for (VirtualContainer child : children) {
+			if (child.root.equals(path)) {
+				// done, path already exists
+				return;
+			} else if (child.root.isPrefixOf(path)) {
+				child.create(path);
+				return;
+			}
+		}
+		// If we get here, it means that the path doesn't exists and, hence, we
+		// need to make it.
+		VirtualContainer iterator = this;
+		String[] segments = path.segments();
+		for (int i = 0; i != segments.length; ++i) {
+			Path newPath = new Path(segments[i]);
+			VirtualContainer newContainer = new VirtualContainer(newPath);
+			iterator.getChildren().add(newContainer);
+			iterator = newContainer;
+		}
+	}
+	
 	public List<VirtualContainer> getChildren() {
 		if (children == null) {
 			children = new ArrayList<VirtualContainer>();

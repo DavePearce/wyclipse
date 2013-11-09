@@ -28,6 +28,7 @@ import org.xml.sax.SAXException;
 import wyclipse.core.WhileyNature;
 import wyclipse.core.builder.WhileyPath;
 import wyclipse.ui.pages.WhileyPathConfigurationControl;
+import wyclipse.ui.util.VirtualContainer;
 
 public class NewWhileyProjectPageTwo extends WizardPage {
 	
@@ -58,7 +59,7 @@ public class NewWhileyProjectPageTwo extends WizardPage {
 	
 	@Override
 	public void createControl(Composite parent) {;
-		wpControl = new WhileyPathConfigurationControl(getShell());
+		wpControl = new WhileyPathConfigurationControl(getShell(),null,new WhileyPath());
 		Composite composite = wpControl.create(parent);
 		setControl(composite);
 	}
@@ -78,10 +79,13 @@ public class NewWhileyProjectPageTwo extends WizardPage {
 			// So, the location has changed since the last time we were here.
 			// Therefore, redetect the WhileyPath based on the new location.
 			// Observe that this will destroy any previous information the user
-			// has configured for the WhileyPath.			
-			wpControl.setWhileyPath(detectWhileyPath(location, (NewWhileyProjectPageOne) page));
+			// has configured for the WhileyPath.
+			WhileyPath whileypath = detectWhileyPath(location, (NewWhileyProjectPageOne) page);
+			VirtualContainer project = new VirtualContainer(new Path(location.toString()));
+			initialiseFromWhileyPath(project,whileypath);
+			wpControl.setProject(project);
+			wpControl.setWhileyPath(whileypath);
 			this.location = location;
-			System.out.println("GOT HERE");
 		}
 	}
 	
@@ -101,6 +105,39 @@ public class NewWhileyProjectPageTwo extends WizardPage {
 	void instantiateWhileyPath(IProject project, IProgressMonitor monitor)
 			throws CoreException {
 		wpControl.instantiateWhileyPath(project,monitor);
+	}
+	
+	/**
+	 * Make sure that all folders described in actions on the WhileyPath exist
+	 * in the virtual container. Observe that this doesn't mean they *actually*
+	 * exist. This is because to ensure that items currently declared on the
+	 * WhileyPath appear to exist as we go about configuring the WhileyPath.
+	 * 
+	 * @param whileypath
+	 * @param project
+	 */
+	protected void initialiseFromWhileyPath(VirtualContainer project,
+			WhileyPath whileypath) {
+		// First, check whether the default output location exists (if
+		// applicable)
+		IPath defaultOutputLocation = whileypath.getDefaultOutputFolder();
+		if (defaultOutputLocation != null) {
+			project.create(defaultOutputLocation);			
+		}
+
+		// Second, iterate through all the entries, looking for actions which
+		// may have folders that don't yet exist.
+		for (WhileyPath.Entry e : whileypath.getEntries()) {
+			if (e instanceof WhileyPath.BuildRule) {
+				WhileyPath.BuildRule container = (WhileyPath.BuildRule) e;
+				IPath sourceLocation = container.getSourceFolder();
+				IPath outputLocation = container.getOutputFolder();
+				project.create(sourceLocation);				
+				if (outputLocation != null) {
+					project.create(outputLocation);					
+				}
+			}
+		}
 	}
 	
 	/**

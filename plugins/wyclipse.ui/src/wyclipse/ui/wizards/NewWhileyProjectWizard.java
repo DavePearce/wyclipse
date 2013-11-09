@@ -222,7 +222,5 @@ public class NewWhileyProjectWizard extends Wizard implements IExecutableExtensi
 		} else {
 			whileypath.create(bin, IResource.NONE, monitor);
 		}
-	}
-	
-	
+	}	
 }
