@@ -81,6 +81,8 @@ public class WhileyPathConfigurationControl {
 			defaultOutputFolderBrowseButton.setEnabled(false);
 			defaultOutputFolderText.setText("");
 		}
+		enableVerificationButton.setSelection(whileypath.getEnableVerification());
+		enableRuntimeAssertionsButton.setSelection(whileypath.getEnableRuntimeAssertions());
 	}
 	
 	public Composite create(Composite parent) {				
@@ -166,6 +168,9 @@ public class WhileyPathConfigurationControl {
 				handleEnableRuntimeAssertions();
 			}
 		});	
+		
+		enableVerificationButton.setSelection(whileypath.getEnableVerification());
+		enableRuntimeAssertionsButton.setSelection(whileypath.getEnableRuntimeAssertions());
 		
 		IPath defaultOutputFolder = whileypath.getDefaultOutputFolder();
 		if(defaultOutputFolder == null) {
