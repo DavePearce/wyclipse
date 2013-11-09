@@ -55,11 +55,12 @@ public class NewWhileyPathBuildRuleDialog extends Dialog {
 	
 	// Output Folder Group
 	private Button useFolderSpecificSettings;
+	private Button useDefaultOutputFolderButton;
 	private Label outputFolderLabel;	
 	private Text outputFolderText;	
 	private Button outputFolderBrowseButton;
-	private Button enableVerification;
-	private Button enableRuntimeAssertions;
+	private Button enableVerificationButton;
+	private Button enableRuntimeAssertionsButton;
 	
 	// Advanced Config Group
 	private Button generateWyIL;
@@ -121,11 +122,18 @@ public class NewWhileyPathBuildRuleDialog extends Dialog {
 		
 		Group settings = WyclipseUI.createGroup(container,"Folder Specific Settings",SWT.SHADOW_ETCHED_IN, 3, 3);
 		
-		enableVerification = WyclipseUI.createCheckBox(settings,
+		enableVerificationButton = WyclipseUI.createCheckBox(settings,
 				"Enable Verification", 3);
-		enableRuntimeAssertions = WyclipseUI.createCheckBox(settings,
+		enableRuntimeAssertionsButton = WyclipseUI.createCheckBox(settings,
 				"Enable RuntimeAssertions", 3);
-				
+		useDefaultOutputFolderButton = WyclipseUI.createCheckBox(settings,
+				"Use Default Output Folder", 3);
+		useDefaultOutputFolderButton.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				handleUseDefaultOutputFolder();
+			}
+		});
+		
 		outputFolderLabel = WyclipseUI.createLabel(settings, "Output Folder:", 1);		
 		outputFolderText = WyclipseUI.createText(settings, "", 1, 200);
 		outputFolderBrowseButton = WyclipseUI.createButton(settings, "Browse...", 120);
@@ -151,7 +159,8 @@ public class NewWhileyPathBuildRuleDialog extends Dialog {
 		// Initialise Data
 	    // =====================================================================
 		write();
-		
+		handleEnableFolderSpecificSettings();
+				
 		// =====================================================================
 		// Done
 	    // =====================================================================
@@ -172,31 +181,38 @@ public class NewWhileyPathBuildRuleDialog extends Dialog {
 	}
 	
 	private void handleEnableFolderSpecificSettings() {
-		// useDefaultOutputFolder control toggled.
 		if (useFolderSpecificSettings.getSelection()) {
+			useDefaultOutputFolderButton.setEnabled(true);
+			enableVerificationButton.setEnabled(true);
+			enableRuntimeAssertionsButton.setEnabled(true);
+			generateWyIL.setEnabled(true);
+			generateWyAL.setEnabled(true);
+		} else {
+			useDefaultOutputFolderButton.setEnabled(false);			
+			enableVerificationButton.setEnabled(false);
+			enableRuntimeAssertionsButton.setEnabled(false);
+			generateWyIL.setEnabled(false);
+			generateWyAL.setEnabled(false);
+		}
+		handleUseDefaultOutputFolder();
+	}
+	
+	private void handleUseDefaultOutputFolder() {
+		if (useFolderSpecificSettings.getSelection()
+				&& !useDefaultOutputFolderButton.getSelection()) {
 			outputFolderLabel.setEnabled(true);
 			outputFolderLabel.setForeground(null); // set default
 			outputFolderText.setEnabled(true);
 			outputFolderBrowseButton.setEnabled(true);
-			
-			enableVerification.setEnabled(true);
-			enableRuntimeAssertions.setEnabled(true);
-			generateWyIL.setEnabled(true);
-			generateWyAL.setEnabled(true);
 		} else {
 			outputFolderLabel.setEnabled(false);
 			outputFolderLabel.setForeground(outputFolderLabel.getDisplay()
 					.getSystemColor(SWT.COLOR_DARK_GRAY)); // force gray
 			outputFolderText.setEnabled(false);
 			outputFolderBrowseButton.setEnabled(false);
-			
-			enableVerification.setEnabled(false);
-			enableRuntimeAssertions.setEnabled(false);
-			generateWyIL.setEnabled(false);
-			generateWyAL.setEnabled(false);
 		}
 	}
-	
+
 	private void handleBrowseSourceFolder() {
 		VirtualContainerSelectionDialog dialog = new VirtualContainerSelectionDialog(getShell(),
 				projectLocation);
@@ -207,14 +223,15 @@ public class NewWhileyPathBuildRuleDialog extends Dialog {
 	}
 	
 	private void handleBrowseOutputFolder() {
-		VirtualContainerSelectionDialog dialog = new VirtualContainerSelectionDialog(getShell(),
-				projectLocation);
+		VirtualContainerSelectionDialog dialog = new VirtualContainerSelectionDialog(
+				getShell(), projectLocation);
 		if (dialog.open() == Window.OK) {
 			IPath path = dialog.getResult();
 			outputFolderText.setText(path.toString());
 		}
 	}
 	
+
 	// =========================================================================
 	// Write data to fields from WhileyPath
 	// =========================================================================
@@ -224,32 +241,20 @@ public class NewWhileyPathBuildRuleDialog extends Dialog {
 		sourceIncludesText.setText(buildRule.getSourceIncludes().toString());
 		targetCombo.setText("Whiley Virtual Machine");
 	
-		if(buildRule.getEnableLocalSettings()) {
+		if (buildRule.getEnableLocalSettings()) {
 			useFolderSpecificSettings.setSelection(true);
-			outputFolderLabel.setEnabled(true);
-			outputFolderLabel.setForeground(null); // set default
-			outputFolderText.setText(buildRule.getOutputFolder().toString());
-			outputFolderText.setEnabled(true);
-			outputFolderBrowseButton.setEnabled(true);		
-			enableVerification.setEnabled(true);
-			enableRuntimeAssertions.setEnabled(true);
-			generateWyIL.setEnabled(true);
-			generateWyAL.setEnabled(true);
 		} else {
 			useFolderSpecificSettings.setSelection(false);
-			outputFolderLabel.setEnabled(false);
-			outputFolderLabel.setForeground(outputFolderLabel.getDisplay()
-					.getSystemColor(SWT.COLOR_DARK_GRAY)); // force gray
-			outputFolderText.setEnabled(false);
-			outputFolderBrowseButton.setEnabled(false);
-			enableVerification.setEnabled(false);
-			enableRuntimeAssertions.setEnabled(false);
-			generateWyIL.setEnabled(false);
-			generateWyAL.setEnabled(false);
+		}
+		if (buildRule.getOutputFolder() != null) {
+			useDefaultOutputFolderButton.setSelection(false);
+			outputFolderText.setText(buildRule.getOutputFolder().toString());
+		} else {
+			useDefaultOutputFolderButton.setSelection(true);
 		}
 		
-		enableVerification.setSelection(buildRule.getEnableVerification());
-		enableRuntimeAssertions.setSelection(buildRule.getEnableRuntimeAssertions());
+		enableVerificationButton.setSelection(buildRule.getEnableVerification());
+		enableRuntimeAssertionsButton.setSelection(buildRule.getEnableRuntimeAssertions());
 		generateWyIL.setSelection(buildRule.getGenerateWyIL());
 		generateWyAL.setSelection(buildRule.getGenerateWyAL());
 	}
@@ -263,9 +268,13 @@ public class NewWhileyPathBuildRuleDialog extends Dialog {
 		buildRule.setSourceIncludes(sourceIncludesText.getText());
 		buildRule.setEnableLocalSettings(useFolderSpecificSettings
 				.getSelection());
-		buildRule.setOutputFolder(new Path(outputFolderText.getText()));
-		buildRule.setEnableVerification(enableVerification.getSelection());
-		buildRule.setEnableRuntimeAssertions(enableRuntimeAssertions.getSelection());
+		if(useDefaultOutputFolderButton.getSelection()) {
+			buildRule.setOutputFolder(null);
+		} else {
+			buildRule.setOutputFolder(new Path(outputFolderText.getText()));
+		}
+		buildRule.setEnableVerification(enableVerificationButton.getSelection());
+		buildRule.setEnableRuntimeAssertions(enableRuntimeAssertionsButton.getSelection());
 		buildRule.setGenerateWyIL(generateWyIL.getSelection());
 		buildRule.setGenerateWyAL(generateWyAL.getSelection());
 	}	

@@ -97,7 +97,7 @@ public final class WhileyPath {
 						defaultOutputFolder.toString());
 			}
 			if(enableVerification) {
-				root.setAttribute("verify","true");
+				root.setAttribute("verification","true");
 			}
 			if(enableRuntimeAssertions) {
 				root.setAttribute("runtimeassertions","true");
@@ -115,10 +115,12 @@ public final class WhileyPath {
 					child.setAttribute("includes", action.getSourceIncludes()
 							.toString());
 					if (action.getEnableLocalSettings()) {
-						child.setAttribute("bindir", action.getOutputFolder()
-								.toString());
+						if(action.getOutputFolder() != null) {
+							child.setAttribute("bindir", action.getOutputFolder()
+									.toString());
+						}
 						if(action.getEnableVerification()) {
-							child.setAttribute("verify","true");
+							child.setAttribute("verification","true");
 						}
 						if(action.getEnableRuntimeAssertions()) {
 							child.setAttribute("runtimeassertions","true");
@@ -175,7 +177,7 @@ public final class WhileyPath {
 							globalBinDir.getNodeValue()));
 		}
 		Node globalEnableVerification = root.getAttributes().getNamedItem(
-				"verify");
+				"verification");
 		if (globalEnableVerification != null) {
 			whileypath.setEnableVerification(Boolean
 					.parseBoolean(globalEnableVerification.getNodeValue()));
@@ -212,7 +214,7 @@ public final class WhileyPath {
 				IPath outputFolder = bindir == null ? null
 						: new org.eclipse.core.runtime.Path(
 								bindir.getNodeValue());
-				Node ev = attributes.getNamedItem("verify");
+				Node ev = attributes.getNamedItem("verification");
 				boolean enableVerification = ev == null ? false : Boolean
 						.parseBoolean(ev.getNodeValue());
 				Node rv = attributes.getNamedItem("runtimeassertions");
