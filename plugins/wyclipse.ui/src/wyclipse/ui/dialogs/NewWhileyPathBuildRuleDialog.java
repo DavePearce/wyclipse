@@ -230,8 +230,11 @@ public class NewWhileyPathBuildRuleDialog extends Dialog {
 			outputFolderLabel.setForeground(null); // set default
 			outputFolderText.setText(buildRule.getOutputFolder().toString());
 			outputFolderText.setEnabled(true);
-			outputFolderBrowseButton.setEnabled(true);
-			
+			outputFolderBrowseButton.setEnabled(true);		
+			enableVerification.setEnabled(true);
+			enableRuntimeAssertions.setEnabled(true);
+			generateWyIL.setEnabled(true);
+			generateWyAL.setEnabled(true);
 		} else {
 			useFolderSpecificSettings.setSelection(false);
 			outputFolderLabel.setEnabled(false);
@@ -239,6 +242,10 @@ public class NewWhileyPathBuildRuleDialog extends Dialog {
 					.getSystemColor(SWT.COLOR_DARK_GRAY)); // force gray
 			outputFolderText.setEnabled(false);
 			outputFolderBrowseButton.setEnabled(false);
+			enableVerification.setEnabled(false);
+			enableRuntimeAssertions.setEnabled(false);
+			generateWyIL.setEnabled(false);
+			generateWyAL.setEnabled(false);
 		}
 		
 		enableVerification.setSelection(buildRule.getEnableVerification());
@@ -256,14 +263,10 @@ public class NewWhileyPathBuildRuleDialog extends Dialog {
 		buildRule.setSourceIncludes(sourceIncludesText.getText());
 		buildRule.setEnableLocalSettings(useFolderSpecificSettings
 				.getSelection());
-		if(useFolderSpecificSettings.getSelection()) {
-			buildRule.setOutputFolder(null);		
-		} else {
-			buildRule.setOutputFolder(new Path(outputFolderText.getText()));
-			buildRule.setEnableVerification(enableVerification.getSelection());
-			buildRule.setEnableRuntimeAssertions(enableRuntimeAssertions.getSelection());
-			buildRule.setGenerateWyIL(generateWyIL.getSelection());
-			buildRule.setGenerateWyAL(generateWyAL.getSelection());
-		}
+		buildRule.setOutputFolder(new Path(outputFolderText.getText()));
+		buildRule.setEnableVerification(enableVerification.getSelection());
+		buildRule.setEnableRuntimeAssertions(enableRuntimeAssertions.getSelection());
+		buildRule.setGenerateWyIL(generateWyIL.getSelection());
+		buildRule.setGenerateWyAL(generateWyAL.getSelection());
 	}	
 }

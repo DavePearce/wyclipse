@@ -133,6 +133,8 @@ public class WhileyProjectBuilder extends IncrementalProjectBuilder {
 		
 		List<Path.Root> whileyProjectRoots = whileyProject.roots();
 		ContainerRoot defaultOutputRoot = null;
+		boolean globalEnableVerification = whileypath.getEnableVerification();
+		boolean globalEnableRuntimeAssertions = whileypath.getEnableRuntimeAssertions();
 		
 		if (whileypath.getDefaultOutputFolder() != null) {			
 			IFolder defaultOutputFolder = project.getFolder(whileypath
@@ -177,8 +179,10 @@ public class WhileyProjectBuilder extends IncrementalProjectBuilder {
 					whileyProjectRoots.add(outputRoot);
 				}
 				Path.Root virtualOutputRoot = new VirtualRoot(registry); 				
-				Path.Root wyilOutputRoot = action.getGenerateWyIL() ? outputRoot : virtualOutputRoot;
-				Path.Root wyalOutputRoot = action.getGenerateWyAL() ? outputRoot : virtualOutputRoot;
+				Path.Root wyilOutputRoot = (action.getEnableLocalSettings() && action
+						.getGenerateWyIL()) ? outputRoot : virtualOutputRoot;
+				Path.Root wyalOutputRoot = (action.getEnableLocalSettings() && action
+						.getGenerateWyAL()) ? outputRoot : virtualOutputRoot;
 				whileyProjectRoots.add(virtualOutputRoot);
 				
 				// ============================================================
@@ -189,8 +193,9 @@ public class WhileyProjectBuilder extends IncrementalProjectBuilder {
 				whiley2wyil.add(sourceRoot, sourceIncludes, wyilOutputRoot,
 						WhileyFile.ContentType, WyilFile.ContentType);
 				whileyProject.add(whiley2wyil);
-				
-				if(action.getEnableVerification()) {	
+				boolean enableVerification = (!action.getEnableLocalSettings() && globalEnableVerification)
+											|| (action.getEnableLocalSettings() && action.getEnableVerification());
+				if(enableVerification) {	
 					
 					System.out.println("*** INITIALISING VERIFIER");
 					

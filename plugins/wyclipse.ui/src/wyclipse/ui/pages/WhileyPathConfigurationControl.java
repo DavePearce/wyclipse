@@ -48,8 +48,8 @@ public class WhileyPathConfigurationControl {
 	private Label defaultOutputFolderLabel;
 	private Text defaultOutputFolderText; 
 	private Button defaultOutputFolderBrowseButton;
-	private Button enableVerification;
-	private Button enableRuntimeAssertions;
+	private Button enableVerificationButton;
+	private Button enableRuntimeAssertionsButton;
 	
 	public WhileyPathConfigurationControl(Shell shell,
 			VirtualContainer project, WhileyPath whileypath) {
@@ -139,9 +139,9 @@ public class WhileyPathConfigurationControl {
 		
 		Group settings = WyclipseUI.createGroup(container,"Global Settings",SWT.SHADOW_ETCHED_IN, 3, 3);		
 		
-		enableVerification = WyclipseUI.createCheckBox(settings,
+		enableVerificationButton = WyclipseUI.createCheckBox(settings,
 				"Enable Verification", 3);
-		enableRuntimeAssertions = WyclipseUI.createCheckBox(settings,
+		enableRuntimeAssertionsButton = WyclipseUI.createCheckBox(settings,
 				"Enable Runtime Assertions", 3);
 		
 		defaultOutputFolderLabel = WyclipseUI.createLabel(settings, "Output Folder:", 1);		
@@ -154,6 +154,18 @@ public class WhileyPathConfigurationControl {
 						handleBrowseDefaultOutputFolder();
 					}
 				});	
+		
+		enableVerificationButton.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				handleEnableVerification();
+			}
+		});	
+
+		enableRuntimeAssertionsButton.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				handleEnableRuntimeAssertions();
+			}
+		});	
 		
 		IPath defaultOutputFolder = whileypath.getDefaultOutputFolder();
 		if(defaultOutputFolder == null) {
@@ -231,7 +243,7 @@ public class WhileyPathConfigurationControl {
 	 */
 	protected void handleAddRule() {
 		WhileyPath.BuildRule buildRule = new WhileyPath.BuildRule(new Path(""),
-				"**/*.whiley", null);
+				"**/*.whiley");
 		NewWhileyPathBuildRuleDialog dialog = new NewWhileyPathBuildRuleDialog(
 				shell, buildRule, project);
 		
@@ -330,6 +342,23 @@ public class WhileyPathConfigurationControl {
 	protected void handleModifyDefaultOutputFolder() {
 		whileypath.setDefaultOutputFolder(new Path(defaultOutputFolderText
 				.getText()));
+	}
+	
+	/**
+	 * This function is called when the global enable verification toggle is
+	 * toggled.
+	 */
+	protected void handleEnableVerification() {
+		whileypath.setEnableVerification(enableVerificationButton.getSelection());
+	}
+
+	/**
+	 * This function is called when the global enable runtime assertions toggle
+	 * is toggled.
+	 */
+	protected void handleEnableRuntimeAssertions() {
+		whileypath.setEnableRuntimeAssertions(enableRuntimeAssertionsButton
+				.getSelection());
 	}
 	
 	// ======================================================================

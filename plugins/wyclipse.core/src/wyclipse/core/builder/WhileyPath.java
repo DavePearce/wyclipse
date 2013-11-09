@@ -35,6 +35,8 @@ import wyil.lang.WyilFile;
 public final class WhileyPath {
 	private final ArrayList<Entry> entries;
 	private IPath defaultOutputFolder;
+	private boolean enableVerification;
+	private boolean enableRuntimeAssertions;
 	
 	public WhileyPath() {
 		entries = new ArrayList<Entry>();
@@ -61,6 +63,22 @@ public final class WhileyPath {
 		this.defaultOutputFolder = defaultOutputFolder;
 	}
 	
+	public boolean getEnableVerification() {
+		return enableVerification;
+	}
+	
+	public void setEnableVerification(boolean enableVerification) {
+		this.enableVerification = enableVerification;
+	}
+	
+	public boolean getEnableRuntimeAssertions() {
+		return enableRuntimeAssertions;
+	}
+	
+	public void setEnableRuntimeAssertions(boolean enableRuntimeAssertions) {
+		this.enableRuntimeAssertions = enableRuntimeAssertions;
+	}
+	
 	public List<Entry> getEntries() {
 		return entries;
 	}
@@ -77,6 +95,12 @@ public final class WhileyPath {
 			if (defaultOutputFolder != null) {
 				root.setAttribute("bindir",
 						defaultOutputFolder.toString());
+			}
+			if(enableVerification) {
+				root.setAttribute("verify","true");
+			}
+			if(enableRuntimeAssertions) {
+				root.setAttribute("runtimeassertions","true");
 			}
 			doc.appendChild(root);
 
@@ -139,8 +163,9 @@ public final class WhileyPath {
 	public static final WhileyPath fromXmlDocument(Document xmldoc) {
 		WhileyPath whileypath = new WhileyPath();
 		
-		// First, check whether or not a bindir attribute is given on the root
-		// of the whileypath file.
+		// ========================================================================
+		// Global Settings
+		// ========================================================================
 		Node root = xmldoc.getFirstChild();
 		Node globalBinDir = root.getAttributes().getNamedItem("bindir");
 		if (globalBinDir != null) {
@@ -149,6 +174,24 @@ public final class WhileyPath {
 					.setDefaultOutputFolder(new org.eclipse.core.runtime.Path(
 							globalBinDir.getNodeValue()));
 		}
+		Node globalEnableVerification = root.getAttributes().getNamedItem(
+				"verify");
+		if (globalEnableVerification != null) {
+			whileypath.setEnableVerification(Boolean
+					.parseBoolean(globalEnableVerification.getNodeValue()));
+		}
+		Node globalEnableRuntimeAssertions = root.getAttributes().getNamedItem(
+				"runtimeassertions");
+		if (globalEnableRuntimeAssertions != null) {
+			whileypath
+					.setEnableRuntimeAssertions(Boolean
+							.parseBoolean(globalEnableRuntimeAssertions
+									.getNodeValue()));
+		}
+		
+		// ========================================================================
+		// Path Entries
+		// ========================================================================
 		
 		List<Entry> whileyPathEntries = whileypath.getEntries();
 		NodeList children = root.getChildNodes();
@@ -182,9 +225,10 @@ public final class WhileyPath {
 				boolean generateWyIL = gwyil == null ? false : Boolean
 						.parseBoolean(gwyil.getNodeValue());
 				
-				WhileyPath.BuildRule rule = new WhileyPath.BuildRule(sourceFolder,
-						sourceIncludes, outputFolder);
+				WhileyPath.BuildRule rule = new WhileyPath.BuildRule(
+						sourceFolder, sourceIncludes);
 				rule.setEnableLocalSettings(bindir != null);
+				rule.setOutputFolder(outputFolder);
 				rule.setEnableVerification(enableVerification);
 				rule.setEnableRuntimeAssertions(enableRuntimeAssertions);
 				rule.setGenerateWyAL(generateWyAL);
@@ -326,10 +370,9 @@ public final class WhileyPath {
 		 */
 		private boolean generateWyIL;
 		
-		public BuildRule(IPath sourceFolder, String sourceIncludes, IPath outputFolder) {
+		public BuildRule(IPath sourceFolder, String sourceIncludes) {
 			this.sourceFolder = sourceFolder;
 			this.sourceIncludes = sourceIncludes;
-			this.outputFolder = outputFolder;
 		}	
 				
 		public IPath getSourceFolder() {
