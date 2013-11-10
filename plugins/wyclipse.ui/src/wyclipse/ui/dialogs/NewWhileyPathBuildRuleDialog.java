@@ -112,7 +112,8 @@ public class NewWhileyPathBuildRuleDialog extends Dialog {
 		// =====================================================================
 		// Configure Output Folder Group
 		// =====================================================================
-
+		WyclipseUI.createSeparator(container, 3);
+		
 		// create check box
 		useFolderSpecificSettingsButton = WyclipseUI.createCheckBox(container, "Enable Folder Specific Settings",3);
 		

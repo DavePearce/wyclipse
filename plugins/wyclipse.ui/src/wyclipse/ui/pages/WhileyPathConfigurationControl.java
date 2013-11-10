@@ -137,9 +137,9 @@ public class WhileyPathConfigurationControl {
 		// =====================================================================
 		// Bottom Section
 		// =====================================================================
-		//WyclipseUI.createCheckBox(container, "Enable Folder Specific Settings", 3);
+		WyclipseUI.createSeparator(container, 3);
 		
-		Group settings = WyclipseUI.createGroup(container,"Global Settings",SWT.SHADOW_ETCHED_IN, 3, 3);		
+		Group settings = WyclipseUI.createGroup(container,"Global Build Settings",SWT.SHADOW_ETCHED_IN, 3, 3);		
 		
 		enableVerificationButton = WyclipseUI.createCheckBox(settings,
 				"Enable Verification", 3);
