@@ -1,0 +1,12 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Jdt
+Bundle-SymbolicName: wyclipse.jdt;singleton:=true
+Bundle-Version: 0.0.1
+Bundle-Activator: wyclipse.jdt.Activator
+Require-Bundle: org.eclipse.ui,
+ org.eclipse.core.runtime,
+ wyclipse.core;bundle-version="0.0.15",
+ wyclipse.ui;bundle-version="1.0.0"
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-ActivationPolicy: lazy
