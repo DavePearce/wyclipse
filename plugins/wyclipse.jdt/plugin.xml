@@ -13,11 +13,17 @@
    <extension
          point="org.eclipse.ui.menus">
       <menuContribution
-            allPopups="true"
-            locationURI="menu:org.eclipse.ui.main.menu">
+            allPopups="false"
+            locationURI="popup:org.eclipse.ui.navigator.ProjectExplorer#PopupMenu?after=additions">
          <menu
                commandId="wyclipse.jdt.configureWhileyBuildPath"
-               label="Configure Whiley Build Path">
+               id="configureWhileyBuildPathMenu"
+               label="Whiley Build Path">
+            <command
+                  commandId="wyclipse.jdt.configureWhileyBuildPath"
+                  label="Configure"
+                  style="push">
+            </command>
          </menu>
       </menuContribution>
    </extension>
