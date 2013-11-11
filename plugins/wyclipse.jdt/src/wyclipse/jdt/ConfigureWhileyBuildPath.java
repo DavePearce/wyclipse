@@ -9,26 +9,19 @@ public class ConfigureWhileyBuildPath implements IHandler {
 
 	@Override
 	public void addHandlerListener(IHandlerListener handlerListener) {
-		// TODO Auto-generated method stub
-
 	}
 
 	@Override
-	public void dispose() {
-		// TODO Auto-generated method stub
-
-	}
+	public void dispose() {}
 
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
 	public boolean isEnabled() {
-		// TODO Auto-generated method stub
-		return false;
+		return true;
 	}
 
 	@Override
@@ -38,9 +31,6 @@ public class ConfigureWhileyBuildPath implements IHandler {
 	}
 
 	@Override
-	public void removeHandlerListener(IHandlerListener handlerListener) {
-		// TODO Auto-generated method stub
-
-	}
+	public void removeHandlerListener(IHandlerListener handlerListener) { }
 
 }
