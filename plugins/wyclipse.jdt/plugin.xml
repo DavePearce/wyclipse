@@ -1,6 +1,26 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?eclipse version="3.4"?>
 <plugin>
+   <extension
+         point="org.eclipse.ui.commands">
+      <command
+            categoryId="org.eclipse.ui.category.project"
+            description="Configure Whiley Build Path"
+            id="wyclipse.jdt.configureWhileyBuildPath"
+            name="Whiley Build Path">
+      </command>
+   </extension>
+   <extension
+         point="org.eclipse.ui.menus">
+      <menuContribution
+            allPopups="true"
+            locationURI="menu:org.eclipse.ui.main.menu">
+         <menu
+               commandId="wyclipse.jdt.configureWhileyBuildPath"
+               label="Configure Whiley Build Path">
+         </menu>
+      </menuContribution>
+   </extension>
   
   
   
