@@ -23,9 +23,6 @@
                   commandId="wyclipse.jdt.configureWhileyBuildPath"
                   label="Configure"
                   style="push">
-               <visibleWhen
-                     checkEnabled="true">
-               </visibleWhen>
             </command>
          </menu>
       </menuContribution>
