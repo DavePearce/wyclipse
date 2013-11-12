@@ -19,6 +19,13 @@
                commandId="wyclipse.jdt.configureWhileyBuildPath"
                id="configureWhileyBuildPathMenu"
                label="Whiley Build Path">
+	   <enabledWhen>
+	     <adapt type="org.eclipse.core.resources.IProject">
+	       <test
+		   property="org.eclipse.core.resources.projectNature"
+		   value="wyclipse.core.whileynature"/>
+	     </adapt>         
+	   </enabledWhen>	   
             <command
                   commandId="wyclipse.jdt.configureWhileyBuildPath"
                   label="Configure"
