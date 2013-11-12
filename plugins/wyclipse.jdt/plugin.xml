@@ -14,7 +14,7 @@
          point="org.eclipse.ui.menus">
       <menuContribution
             allPopups="false"
-            locationURI="popup:org.eclipse.ui.navigator.ProjectExplorer#PopupMenu?after=additions">
+            locationURI="popup:org.eclipse.ui.navigator.ProjectExplorer#PopupMenu?before=additions">
          <menu
                commandId="wyclipse.jdt.configureWhileyBuildPath"
                id="configureWhileyBuildPathMenu"
@@ -32,6 +32,9 @@
                   style="push">
             </command>
          </menu>
+         <separator
+               name="wyclipse.jdt.separator1">
+         </separator>
       </menuContribution>
    </extension>
   
