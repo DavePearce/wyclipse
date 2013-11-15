@@ -16,6 +16,7 @@ public class ConfigureWhileyBuildPath implements IHandler {
 
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
+		System.out.println("*** ConfigureWhileyBuildPath action called");
 		return null;
 	}
 

@@ -8,6 +8,9 @@
             description="Configure Whiley Build Path"
             id="wyclipse.jdt.configureWhileyBuildPath"
             name="Whiley Build Path">
+         <defaultHandler
+               class="wyclipse.jdt.ConfigureWhileyBuildPath">
+         </defaultHandler>
       </command>
    </extension>
    <extension
