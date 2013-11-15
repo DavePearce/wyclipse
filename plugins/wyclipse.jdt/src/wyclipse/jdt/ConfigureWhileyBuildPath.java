@@ -5,6 +5,14 @@ import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.commands.IHandler;
 import org.eclipse.core.commands.IHandlerListener;
 
+/**
+ * Responsible for adding the <code>WhileyNature</code> onto an existing
+ * project. This requires configuring the build path based on the existing code
+ * structure.
+ * 
+ * @author David J. Pearce
+ * 
+ */
 public class ConfigureWhileyBuildPath implements IHandler {
 
 	@Override
