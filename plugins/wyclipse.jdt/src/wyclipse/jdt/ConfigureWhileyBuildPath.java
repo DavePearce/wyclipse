@@ -6,9 +6,11 @@ import org.eclipse.core.commands.IHandler;
 import org.eclipse.core.commands.IHandlerListener;
 
 /**
- * Responsible for adding the <code>WhileyNature</code> onto an existing
- * project. This requires configuring the build path based on the existing code
- * structure.
+ * Opens the properties dialog for configuring the Whiley Build Path. When
+ * applied to a project which does not include the <code>WhileyNature</code>,
+ * then this is automatically added an initialised appropriately. Specifically,
+ * this will be configured based on the ".whileypath" file (if one exists), or
+ * will fall back to a default setup.
  * 
  * @author David J. Pearce
  * 
