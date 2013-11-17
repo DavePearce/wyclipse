@@ -71,8 +71,7 @@ public class ConfigureWhileyBuildPath implements IHandler {
 
 	@Override
 	public boolean isHandled() {
-		// TODO Auto-generated method stub
-		return false;
+		return true;
 	}
 
 	@Override
