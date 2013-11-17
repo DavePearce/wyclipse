@@ -33,31 +33,34 @@ public class ConfigureWhileyBuildPath implements IHandler {
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
 		System.out.println("*** ConfigureWhileyBuildPath action called");
-		
+
 		// First, determine whether this command was executed on a selected
 		// project or not.
-		
-		try {
-		ISelection selection = HandlerUtil.getActiveWorkbenchWindow(event)
-				.getActivePage().getSelection();
-		if (selection != null & selection instanceof IStructuredSelection) {
-			IStructuredSelection iss = (IStructuredSelection) selection;
-			Object firstElement = iss.getFirstElement();
-			if (firstElement instanceof IProject) {
 
-				IProject project = (IProject) firstElement;
-				System.out.println("*** CALLED ON IPROJECT " + project.getName());
-				if(hasWhileyNature(project)) {
-					System.out.println("*** PROJECT HAS WHILEY NATURE");
-				} else {
-					System.out.println("*** PROJECT DOESN'T HAVE WHILEY NATURE");
-				}												
+		try {
+			ISelection selection = HandlerUtil.getActiveWorkbenchWindow(event)
+					.getActivePage().getSelection();
+			if (selection != null & selection instanceof IStructuredSelection) {
+				IStructuredSelection iss = (IStructuredSelection) selection;
+				Object firstElement = iss.getFirstElement();
+				if (firstElement instanceof IProject) {
+
+					IProject project = (IProject) firstElement;
+					System.out.println("*** CALLED ON IPROJECT "
+							+ project.getName());
+					if (hasWhileyNature(project)) {
+						System.out.println("*** PROJECT HAS WHILEY NATURE");
+					} else {
+						System.out
+								.println("*** PROJECT DOESN'T HAVE WHILEY NATURE");
+					}
+				}
 			}
+		} catch (CoreException e) {
+			throw new ExecutionException(
+					"A problem occurred configuring the Whiley Build Path", e);
 		}
-		} catch(CoreException e) {
-			throw new ExecutionException("A problem occurred configuring the Whiley Build Path",e);
-		}
-		
+
 		return null;
 	}
 
