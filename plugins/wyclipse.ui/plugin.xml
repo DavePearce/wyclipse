@@ -113,4 +113,38 @@
       </enabledWhen>
     </page>
   </extension>
+
+   <extension
+         point="org.eclipse.ui.commands">
+      <command
+            categoryId="org.eclipse.ui.category.project"
+            description="Configure Whiley Build Path"
+            id="wyclipse.ui.configureWhileyBuildPath"
+            name="Whiley Build Path">
+         <defaultHandler
+               class="wyclipse.ui.actions.ConfigureWhileyBuildPath">
+         </defaultHandler>
+      </command>
+   </extension>
+   <extension
+         point="org.eclipse.ui.menus">
+      <menuContribution
+            allPopups="false"
+            locationURI="popup:org.eclipse.ui.navigator.ProjectExplorer#PopupMenu?before=additions">
+         <menu
+               commandId="wyclipse.ui.configureWhileyBuildPath"
+               id="configureWhileyBuildPathMenu"
+               label="Whiley Build Path">
+            <command
+                  commandId="wyclipse.ui.configureWhileyBuildPath"
+                  label="Configure"
+                  style="push">
+            </command>
+         </menu>
+         <separator
+               name="wyclipse.ui.separator1">
+         </separator>
+      </menuContribution>
+   </extension>
+
 </plugin>

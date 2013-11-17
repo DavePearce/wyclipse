@@ -1,4 +1,4 @@
-package wyclipse.jdt;
+package wyclipse.ui.actions;
 
 import java.util.Collections;
 
