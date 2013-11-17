@@ -16,6 +16,8 @@ public class Activator extends AbstractUIPlugin {
 	// The plug-in ID
 	public static final String PLUGIN_ID = "wyclipse.ui"; //$NON-NLS-1$
 
+	public static final String WHILEY_BUILD_PATH_PROPERTY_PAGE_ID = "wyclipse.ui.whileybuildpathpropertypage";
+	
 	// The shared instance
 	private static Activator plugin;
 	
