@@ -54,14 +54,12 @@ public class ConfigureWhileyBuildPath implements IHandler {
 				if (firstElement instanceof IProject) {
 
 					IProject project = (IProject) firstElement;					
-					if (hasWhileyNature(project)) {
-						// Ok, project already has Whiley nature so jump
-						// straight to the Whiley Build Path Configuration page.
-						openPropertiesDialog(project,activeWorkbenchWindow);
-					} else {
-						System.out
-								.println("*** PROJECT DOESN'T HAVE WHILEY NATURE");
+					if (!hasWhileyNature(project)) {
+						configureWhileyNature(project);						
 					}
+					// Project definitely has Whiley nature so jump straight to
+					// the Whiley Build Path Configuration page.
+					openPropertiesDialog(project,activeWorkbenchWindow);
 				}
 			}
 		} catch (CoreException e) {
@@ -122,5 +120,15 @@ public class ConfigureWhileyBuildPath implements IHandler {
 						new String[] { wyclipse.ui.Activator.WHILEY_BUILD_PATH_PROPERTY_PAGE_ID },
 						Collections.EMPTY_MAP);
 		dialog.open();
+	}
+	
+	/**
+	 * Add a default whiley nature onto this project, including an appropriate
+	 * ".whileypath" file.
+	 * 
+	 * @param project
+	 */
+	private void configureWhileyNature(IProject project) {
+		
 	}
 }
