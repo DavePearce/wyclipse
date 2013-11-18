@@ -156,7 +156,7 @@ public class ConfigureWhileyBuildPath implements IHandler {
 		buildCommand.setBuilderName(Activator.WYCLIPSE_BUILDER_ID);
 
 		ICommand[] oldBuilders = desc.getBuildSpec();
-		ICommand[] newBuilders = new ICommand[oldBuilders.length];
+		ICommand[] newBuilders = new ICommand[oldBuilders.length+1];
 		System.arraycopy(natures, 0, newNatures, 1, natures.length);
 		newBuilders[0] = buildCommand;
 		desc.setBuildSpec(newBuilders);		
