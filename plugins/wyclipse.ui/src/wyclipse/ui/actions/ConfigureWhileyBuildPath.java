@@ -12,10 +12,12 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jface.preference.PreferenceDialog;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.window.Window;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.dialogs.PreferencesUtil;
 import org.eclipse.ui.handlers.HandlerUtil;
+
+import wyclipse.core.Activator;
+import wyclipse.core.WhileyNature;
 
 /**
  * Opens the properties dialog for configuring the Whiley Build Path. When
@@ -48,18 +50,24 @@ public class ConfigureWhileyBuildPath implements IHandler {
 					.getActiveWorkbenchWindow(event);
 			ISelection selection = activeWorkbenchWindow.getActivePage()
 					.getSelection();
+			
+			// TODO: update the following so that this works on all structured
+			// selections within a project.
+			
 			if (selection != null & selection instanceof IStructuredSelection) {
 				IStructuredSelection iss = (IStructuredSelection) selection;
 				Object firstElement = iss.getFirstElement();
+				
 				if (firstElement instanceof IProject) {
-
-					IProject project = (IProject) firstElement;					
+					IProject project = (IProject) firstElement;
+					
 					if (!hasWhileyNature(project)) {
-						configureWhileyNature(project);						
+						configureWhileyNature(project);
 					}
+					
 					// Project definitely has Whiley nature so jump straight to
 					// the Whiley Build Path Configuration page.
-					openPropertiesDialog(project,activeWorkbenchWindow);
+					openPropertiesDialog(project, activeWorkbenchWindow);
 				}
 			}
 		} catch (CoreException e) {
@@ -128,7 +136,22 @@ public class ConfigureWhileyBuildPath implements IHandler {
 	 * 
 	 * @param project
 	 */
-	private void configureWhileyNature(IProject project) {
+	private void configureWhileyNature(IProject project) throws CoreException {
+
+		// Add the WhileyNature to the given project.
+		IProjectDescription desc = project.getDescription();
+		String[] natures = desc.getNatureIds();
+			
+		String[] newNatures = new String[natures.length+1];
+		System.arraycopy(natures, 0, newNatures, 0, natures.length);
+		newNatures[natures.length] = Activator.WYCLIPSE_NATURE_ID;
+		desc.setNatureIds(newNatures);
+		project.setDescription(desc, null);	
 		
+		// At this point, we cannot be guaranteed that the WhileyNature object
+		// is constructed.
+		
+		// TODO: detect existing .whileypath and/or configure new one
+		WhileyNature.initialiseWhileyPath(project, null);
 	}
 }

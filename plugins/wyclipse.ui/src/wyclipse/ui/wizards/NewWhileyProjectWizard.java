@@ -25,20 +25,8 @@
 
 package wyclipse.ui.wizards;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.StringBufferInputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URI;
-
-import javax.xml.transform.OutputKeys;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerConfigurationException;
-import javax.xml.transform.TransformerException;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
 
 import org.eclipse.core.resources.*;
 import org.eclipse.core.runtime.*;
@@ -48,9 +36,9 @@ import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.ui.*;
 import org.eclipse.ui.actions.WorkspaceModifyOperation;
 import org.eclipse.ui.wizards.newresource.BasicNewProjectResourceWizard;
-import org.w3c.dom.Document;
 
 import wyclipse.core.Activator;
+import wyclipse.core.WhileyNature;
 import wyclipse.core.builder.WhileyPath;
 
 /**
@@ -110,13 +98,14 @@ public class NewWhileyProjectWizard extends Wizard implements IExecutableExtensi
 					createProject(desc, projectHandle, monitor);
 					monitor.worked(1000);
 					WhileyPath whileypath = page2.getWhileyPath();
-					createWhileyPathFile(whileypath,projectHandle,monitor);
+					WhileyNature.setWhileyPath(projectHandle, whileypath,
+							monitor);
 					monitor.worked(1000);
-					page2.instantiateWhileyPath(projectHandle,monitor);
+					page2.instantiateWhileyPath(projectHandle, monitor);
 				} finally {
 					monitor.done();
 				}
-				
+
 			}
 		};
 
@@ -175,52 +164,4 @@ public class NewWhileyProjectWizard extends Wizard implements IExecutableExtensi
 		project.open(IResource.BACKGROUND_REFRESH, new SubProgressMonitor(
 				monitor, 1000));
 	}
-	
-	/**
-	 * Create the ".whileypath" file in the project's root.
-	 * 
-	 * @param project
-	 * @param monitor
-	 * @throws CoreException
-	 */
-	void createWhileyPathFile(WhileyPath whileyPath, IProject project, IProgressMonitor monitor)
-			throws CoreException {
-		
-		// ==================================================
-		// First, turn the whileypath into an XML bytestream.
-		// ==================================================
-		Document xmldoc = whileyPath.toXmlDocument();
-		ByteArrayOutputStream bout = new ByteArrayOutputStream();
-
-		try {
-			TransformerFactory transformerFactory = TransformerFactory
-					.newInstance();
-			DOMSource source = new DOMSource(xmldoc);
-			StreamResult result = new StreamResult(bout);
-			Transformer transformer = transformerFactory.newTransformer();
-			// The following two seamingly random lines ensure that the
-			// resulting XML is properly indented, and looks nice. Thanks Stack
-			// Overflow!
-			transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "2");
-			transformer.setOutputProperty(OutputKeys.INDENT, "yes");
-			// Finally, generate the XML byte stream...
-			transformer.transform(source, result);
-		} catch (TransformerConfigurationException e) {
-			// FIXME: throw a CoreException?
-		} catch (TransformerException e) {
-			// FIXME: throw a CoreException?
-		}
-
-		// ==================================================
-		// Second, create the physical .whileypath file
-		// ==================================================
-		IFile whileypath = project.getFile(".whileypath");
-		ByteArrayInputStream bin = new ByteArrayInputStream(bout.toByteArray());
-
-		if (whileypath.exists()) {
-			whileypath.setContents(bin, IResource.NONE, monitor);
-		} else {
-			whileypath.create(bin, IResource.NONE, monitor);
-		}
-	}	
 }

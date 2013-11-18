@@ -140,6 +140,83 @@ public class WhileyNature implements IProjectNature {
 	 */
 	public void setWhileyPath(WhileyPath whileyPath, IProgressMonitor monitor)
 			throws CoreException {
+		setWhileyPath(project,whileyPath,monitor);		
+	}
+	
+	/**
+	 * Set the project that this nature is associated with. This method gets
+	 * called when the nature is first created, and therefore it needs to load
+	 * the build configuration from the ".whileypath" file.
+	 */
+	@Override
+	public void setProject(IProject project) {
+		this.project = project;		
+	}	
+	
+	public void setWhileyProjectBuilder(WhileyProjectBuilder builder) {
+		this.whileyProjectBuilder = builder;
+	}
+	
+	/**
+	 * Return the mapping from standard library names to their absolute path
+	 * location. Standard libraries are effectively built in libraries (e.g.
+	 * wyrt) which have standard names. This means they can be specified on the
+	 * whileypath without giving an absolute location.
+	 * 
+	 * @return
+	 */
+	public Map<String,IPath> getStandardLibraries() {
+		HashMap<String,IPath> stdlibs = new HashMap<String,IPath>();
+		stdlibs.put("Default WyRT", Activator.WHILEY_RUNTIME_JAR_IPATH);
+		return stdlibs;
+	}
+	
+	// ===============================================================================================
+	// Helpers
+	// ===============================================================================================
+	
+	/**
+	 * Initialise the whileypath for a given project. Specifically, this will
+	 * check whether or not an existing whileypath file exists; if not, a
+	 * default will be used.
+	 * 
+	 * @param project
+	 * @param monitor
+	 */
+	public static void initialiseWhileyPath(IProject project,
+			IProgressMonitor monitor) throws CoreException {
+		setWhileyPath(project, getDefaultWhileyPath(), monitor);
+	}
+	
+	/**
+	 * Construct a default whileypath to be used in the case when no whileypath
+	 * exists already, and we can't find anything which helps us to guess a
+	 * whileypath.
+	 * 
+	 * @return
+	 */
+	public static WhileyPath getDefaultWhileyPath() {
+		Path sourceFolder = new Path("src");
+		Path defaultOutputFolder = new Path("bin");
+
+		WhileyPath.BuildRule defaultAction = new WhileyPath.BuildRule(
+				sourceFolder, "**/*.whiley");
+
+		WhileyPath whileypath = new WhileyPath(defaultOutputFolder, defaultAction);
+		whileypath.setEnableRuntimeAssertions(true);
+		return whileypath;
+	}	
+
+
+	/**
+	 * Write a given whileypath into the ".whileypath" file of a given project.
+	 * 
+	 * @param whileyPath
+	 * @param monitor
+	 * @throws CoreException
+	 */
+	public static void setWhileyPath(IProject project, WhileyPath whileyPath, IProgressMonitor monitor)
+			throws CoreException {
 		Document xmldoc = whileyPath.toXmlDocument();
 		ByteArrayOutputStream bout = new ByteArrayOutputStream();
 
@@ -174,51 +251,4 @@ public class WhileyNature implements IProjectNature {
 			whileypath.create(bin, IResource.NONE, monitor);
 		}
 	}
-	
-	/**
-	 * Set the project that this nature is associated with. This method gets
-	 * called when the nature is first created, and therefore it needs to load
-	 * the build configuration from the ".whileypath" file.
-	 */
-	@Override
-	public void setProject(IProject project) {
-		this.project = project;		
-	}	
-	
-	public void setWhileyProjectBuilder(WhileyProjectBuilder builder) {
-		this.whileyProjectBuilder = builder;
-	}
-	
-	/**
-	 * Return the mapping from standard library names to their absolute path
-	 * location. Standard libraries are effectively built in libraries (e.g.
-	 * wyrt) which have standard names. This means they can be specified on the
-	 * whileypath without giving an absolute location.
-	 * 
-	 * @return
-	 */
-	public Map<String,IPath> getStandardLibraries() {
-		HashMap<String,IPath> stdlibs = new HashMap<String,IPath>();
-		stdlibs.put("Default WyRT", Activator.WHILEY_RUNTIME_JAR_IPATH);
-		return stdlibs;
-	}
-			
-	/**
-	 * Construct a default whileypath to be used in the case when no whileypath
-	 * exists already, and we can't find anything which helps us to guess a
-	 * whileypath.
-	 * 
-	 * @return
-	 */
-	public static WhileyPath getDefaultWhileyPath() {
-		Path sourceFolder = new Path("src");
-		Path defaultOutputFolder = new Path("bin");
-
-		WhileyPath.BuildRule defaultAction = new WhileyPath.BuildRule(
-				sourceFolder, "**/*.whiley");
-
-		WhileyPath whileypath = new WhileyPath(defaultOutputFolder, defaultAction);
-		whileypath.setEnableRuntimeAssertions(true);
-		return whileypath;
-	}	
 }
