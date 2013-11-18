@@ -60,7 +60,8 @@ public class ColorManager {
 //	
 	public static final Color KEYWORD_COLOR_C = new Color(null, 127, 0, 85);
 	//public static final Color SPEC_KEYWORD_COLOR_C = new Color(null, 135,95,1);
-	public static final Color SPEC_KEYWORD_COLOR_C = new Color(null, 100,75,0);
+	//public static final Color SPEC_KEYWORD_COLOR_C = new Color(null, 100,75,0);
+	public static final Color SPEC_KEYWORD_COLOR_C = new Color(null, 127, 0, 85);
 	public static final Color DEFAULT_COLOR_C = new Color(null, 0, 0, 0);
 	public static final Color STRING_COLOR_C = new Color(null, 42, 0, 255);
 	public static final Color COMMENT_COLOR_C = new Color(null, 63, 127, 95);
