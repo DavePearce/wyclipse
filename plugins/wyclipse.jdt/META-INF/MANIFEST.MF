@@ -8,6 +8,8 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,
  wyclipse.core;bundle-version="0.0.15",
  wyclipse.ui;bundle-version="1.0.0",
- org.eclipse.core.resources
+ org.eclipse.core.resources,
+ org.eclipse.jdt;bundle-version="3.8.0",
+ org.eclipse.jdt.core;bundle-version="3.8.2"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ActivationPolicy: lazy

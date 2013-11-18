@@ -1,12 +1,47 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?eclipse version="3.4"?>
 <plugin>
-  
-  
-  
-  
 
+   <extension
+         point="org.eclipse.ui.commands">
+      <command
+            categoryId="org.eclipse.ui.category.project"
+            description="Configure Java Build Path"
+            id="wyclipse.jdt.actions.configureJavaBuildPath"
+            name="Java Build Path">
+         <defaultHandler
+               class="wyclipse.jdt.actions.ConfigureJavaBuildPath">
+         </defaultHandler>
+      </command>
+   </extension>
 
-  
+   <extension
+         point="org.eclipse.ui.menus">
+      <menuContribution
+            allPopups="false"
+            locationURI="popup:org.eclipse.ui.navigator.ProjectExplorer#PopupMenu?before=additions">
+         <menu
+               commandId="wyclipse.jdt.actions.configureJavaBuildPath"
+               id="configureJavaBuildPathMenu"
+               label="Java Build Path">
+            <command
+                  commandId="wyclipse.jdt.actions.configureJavaBuildPath"
+                  label="Configure"
+                  style="push">
+            </command>
+            <visibleWhen
+                  checkEnabled="false">
+		<adapt type="org.eclipse.core.resources.IProject">
+		  <test
+		      property="org.eclipse.core.resources.projectNature"
+		      value="wyclipse.core.whileynature"/>
+		</adapt>         
+            </visibleWhen>
+         </menu>
+         <separator
+               name="wyclipse.jdt.separator1">
+         </separator>
+      </menuContribution>
+   </extension>
 
 </plugin>
