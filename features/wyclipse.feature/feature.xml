@@ -35,10 +35,6 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS &quot;AS IS&
       <import plugin="org.eclipse.core.resources" version="3.5.0" match="greaterOrEqual"/>
       <import plugin="org.eclipse.core.filesystem" version="1.3.1" match="greaterOrEqual"/>
       <import plugin="org.eclipse.ui" version="3.7.0" match="greaterOrEqual"/>
-      <import plugin="wyclipse.core" version="0.0.15" match="greaterOrEqual"/>
-      <import plugin="wyclipse.ui" version="1.0.0" match="greaterOrEqual"/>
-      <import plugin="org.eclipse.jdt" version="3.8.0" match="greaterOrEqual"/>
-      <import plugin="org.eclipse.jdt.core" version="3.8.2" match="greaterOrEqual"/>
       <import plugin="org.eclipse.core.filebuffers" version="3.5.200" match="greaterOrEqual"/>
       <import plugin="org.eclipse.ui.editors" version="3.7.0" match="greaterOrEqual"/>
       <import plugin="org.eclipse.ui.ide" version="3.7.0" match="greaterOrEqual"/>
@@ -55,20 +51,13 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS &quot;AS IS&
          id="wyclipse.core"
          download-size="0"
          install-size="0"
-         version="0.0.0"/>
-
-   <plugin
-         id="wyclipse.jdt"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
+         version="0.1.0"/>
 
    <plugin
          id="wyclipse.ui"
          download-size="0"
          install-size="0"
-         version="0.0.0"
+         version="0.1.0"
          unpack="false"/>
 
 </feature>
