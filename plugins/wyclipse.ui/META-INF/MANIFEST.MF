@@ -1,22 +1,22 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: Ui
+Bundle-Name: Wyclipse UI
 Bundle-SymbolicName: wyclipse.ui;singleton:=true
-Bundle-Version: 0.1.0
+Bundle-Version: 0.1.1
 Bundle-Activator: wyclipse.ui.Activator
 Require-Bundle: org.eclipse.core.runtime,
- org.eclipse.core.filebuffers;bundle-version="3.5.200",
+ org.eclipse.core.filebuffers;bundle-version="3.5.0",
  org.eclipse.ui,
- org.eclipse.ui.editors;bundle-version="3.7.0",
- org.eclipse.ui.ide;bundle-version="3.7.0",
- org.eclipse.jface.text;bundle-version="3.7.2",
- org.eclipse.debug.ui;bundle-version="3.7.102",
- org.eclipse.jdt.ui;bundle-version="3.7.2",
- org.eclipse.jdt.core;bundle-version="3.7.3",
- org.eclipse.jdt.launching;bundle-version="3.6.1",
- org.eclipse.jdt.debug.ui;bundle-version="3.6.1",
- wyclipse.core;bundle-version="0.0.15",
- org.eclipse.jface
+ org.eclipse.ui.editors;bundle-version="3.5.0",
+ org.eclipse.ui.ide;bundle-version="3.5.0",
+ org.eclipse.jface.text;bundle-version="3.5.0",
+ org.eclipse.debug.ui;bundle-version="3.5.0",
+ org.eclipse.jdt.ui;bundle-version="3.5.0",
+ org.eclipse.jdt.core;bundle-version="3.5.0",
+ org.eclipse.jdt.launching;bundle-version="3.5.0",
+ org.eclipse.jdt.debug.ui;bundle-version="3.5.0",
+ org.eclipse.jface,
+ wyclipse.core;bundle-version="0.1.0"
 Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Export-Package: wyclipse.ui
+Export-Package: wyclipse.ui;uses:="org.eclipse.jface.resource,org.eclipse.ui.plugin,org.osgi.framework"
