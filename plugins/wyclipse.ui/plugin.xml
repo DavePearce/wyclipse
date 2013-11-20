@@ -10,8 +10,7 @@
 	icon="icons/whiley_perspective.gif">
     </perspective>
   </extension>
-
-<!--  
+  
   <extension
       point="org.eclipse.ui.editors">
     <editor
@@ -145,6 +144,5 @@
          </separator>
       </menuContribution>
    </extension>
--->
 
 </plugin>

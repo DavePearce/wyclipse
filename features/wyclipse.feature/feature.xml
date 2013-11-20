@@ -2,7 +2,7 @@
 <feature
       id="wyclipse.feature"
       label="Whiley Eclipse Plugin"
-      version="0.1.15"
+      version="0.1.0"
       provider-name="whiley.org">
 
    <description url="http://whiley.org">
