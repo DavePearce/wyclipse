@@ -35,7 +35,7 @@
   </extension>
   
   
-
+<!--
   <extension point="org.eclipse.ui.newWizards">
     <category
         id="wyclipse.ui.WhileyCategory"
@@ -146,5 +146,6 @@
          </separator>
       </menuContribution>
    </extension>
+-->
 
 </plugin>
