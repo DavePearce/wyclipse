@@ -10,7 +10,8 @@
 	icon="icons/whiley_perspective.gif">
     </perspective>
   </extension>
-  
+
+<!--  
   <extension
       point="org.eclipse.ui.editors">
     <editor
@@ -34,8 +35,6 @@
     </participant>
   </extension>
   
-  
-<!--
   <extension point="org.eclipse.ui.newWizards">
     <category
         id="wyclipse.ui.WhileyCategory"
