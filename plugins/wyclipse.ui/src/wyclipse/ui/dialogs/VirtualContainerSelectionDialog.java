@@ -109,6 +109,7 @@ public class VirtualContainerSelectionDialog extends Dialog {
 				if(selections.length > 0) {
 					VirtualContainer node = (VirtualContainer) selections[0].getData();
 					selection = node.getRoot();
+					// The following line is causing #30 for some reason?
 					selection = selection.makeRelativeTo(project.getRoot());
 				}
 			}
