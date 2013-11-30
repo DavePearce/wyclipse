@@ -81,6 +81,7 @@ public class NewWhileyProjectPageTwo extends WizardPage {
 			// Observe that this will destroy any previous information the user
 			// has configured for the WhileyPath.
 			WhileyPath whileypath = detectWhileyPath(location, (NewWhileyProjectPageOne) page);
+			System.out.println("NOW: " + new Path(location.toString()));
 			VirtualContainer project = new VirtualContainer(new Path(location.toString()));
 			initialiseFromWhileyPath(project,whileypath);
 			wpControl.setProject(project);
