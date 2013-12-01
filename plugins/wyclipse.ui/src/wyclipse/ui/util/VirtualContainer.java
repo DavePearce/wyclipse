@@ -52,18 +52,19 @@ public class VirtualContainer {
 	}
 
 	/**
-	 * Create a folder with the given path, if it does not already exist.
+	 * Create a folder with a given (absolute) path, if it does not already
+	 * exist.  The given path must have the root of this folder as a prefix.
 	 * 
 	 * @param path
 	 */
-	public void create(IPath path) {
+	public void createAbsolute(IPath path) {
 		List<VirtualContainer> children = getChildren();
 		for (VirtualContainer child : children) {
 			if (child.root.equals(path)) {
 				// done, path already exists
 				return;
 			} else if (child.root.isPrefixOf(path)) {
-				child.create(path);
+				child.createAbsolute(path);
 				return;
 			}
 		}

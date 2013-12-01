@@ -123,7 +123,7 @@ public class NewWhileyProjectPageTwo extends WizardPage {
 		// applicable)
 		IPath defaultOutputLocation = whileypath.getDefaultOutputFolder();
 		if (defaultOutputLocation != null) {
-			project.create(defaultOutputLocation);			
+			project.createAbsolute(defaultOutputLocation);			
 		}
 
 		// Second, iterate through all the entries, looking for actions which
@@ -133,9 +133,9 @@ public class NewWhileyProjectPageTwo extends WizardPage {
 				WhileyPath.BuildRule container = (WhileyPath.BuildRule) e;
 				IPath sourceLocation = container.getSourceFolder();
 				IPath outputLocation = container.getOutputFolder();
-				project.create(sourceLocation);				
+				project.createAbsolute(sourceLocation);				
 				if (outputLocation != null) {
-					project.create(outputLocation);					
+					project.createAbsolute(outputLocation);					
 				}
 			}
 		}
