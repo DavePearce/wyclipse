@@ -52,18 +52,33 @@ public class VirtualContainer {
 	}
 
 	/**
+	 * Create a folder with a given (relative) path, if it does not already
+	 * exist.  The given path will be given the root of this folder as a prefix.
+	 * 
+	 * @param path
+	 */
+	public void createRelative(IPath path) {
+		IPath prefix = (IPath) root.clone();
+		
+		System.out.println("CREATING PATH: " + path + " RELATIVE TO: " + root);
+		createAbsolute(prefix.append(path));
+	}
+	
+	/**
 	 * Create a folder with a given (absolute) path, if it does not already
 	 * exist.  The given path must have the root of this folder as a prefix.
 	 * 
 	 * @param path
 	 */
 	public void createAbsolute(IPath path) {
+		System.out.println("CREATING ABSOLUTE PATH: " + path);
+		if(root.equals(path)) {
+			// done, path already exists.
+			return;
+		}
 		List<VirtualContainer> children = getChildren();
 		for (VirtualContainer child : children) {
-			if (child.root.equals(path)) {
-				// done, path already exists
-				return;
-			} else if (child.root.isPrefixOf(path)) {
+			if (child.root.isPrefixOf(path)) {
 				child.createAbsolute(path);
 				return;
 			}
@@ -72,8 +87,9 @@ public class VirtualContainer {
 		// need to make it.
 		VirtualContainer iterator = this;
 		String[] segments = path.segments();
-		for (int i = 0; i != segments.length; ++i) {
-			Path newPath = new Path(segments[i]);
+		IPath newPath = root;
+		for (int i = root.segmentCount(); i < segments.length; ++i) {			
+			newPath = newPath.append(segments[i]);
 			VirtualContainer newContainer = new VirtualContainer(newPath);
 			iterator.getChildren().add(newContainer);
 			iterator = newContainer;

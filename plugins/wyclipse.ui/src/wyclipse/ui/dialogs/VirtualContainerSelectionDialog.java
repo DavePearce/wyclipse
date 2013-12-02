@@ -109,11 +109,9 @@ public class VirtualContainerSelectionDialog extends Dialog {
 				if(selections.length > 0) {
 					VirtualContainer node = (VirtualContainer) selections[0].getData();
 					selection = node.getRoot();
-					// The following line is causing #30 for some reason? 
-					// The problem is that the VirtualContainer.create() method
-					// does not accept relative paths, but is being given them
-					// from NewWhileyProjectWizardPage2
+					System.out.println("SELECTION: " + selection);
 					selection = selection.makeRelativeTo(project.getRoot());
+					System.out.println("SELECTION: " + selection + " RELATIVE TO: " + project.getRoot());
 				}
 			}
 			
