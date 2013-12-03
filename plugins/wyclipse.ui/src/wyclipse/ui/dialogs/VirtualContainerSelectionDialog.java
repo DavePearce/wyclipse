@@ -110,7 +110,7 @@ public class VirtualContainerSelectionDialog extends Dialog {
 					VirtualContainer node = (VirtualContainer) selections[0].getData();
 					selection = node.getRoot();
 					System.out.println("SELECTION: " + selection);
-					selection = selection.makeRelativeTo(project.getRoot());
+					selection = selection.makeRelativeTo(project.getRoot().removeLastSegments(1));
 					System.out.println("SELECTION: " + selection + " RELATIVE TO: " + project.getRoot());
 				}
 			}
