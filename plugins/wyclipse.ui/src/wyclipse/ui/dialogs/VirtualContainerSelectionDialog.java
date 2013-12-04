@@ -93,7 +93,7 @@ public class VirtualContainerSelectionDialog extends Dialog {
 		// Force project root to be selected
 		view.setSelection(new StructuredSelection(project.getFolder()),true);		
 		// Force project root to be expanded
-		view.setExpandedState(project, true);
+		view.setExpandedState(project.getFolder(), true);
 		
 		GridData gd = new GridData(GridData.FILL_HORIZONTAL | GridData.FILL_VERTICAL);
 		gd.horizontalSpan = 2;
