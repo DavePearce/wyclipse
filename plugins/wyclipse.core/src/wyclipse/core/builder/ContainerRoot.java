@@ -104,8 +104,8 @@ public class ContainerRoot extends AbstractRoot<ContainerRoot.IFolderEntry> {
 	 * @throws CoreException
 	 */
 	public IFileEntry create(IResource resource) throws CoreException {
-		IPath path = resource.getFullPath();
-		IPath fullPath = dir.getFullPath();
+		IPath path = resource.getLocation();
+		IPath fullPath = dir.getLocation();
 		try {
 			if (fullPath.isPrefixOf(path)
 					&& resource instanceof IFile) {
@@ -210,7 +210,7 @@ public class ContainerRoot extends AbstractRoot<ContainerRoot.IFolderEntry> {
 				if (folder == null) {
 					// Folder doesn't already exist, so create it.
 					ID fid = id.append(root); 							
-					IPath fpath = dir.getFullPath().append(root);
+					IPath fpath = dir.getLocation().append(root);
 					folder = new IFolderEntry(fid,dir.getFolder(fpath));
 					super.insert(folder);
 				}
@@ -232,7 +232,7 @@ public class ContainerRoot extends AbstractRoot<ContainerRoot.IFolderEntry> {
 				if (folder == null) {
 					// Folder doesn't already exist, so create it.
 					ID fid = id.append(root); 		
-					IPath fpath = dir.getFullPath().append(root);
+					IPath fpath = dir.getLocation().append(root);
 					folder = new IFolderEntry(fid,dir.getFolder(fpath));
 					super.insert(folder);
 				}
