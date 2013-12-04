@@ -83,7 +83,7 @@ public class NewWhileyProjectPageTwo extends WizardPage {
 			// has configured for the WhileyPath.
 			WhileyPath whileypath = detectWhileyPath(location, (NewWhileyProjectPageOne) page);
 			System.out.println("NOW: " + new Path(location.toString()));
-			VirtualProject project = new VirtualProject(p1.getName(), new Path(location.toString()));
+			VirtualProject project = new VirtualProject(p1.getProjectName(), new Path(location.toString()));
 			initialiseFromWhileyPath(project,whileypath);
 			wpControl.setProject(project);
 			wpControl.setWhileyPath(whileypath);

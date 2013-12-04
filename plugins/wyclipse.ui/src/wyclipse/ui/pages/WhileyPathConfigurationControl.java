@@ -71,7 +71,7 @@ public class WhileyPathConfigurationControl {
 		this.whileyPathViewer.setInput(whileypath);
 		IPath defaultOutputFolder = whileypath.getDefaultOutputFolder();
 		if(defaultOutputFolder != null) {
-			defaultOutputFolderText.setText(defaultOutputFolder.toString());
+			defaultOutputFolderText.setText(project.getName() + defaultOutputFolder.toString());
 			defaultOutputFolderLabel.setEnabled(true);
 			defaultOutputFolderText.setEnabled(true);
 			defaultOutputFolderBrowseButton.setEnabled(true);
@@ -179,7 +179,7 @@ public class WhileyPathConfigurationControl {
 			defaultOutputFolderText.setEnabled(false);
 			defaultOutputFolderBrowseButton.setEnabled(false);
 		} else {
-			defaultOutputFolderText.setText(defaultOutputFolder.toString());
+			defaultOutputFolderText.setText(project.getName() + defaultOutputFolder.toString());
 		}
 		
 		defaultOutputFolderText.addModifyListener(new ModifyListener() {
@@ -335,7 +335,7 @@ public class WhileyPathConfigurationControl {
 				shell, project);
 		if (dialog.open() == Window.OK) {
 			IPath path = dialog.getResult();
-			defaultOutputFolderText.setText(path.toString());
+			defaultOutputFolderText.setText(project.getName() + path.toString());
 			whileypath.setDefaultOutputFolder(path);
 		}
 	}

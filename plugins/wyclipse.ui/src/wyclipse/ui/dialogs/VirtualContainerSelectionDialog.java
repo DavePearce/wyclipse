@@ -2,6 +2,7 @@ package wyclipse.ui.dialogs;
 
 import org.eclipse.ui.ISharedImages;
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.viewers.*;
 import org.eclipse.jface.window.Window;
@@ -235,7 +236,17 @@ public class VirtualContainerSelectionDialog extends Dialog {
 
 		@Override
 		public String getText(Object element) {
-			return element.toString();
+			if (element instanceof VirtualProject.Folder) {
+				VirtualProject.Folder folder = (VirtualProject.Folder) element;
+				IPath path = folder.getPath();
+				if(path == Path.ROOT) {
+					return project.getName();
+				} else {
+					return folder.getPath().lastSegment();
+				}
+			} else {
+				return element.toString();
+			}
 		}		
 	}
 	
