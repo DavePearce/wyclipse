@@ -44,7 +44,7 @@ public class VirtualContainerSelectionDialog extends Dialog {
 	 * within the project, and add new folders. However, new folders are not
 	 * actually created on the filesystem and remain "virtual".
 	 */
-	private VirtualContainer project;
+	private VirtualProject project;
 	
 	/**
 	 * The tree-based folder view which makes up the majority of this dialog.
@@ -59,7 +59,7 @@ public class VirtualContainerSelectionDialog extends Dialog {
 	 */
 	private IPath selection;
 	
-	public VirtualContainerSelectionDialog(Shell parentShell, VirtualContainer project) {
+	public VirtualContainerSelectionDialog(Shell parentShell, VirtualProject project) {
 		super(parentShell);
 		this.project = project;
 	}
@@ -88,9 +88,9 @@ public class VirtualContainerSelectionDialog extends Dialog {
 		this.view = new TreeViewer(container, SWT.VIRTUAL | SWT.BORDER);
 		this.view.setContentProvider(new ContentProvider());
 		this.view.setLabelProvider(new LabelProvider());
-		this.view.setInput(new Object[]{project});
+		this.view.setInput(new Object[]{project.getFolder()});
 		// Force project root to be selected
-		view.setSelection(new StructuredSelection(project),true);		
+		view.setSelection(new StructuredSelection(project.getFolder()),true);		
 		// Force project root to be expanded
 		view.setExpandedState(project, true);
 		
@@ -107,11 +107,8 @@ public class VirtualContainerSelectionDialog extends Dialog {
 			public void selectionChanged(SelectionChangedEvent event) {
 				TreeItem[] selections = view.getTree().getSelection();
 				if(selections.length > 0) {
-					VirtualContainer node = (VirtualContainer) selections[0].getData();
-					selection = node.getRoot();
-					System.out.println("SELECTION: " + selection);
-					selection = selection.makeRelativeTo(project.getRoot().removeLastSegments(1));
-					System.out.println("SELECTION: " + selection + " RELATIVE TO: " + project.getRoot());
+					VirtualProject.Folder node = (VirtualProject.Folder) selections[0].getData();
+					selection = node.getPath();					
 				}
 			}
 			
@@ -140,17 +137,17 @@ public class VirtualContainerSelectionDialog extends Dialog {
 		NewFolderDialog dialog = new NewFolderDialog(getShell());
 		if (dialog.open() == Window.OK) {
 			TreeItem[] items = view.getTree().getSelection();
-			VirtualContainer node = project;
+			VirtualProject.Folder folder = project.getFolder();			
 			if (items.length > 0) {
-				node = (VirtualContainer) items[0].getData();
+				folder = (VirtualProject.Folder) items[0].getData();
 			}
 			String name = dialog.getResult();
-			VirtualContainer newFolder = new VirtualContainer(node.getRoot().append(name)); 
-			node.getChildren().add(newFolder);
+			VirtualProject.Folder newFolder = project.new Folder(folder
+					.getPath().append(name));
+			folder.getChildren().add(newFolder);
 			view.refresh();
 			// Force the newly created folder to be automatically selected
-			view.setSelection(new StructuredSelection(newFolder),true);
-			
+			view.setSelection(new StructuredSelection(newFolder),true);			
 		}
 	}
 			
@@ -179,9 +176,9 @@ public class VirtualContainerSelectionDialog extends Dialog {
 
 		@Override
 		public Object[] getChildren(Object parentElement) {			
-			if (parentElement instanceof VirtualContainer) {
-				VirtualContainer node = (VirtualContainer) parentElement;
-				return node.getChildren().toArray();				
+			if (parentElement instanceof VirtualProject.Folder) {
+				VirtualProject.Folder node = (VirtualProject.Folder) parentElement;
+				return node.getChildren().toArray();
 			} else {
 				return new Object[] {};
 			}
@@ -194,8 +191,8 @@ public class VirtualContainerSelectionDialog extends Dialog {
 
 		@Override
 		public boolean hasChildren(Object element) {
-			if(element instanceof VirtualContainer) {
-				VirtualContainer node = (VirtualContainer) element;
+			if (element instanceof VirtualProject.Folder) {
+				VirtualProject.Folder node = (VirtualProject.Folder) element;
 				return node.getChildren().size() > 0;
 			}
 			return false;
@@ -210,7 +207,7 @@ public class VirtualContainerSelectionDialog extends Dialog {
 	 * @author David J. Pearce
 	 * 
 	 */
-	protected static class LabelProvider implements ILabelProvider {
+	protected class LabelProvider implements ILabelProvider {
 
 		@Override
 		public void addListener(ILabelProviderListener listener) {

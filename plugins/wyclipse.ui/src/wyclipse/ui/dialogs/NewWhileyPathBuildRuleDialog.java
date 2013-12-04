@@ -15,7 +15,7 @@ import org.eclipse.swt.widgets.*;
 
 import wybs.util.Trie;
 import wyclipse.core.builder.WhileyPath;
-import wyclipse.ui.util.VirtualContainer;
+import wyclipse.ui.util.VirtualProject;
 import wyclipse.ui.util.WyclipseUI;
 
 /**
@@ -46,7 +46,7 @@ public class NewWhileyPathBuildRuleDialog extends Dialog {
 	 * within the project, and add new folders. However, new folders are not
 	 * actually created on the filesystem and remain "virtual".
 	 */
-	private VirtualContainer projectLocation;
+	private VirtualProject projectLocation;
 	
 	// Source / Target Group
 	private Text sourceFolderText;	
@@ -67,7 +67,7 @@ public class NewWhileyPathBuildRuleDialog extends Dialog {
 	private Button generateWyAL;
 
 	public NewWhileyPathBuildRuleDialog(Shell shell,
-			WhileyPath.BuildRule buildRule, VirtualContainer project) {
+			WhileyPath.BuildRule buildRule, VirtualProject project) {
 		super(shell);
 		this.buildRule = buildRule;
 		this.projectLocation = project;

@@ -24,7 +24,7 @@ import wybs.util.Trie;
 import wyclipse.core.builder.WhileyPath;
 import wyclipse.ui.dialogs.VirtualContainerSelectionDialog;
 import wyclipse.ui.dialogs.NewWhileyPathBuildRuleDialog;
-import wyclipse.ui.util.VirtualContainer;
+import wyclipse.ui.util.VirtualProject;
 import wyclipse.ui.util.WhileyPathViewer;
 import wyclipse.ui.util.WyclipseUI;
 
@@ -38,7 +38,7 @@ import wyclipse.ui.util.WyclipseUI;
  */
 public class WhileyPathConfigurationControl {
 	private Shell shell;
-	private VirtualContainer project;
+	private VirtualProject project;
 	private WhileyPath whileypath;
 	
 	// WhileyPath view + controls
@@ -52,7 +52,7 @@ public class WhileyPathConfigurationControl {
 	private Button enableRuntimeAssertionsButton;
 	
 	public WhileyPathConfigurationControl(Shell shell,
-			VirtualContainer project, WhileyPath whileypath) {
+			VirtualProject project, WhileyPath whileypath) {
 		this.shell = shell;
 		this.whileypath = whileypath;
 		this.project = project;
@@ -62,7 +62,7 @@ public class WhileyPathConfigurationControl {
 		return whileypath;
 	}
 
-	public void setProject(VirtualContainer project) {
+	public void setProject(VirtualProject project) {
 		this.project = project;
 	}
 	

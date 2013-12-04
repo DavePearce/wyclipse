@@ -10,7 +10,7 @@ import org.eclipse.ui.dialogs.PropertyPage;
 import wyclipse.core.Activator;
 import wyclipse.core.WhileyNature;
 import wyclipse.core.builder.WhileyPath;
-import wyclipse.ui.util.VirtualContainer;
+import wyclipse.ui.util.VirtualProject;
 
 /**
  * This is the property page entitled "Whiley Build Path" which shows on all
@@ -43,7 +43,7 @@ public class WhileyPathPropertyPage extends PropertyPage {
 		IProject project = (IProject) getElement();
 		this.whileypath = getWhileyPath();
 		this.wpControl = new WhileyPathConfigurationControl(getShell(),
-				new VirtualContainer(project.getLocation()), whileypath);
+				new VirtualProject(project.getName(),project.getLocation()), whileypath);
 		Composite composite = wpControl.create(parent);
 		composite.pack();
 		return composite;

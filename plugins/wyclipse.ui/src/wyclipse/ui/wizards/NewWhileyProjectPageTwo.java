@@ -28,7 +28,7 @@ import org.xml.sax.SAXException;
 import wyclipse.core.WhileyNature;
 import wyclipse.core.builder.WhileyPath;
 import wyclipse.ui.pages.WhileyPathConfigurationControl;
-import wyclipse.ui.util.VirtualContainer;
+import wyclipse.ui.util.VirtualProject;
 
 public class NewWhileyProjectPageTwo extends WizardPage {
 	
@@ -71,7 +71,8 @@ public class NewWhileyProjectPageTwo extends WizardPage {
 		// This is the signal that the previous page is finished, and that we're
 		// now visible.  At this point, we want to run the whileypath detection.
 		
-		URI location = ((NewWhileyProjectPageOne)page).getLocationURI();
+		NewWhileyProjectPageOne p1 = ((NewWhileyProjectPageOne)page);
+		URI location = p1.getLocationURI();
 		
 		System.out.println("PROJECT LOCATION: " + location.getPath());
 		
@@ -82,7 +83,7 @@ public class NewWhileyProjectPageTwo extends WizardPage {
 			// has configured for the WhileyPath.
 			WhileyPath whileypath = detectWhileyPath(location, (NewWhileyProjectPageOne) page);
 			System.out.println("NOW: " + new Path(location.toString()));
-			VirtualContainer project = new VirtualContainer(new Path(location.toString()));
+			VirtualProject project = new VirtualProject(p1.getName(), new Path(location.toString()));
 			initialiseFromWhileyPath(project,whileypath);
 			wpControl.setProject(project);
 			wpControl.setWhileyPath(whileypath);
@@ -117,13 +118,13 @@ public class NewWhileyProjectPageTwo extends WizardPage {
 	 * @param whileypath
 	 * @param project
 	 */
-	protected void initialiseFromWhileyPath(VirtualContainer project,
+	protected void initialiseFromWhileyPath(VirtualProject project,
 			WhileyPath whileypath) {
 		// First, check whether the default output location exists (if
 		// applicable)
 		IPath defaultOutputLocation = whileypath.getDefaultOutputFolder();
 		if (defaultOutputLocation != null) {
-			project.createRelative(defaultOutputLocation);			
+			project.createFolder(defaultOutputLocation);			
 		}
 
 		// Second, iterate through all the entries, looking for actions which
@@ -133,9 +134,9 @@ public class NewWhileyProjectPageTwo extends WizardPage {
 				WhileyPath.BuildRule container = (WhileyPath.BuildRule) e;
 				IPath sourceLocation = container.getSourceFolder();
 				IPath outputLocation = container.getOutputFolder();
-				project.createRelative(sourceLocation);				
+				project.createFolder(sourceLocation);				
 				if (outputLocation != null) {
-					project.createRelative(outputLocation);					
+					project.createFolder(outputLocation);					
 				}
 			}
 		}
