@@ -345,8 +345,13 @@ public class WhileyPathConfigurationControl {
 	 * folder is modified.
 	 */
 	protected void handleModifyDefaultOutputFolder() {
-		whileypath.setDefaultOutputFolder(new Path(defaultOutputFolderText
-				.getText()));
+		// Construct path from output folder text
+		IPath path = new Path(defaultOutputFolderText
+				.getText());
+		// Remove project from beginning of path		
+		path = path.removeFirstSegments(1);
+		// Finally, set the output folder
+		whileypath.setDefaultOutputFolder(path);
 	}
 	
 	/**

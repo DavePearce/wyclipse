@@ -229,7 +229,7 @@ public class WhileyProjectBuilder extends IncrementalProjectBuilder {
 						Content.filter("**", WyilFile.ContentType), outputRoot,
 						WyilFile.ContentType, WyjcBuildTask.ContentType);
 				whileyProject.add(wyil2class);
-
+				
 				System.err.println("*** INITIALISING WYC BUILD RULE: " + sourceRoot + " => " + outputRoot);				
 				
 			} else if(entry instanceof WhileyPath.ExternalLibrary){
