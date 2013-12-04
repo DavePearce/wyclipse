@@ -57,7 +57,7 @@ public class VirtualProject {
 	public VirtualProject(String name, IPath location) {
 		this.name = name;
 		this.location = location;
-		this.root = new Folder(Path.ROOT);
+		this.root = new Folder(Path.EMPTY);
 	}
 
 	/**
@@ -94,23 +94,24 @@ public class VirtualProject {
 	 * @param path
 	 */
 	public void createFolder(IPath path) {
-		Folder folder = root;
+		System.out.println("ADDING: " + path);
+		Folder iterator = root;
 
 		// First, descend the appropriate path through the folder tree until we
 		// either reach the folder we're looking for (in which case we just
 		// return), or we find can no longer find matching a folder.
-		List<Folder> children = folder.getChildren();
-		int lastSegment = 1;
+		List<Folder> children = iterator.getChildren();
+		int lastSegment = 0;
 		for (int i = 0; i != children.size();) {
 			Folder child = children.get(i);
-			if(folder.path.equals(path)) {
+			if(child.path.equals(path)) {
 				// Found the actual folder we're trying to create, so stop! 
 				return;
 			} else if (child.path.isPrefixOf(path)) {
 				// Matched a sub-folder, so continue looking into it.
 				i = 0;
-				folder = child;
-				children = folder.getChildren();
+				iterator = child;
+				children = iterator.getChildren();
 				lastSegment = lastSegment + 1;
 			} else {
 				// Sub-folder did not match, so continue to examine next child.
@@ -122,9 +123,10 @@ public class VirtualProject {
 		// need to make it.
 		String[] segments = path.segments();
 		for (int i = lastSegment; i < segments.length; ++i) {
-			Folder newFolder = new Folder(path.uptoSegment(i));
-			folder.getChildren().add(newFolder);
-			folder = newFolder;
+			Folder newFolder = new Folder(path.uptoSegment(i+1));
+			System.out.println("CREATING SUBFOLDER: " + newFolder.getPath());
+			iterator.getChildren().add(newFolder);
+			iterator = newFolder;
 		}
 	}
 

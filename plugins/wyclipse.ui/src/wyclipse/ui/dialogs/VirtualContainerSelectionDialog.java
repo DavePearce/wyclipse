@@ -239,7 +239,7 @@ public class VirtualContainerSelectionDialog extends Dialog {
 			if (element instanceof VirtualProject.Folder) {
 				VirtualProject.Folder folder = (VirtualProject.Folder) element;
 				IPath path = folder.getPath();
-				if(path == Path.ROOT) {
+				if(path == Path.EMPTY) {
 					return project.getName();
 				} else {
 					return folder.getPath().lastSegment();
