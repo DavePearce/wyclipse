@@ -1,7 +1,5 @@
 package wyclipse.ui.pages;
 
-import java.net.URI;
-
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
@@ -20,7 +18,6 @@ import org.eclipse.swt.layout.*;
 import org.eclipse.swt.widgets.*;
 import org.eclipse.ui.dialogs.ContainerSelectionDialog;
 
-import wybs.util.Trie;
 import wyclipse.core.builder.WhileyPath;
 import wyclipse.ui.dialogs.VirtualContainerSelectionDialog;
 import wyclipse.ui.dialogs.NewWhileyPathBuildRuleDialog;
