@@ -6,9 +6,12 @@ Bundle-Version: 0.1.0
 Bundle-Activator: wyclipse.core.Activator
 Export-Package: wybs.lang,
  wybs.util,
+ wyc.io,
  wyc.lang,
  wyclipse.core,
  wyclipse.core.builder,
+ wyfs.lang,
+ wyfs.util,
  wyil.lang
 Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.core.resources;bundle-version="3.5.0",

@@ -13,7 +13,7 @@ import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.*;
 
-import wybs.util.Trie;
+import wyfs.util.Trie;
 import wyclipse.core.builder.WhileyPath;
 import wyclipse.ui.util.VirtualProject;
 import wyclipse.ui.util.WyclipseUI;

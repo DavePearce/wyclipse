@@ -39,10 +39,66 @@ import org.eclipse.jface.text.rules.WhitespaceRule;
 import org.eclipse.jface.text.rules.WordRule;
 import org.eclipse.swt.SWT;
 
-import wyc.stages.WhileyLexer;
+import wyc.io.WhileyFileLexer;
 
 public class Scanner extends RuleBasedScanner {
 
+	private String[] KEYWORDS = {
+			"all",
+			"any",
+			"assert",
+			"assume",
+			"bool",
+			"break",
+			"byte",
+			"catch",
+			"case",
+			"catch",
+			"char",
+			"continue",
+			"constant",
+			"debug",
+			"default",
+			"do",
+			"else",
+			"ensures",
+			"export",
+			"false",
+			"finite",
+			"for",
+			"function",
+			"from",
+			"if",
+			"import",
+			"in",
+			"is",
+			"method",
+			"native",
+			"new",
+			"no",
+			"null",
+			"package",
+			"private",
+			"protected",
+			"public",
+			"real",	
+			"requires",
+			"return",
+			"skip",
+			"some",
+			"string",
+			"switch",
+			"total",
+			"throw",
+			"throws",
+			"true",
+			"try",
+			"type",
+			"void",
+			"where",
+			"while"	
+	};
+	
 	public Scanner() {
 		IToken keyword = new Token(new TextAttribute(
 				ColorManager.KEYWORD_COLOR_C, null, SWT.BOLD));
@@ -56,7 +112,7 @@ public class Scanner extends RuleBasedScanner {
 		WordRule keywordRule = new WordRule(new KeywordDetector());
 		WordRule specKeywordRule = new WordRule(new KeywordDetector());
 				
-		for (String s : WhileyLexer.keywords) {
+		for (String s : WhileyFileLexer.keywords) {
 			if(s.equals("requires") || s.equals("ensures") || s.equals("where")) {
 				specKeywordRule.addWord(s, specKeyword);
 			} else {
