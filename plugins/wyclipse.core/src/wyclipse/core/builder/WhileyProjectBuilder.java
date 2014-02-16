@@ -34,13 +34,16 @@ import org.eclipse.core.runtime.*;
 import wyclipse.core.Activator;
 import wyclipse.core.WhileyNature;
 import wyclipse.core.builder.ContainerRoot.IFileEntry;
+import wyfs.lang.*;
 import wybs.lang.*;
-import wybs.lang.Path;
-import wybs.util.JarFileRoot;
-import wybs.util.StandardBuildRule;
-import wybs.util.StandardProject;
-import wybs.util.Trie;
-import wybs.util.VirtualRoot;
+import wycc.lang.*;
+import wycc.util.*;
+import wyfs.lang.Path;
+import wyfs.util.JarFileRoot;
+import wyfs.util.Trie;
+import wyfs.util.VirtualRoot;
+import wybs.util.StdBuildRule;
+import wybs.util.StdProject;
 import wyc.builder.WhileyBuilder;
 import wyc.lang.WhileyFile;
 import wyc.util.WycBuildTask;
@@ -82,7 +85,7 @@ public class WhileyProjectBuilder extends IncrementalProjectBuilder {
 	 * contains the various roots of the project and the build rules which have
 	 * been configured.
 	 */
-	private StandardProject whileyProject;
+	private StdProject whileyProject;
 	
 	/**
 	 * The nature associated with this builder. This is useful for getting
@@ -108,7 +111,7 @@ public class WhileyProjectBuilder extends IncrementalProjectBuilder {
 		
 		WhileyPath whileypath = whileyNature.getWhileyPath();		
 		
-		this.whileyProject = new StandardProject();
+		this.whileyProject = new StdProject();
 		
 		// Second, initialise the list of available builders
 		Map<String,Builder> builders = initialiseBuilders();
@@ -189,9 +192,8 @@ public class WhileyProjectBuilder extends IncrementalProjectBuilder {
 				// Third, create the corresponding build rule(s)
 				// ============================================================
 				Builder wycBuilder = builders.get("wyc");
-				StandardBuildRule whiley2wyil = new StandardBuildRule(wycBuilder);
-				whiley2wyil.add(sourceRoot, sourceIncludes, wyilOutputRoot,
-						WhileyFile.ContentType, WyilFile.ContentType);
+				StdBuildRule whiley2wyil = new StdBuildRule(wycBuilder,
+						sourceRoot, sourceIncludes, null, wyilOutputRoot);
 				whileyProject.add(whiley2wyil);
 				boolean enableVerification = (!action.getEnableLocalSettings() && globalEnableVerification)
 											|| (action.getEnableLocalSettings() && action.getEnableVerification());
@@ -201,21 +203,16 @@ public class WhileyProjectBuilder extends IncrementalProjectBuilder {
 					
 					// Ok, enable the verifier and all its rules
 					Builder wyalBuilder = builders.get("wyal");
-					StandardBuildRule wyil2wyal = new StandardBuildRule(
-							wyalBuilder);
-					wyil2wyal.add(wyilOutputRoot,
-							Content.filter("**", WyilFile.ContentType),
-							wyalOutputRoot, WyilFile.ContentType,
-							WyalFile.ContentType);
+					StdBuildRule wyil2wyal = new StdBuildRule(wyalBuilder,
+							wyilOutputRoot, Content.filter("**",
+									WyilFile.ContentType), null, wyalOutputRoot);
 					whileyProject.add(wyil2wyal);
 					
 					Builder wycsBuilder = builders.get("wycs");
-					StandardBuildRule wyal2wycs = new StandardBuildRule(
-							wycsBuilder);
-					wyal2wycs.add(wyalOutputRoot,
+					StdBuildRule wyal2wycs = new StdBuildRule(
+							wycsBuilder,wyalOutputRoot,
 							Content.filter("**", WyalFile.ContentType),
-							virtualOutputRoot, WyalFile.ContentType,
-							WycsFile.ContentType);
+							null,virtualOutputRoot);
 					whileyProject.add(wyal2wycs);
 				}
 				
@@ -223,11 +220,9 @@ public class WhileyProjectBuilder extends IncrementalProjectBuilder {
 				// moment, I'm just assuming only the Java backend.
 								
 				Builder wyjcBuilder = builders.get("wyjc");
-				StandardBuildRule wyil2class = new StandardBuildRule(
-						wyjcBuilder);
-				wyil2class.add(wyilOutputRoot,
-						Content.filter("**", WyilFile.ContentType), outputRoot,
-						WyilFile.ContentType, WyjcBuildTask.ContentType);
+				StdBuildRule wyil2class = new StdBuildRule(wyjcBuilder,
+						wyilOutputRoot, Content.filter("**",
+								WyilFile.ContentType), null, outputRoot);
 				whileyProject.add(wyil2class);
 				
 				System.err.println("*** INITIALISING WYC BUILD RULE: " + sourceRoot + " => " + outputRoot);				
@@ -301,7 +296,7 @@ public class WhileyProjectBuilder extends IncrementalProjectBuilder {
 		
 		// Fourth, add the standard Wyjc builder, which compiles WyIL files to
 		// JVM Class files.
-		Wyil2JavaBuilder wyjc = new Wyil2JavaBuilder();		
+		Wyil2JavaBuilder wyjc = new Wyil2JavaBuilder(whileyProject);		
 		wyjc.setLogger(new Logger.Default(System.err));
 		builders.put("wyjc", wyjc);
 		
@@ -373,9 +368,11 @@ public class WhileyProjectBuilder extends IncrementalProjectBuilder {
 			}
 
 			// second, determine all target files
-			for (BuildRule r : whileyProject.rules()) {
+			for (Build.Rule r : whileyProject.rules()) {
 				for (IFileEntry<?> source : delta) {
-					allTargets.addAll(r.dependentsOf(source));
+					// FIXME: this needs to be corrected, otherwise cleaning
+					// will not work.
+					// allTargets.addAll(r.dependentsOf(source));
 				}
 			}
 
@@ -615,7 +612,7 @@ public class WhileyProjectBuilder extends IncrementalProjectBuilder {
 		}
 		
 
-		public List<wybs.lang.Path.Entry<T>> get() throws IOException {
+		public List<wyfs.lang.Path.Entry<T>> get() throws IOException {
 			return super.get(includes);
 		}		
 	}

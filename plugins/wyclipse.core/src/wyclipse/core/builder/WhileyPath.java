@@ -14,9 +14,6 @@ import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-import wybs.lang.Content;
-import wybs.lang.Path;
-import wybs.util.Trie;
 import wyc.lang.WhileyFile;
 import wycs.core.WycsFile;
 import wycs.syntax.WyalFile;

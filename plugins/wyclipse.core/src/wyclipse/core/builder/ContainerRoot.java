@@ -36,12 +36,15 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 
-import wybs.lang.Content;
-import wybs.lang.Path.*;
-import wybs.util.AbstractFolder;
-import wybs.util.AbstractRoot;
-import wybs.util.AbstractEntry;
-import wybs.util.Trie;
+import wyfs.lang.Content;
+import wyfs.lang.Content.Type;
+import wyfs.lang.Path.Entry;
+import wyfs.lang.Path.ID;
+import wyfs.lang.Path.*;
+import wyfs.util.AbstractFolder;
+import wyfs.util.AbstractRoot;
+import wyfs.util.AbstractEntry;
+import wyfs.util.Trie;
 
 /**
  * An implementation of <code>Path.Root</code> which is backed by an Eclipse
@@ -238,6 +241,12 @@ public class ContainerRoot extends AbstractRoot<ContainerRoot.IFolderEntry> {
 				}
 				return folder.create(nid.subpath(1, nid.size()), file);
 			}
+		}
+
+		@Override
+		public <T> Entry<T> create(ID arg0, Type<T> arg1) throws IOException {
+			// TODO: implement this method, which should be easy enough.
+			throw new RuntimeException("Unsupported Operation");
 		}
 	}
 	

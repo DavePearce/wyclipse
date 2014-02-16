@@ -28,9 +28,7 @@ package wyclipse.core;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -44,8 +42,6 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
-import org.eclipse.core.resources.IBuildConfiguration;
-import org.eclipse.core.resources.ICommand;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
@@ -55,18 +51,11 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Path;
-import org.eclipse.core.runtime.QualifiedName;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 
-import wybs.lang.Content;
-import wybs.util.Trie;
-import wyc.lang.WhileyFile;
 import wyclipse.core.builder.WhileyPath;
 import wyclipse.core.builder.WhileyProjectBuilder;
-import wycs.core.WycsFile;
-import wycs.syntax.WyalFile;
-import wyil.lang.WyilFile;
 
 /**
  * <p>Represents the fundamental building block of the Wyclipse plugin. Attaching a

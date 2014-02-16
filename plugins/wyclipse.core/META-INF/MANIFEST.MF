@@ -7,7 +7,6 @@ Bundle-Activator: wyclipse.core.Activator
 Export-Package: wybs.lang,
  wybs.util,
  wyc.lang,
- wyc.stages,
  wyclipse.core,
  wyclipse.core.builder,
  wyil.lang
@@ -20,4 +19,4 @@ Bundle-ActivationPolicy: lazy
 Bundle-ClassPath: bin/,
  lib/wyrt.jar,
  lib/jasm-v0.1.1.jar,
- lib/wyjc-all-v0.3.21.jar
+ lib/wyjc-all-v0.3.22.jar
