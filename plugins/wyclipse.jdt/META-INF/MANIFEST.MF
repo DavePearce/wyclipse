@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Wyclipse JDT Integration
 Bundle-SymbolicName: wyclipse.jdt;singleton:=true
-Bundle-Version: 0.1.0
+Bundle-Version: 0.1.1
 Bundle-Activator: wyclipse.jdt.Activator
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,
