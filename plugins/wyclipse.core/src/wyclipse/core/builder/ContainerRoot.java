@@ -191,8 +191,7 @@ public class ContainerRoot extends AbstractRoot<ContainerRoot.IFolderEntry> {
 			}
 		}
 				
-		public <T> Entry<T> create(ID nid, Content.Type<T> ct,
-				Entry<?>... sources) throws IOException {
+		public <T> Entry<T> create(ID nid, Content.Type<T> ct) throws IOException {
 			String root = nid.get(0);
 			if (nid.size() == 1) {
 				// attempting to create an entry in this folder
@@ -217,7 +216,7 @@ public class ContainerRoot extends AbstractRoot<ContainerRoot.IFolderEntry> {
 					folder = new IFolderEntry(fid,dir.getFolder(fpath));
 					super.insert(folder);
 				}
-				return folder.create(nid.subpath(1, nid.size()), ct, sources);
+				return folder.create(nid.subpath(1, nid.size()), ct);
 			}
 		}
 		
@@ -241,12 +240,6 @@ public class ContainerRoot extends AbstractRoot<ContainerRoot.IFolderEntry> {
 				}
 				return folder.create(nid.subpath(1, nid.size()), file);
 			}
-		}
-
-		@Override
-		public <T> Entry<T> create(ID arg0, Type<T> arg1) throws IOException {
-			// TODO: implement this method, which should be easy enough.
-			throw new RuntimeException("Unsupported Operation");
 		}
 	}
 	
