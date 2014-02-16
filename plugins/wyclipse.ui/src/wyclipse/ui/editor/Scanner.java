@@ -112,7 +112,7 @@ public class Scanner extends RuleBasedScanner {
 		WordRule keywordRule = new WordRule(new KeywordDetector());
 		WordRule specKeywordRule = new WordRule(new KeywordDetector());
 				
-		for (String s : WhileyFileLexer.keywords) {
+		for (String s : KEYWORDS) {
 			if(s.equals("requires") || s.equals("ensures") || s.equals("where")) {
 				specKeywordRule.addWord(s, specKeyword);
 			} else {
